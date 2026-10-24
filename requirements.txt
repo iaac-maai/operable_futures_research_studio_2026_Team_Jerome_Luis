@@ -1,5 +1,6 @@
 # Currently used
 pytest
+matplotlib==3.11.2  # figures (src/viz/figures.py)
 
 # Planned (add pinned versions when each is first used)
 # ultralytics   (YOLO detector)
