@@ -1,6 +1,6 @@
 # Sources
 
-Numbered as in the 22 Oct 2026 presentation. [25] to [27] added for the data map (checked 24 Oct 2026).
+Numbered as in the 22 Oct 2026 presentation. [25] to [27] added for the data map (checked 24 Oct 2026), [28] to [32] checked 25 Oct 2026.
 
 1. UN DESA, SDG Goal 11 (2022 data): https://sdgs.un.org/goals/goal11
 2. UN-Habitat executive director, UN press briefing, 14 Jul 2023: https://media.un.org/avlibrary/en/asset/d307/d3070335
@@ -29,3 +29,8 @@ Numbered as in the 22 Oct 2026 presentation. [25] to [27] added for the data map
 25. CrackSeg9k, Harvard Dataverse, doi:10.7910/DVN/EGIEBY: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/EGIEBY
 26. PEER Hub ImageNet (PHI-Net), dataset page: https://apps.peer.berkeley.edu/phi-net/
 27. PEER Hub ImageNet (PHI-Net), download page: https://apps.peer.berkeley.edu/phi-net/download/
+28. CODEBRIM, Zenodo record 2620293 (files and licence.md): https://zenodo.org/records/2620293
+29. Mundt et al., CVPR 2019, CODEBRIM paper: https://arxiv.org/abs/1904.08486
+30. Singh and Maity, Brick Masonry Crack Dataset, Darbhanga Fort, Mendeley Data: https://data.mendeley.com/datasets/x6y6f9mmht/1
+31. Dais et al., 2021, masonry crack code and data subset (GitHub): https://github.com/dimitrisdais/crack_detection_CNN_masonry
+32. CrackSeg9k paper (sub-dataset list): https://arxiv.org/abs/2208.13054

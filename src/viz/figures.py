@@ -196,23 +196,24 @@ def segmentation_tree():
 
 STAGES = ["Quality gate", "YOLO detector", "U-Net segmenter", "Measurement (mm)", "Pattern model",
           "Agent: building data", "Triage rules sign-off", "Evaluation (ground truth)"]
-SOURCES = ["SDNET2018", "CrackSeg9k", "PHI-Net", "Our phone photos", "Tripoli lists\n(106 / 114)", "Engineering\npartner"]
+SOURCES = ["SDNET2018", "CrackSeg9k", "PHI-Net", "CODEBRIM", "Brick masonry\n(Darbhanga)", "Masonry masks\n(Dais et al.)",
+           "Pilot photos", "Engineer-\nlabelled photos", "Tripoli lists\n(106 / 114)", "Engineering\npartner"]
 # From docs/data_map.md, section 1. Rows follow STAGES, columns follow SOURCES.
 COVERAGE = [
-    ["none", "none", "none", "planned", "none", "none"],
-    ["none", "none", "partial", "planned", "none", "none"],
-    ["none", "covered", "none", "planned", "none", "none"],
-    ["none", "none", "none", "planned", "none", "planned"],
-    ["partial", "none", "partial", "planned", "none", "planned"],
-    ["none", "none", "none", "none", "partial", "none"],
-    ["none", "none", "none", "none", "none", "planned"],
-    ["none", "none", "none", "planned", "partial", "planned"],
+    ["none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
+    ["none", "none", "partial", "partial", "none", "none", "planned", "planned", "none", "none"],
+    ["none", "covered", "none", "none", "none", "partial", "none", "planned", "none", "none"],
+    ["none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
+    ["partial", "none", "partial", "partial", "partial", "none", "none", "planned", "none", "none"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "partial", "none"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "planned"],
+    ["none", "none", "none", "none", "none", "none", "none", "planned", "partial", "planned"],
 ]
 COVERAGE_LABEL = {"covered": "covers", "partial": "partly", "planned": "planned", "none": ""}
 
 
 def data_coverage():
-    fig, ax = plt.subplots(figsize=(11, 5.6))
+    fig, ax = plt.subplots(figsize=(15, 5.8))
     for r, row in enumerate(COVERAGE):
         for c, state in enumerate(row):
             ax.add_patch(FancyBboxPatch((c + 0.04, r + 0.08), 0.92, 0.84, boxstyle="round,pad=0,rounding_size=0.05",
@@ -232,9 +233,9 @@ def data_coverage():
                         ("none", "Nothing")]],
               loc="upper center", bbox_to_anchor=(0.5, -0.02), ncol=4, frameon=False)
     fig.suptitle("Data map: which source feeds which pipeline stage", x=0.02, ha="left", fontsize=14, weight="bold")
-    fig.text(0.02, 0.905, "Only U-Net training is covered by public data today. From docs/data_map.md (24 Oct 2026).",
-             fontsize=10, color=INK_2)
-    fig.subplots_adjust(left=0.19, right=0.98, top=0.78, bottom=0.1)
+    fig.text(0.02, 0.905, "Public data covers only U-Net training; every other stage needs our own photos or an "
+             "engineer. From docs/data_map.md (25 Oct 2026).", fontsize=10, color=INK_2)
+    fig.subplots_adjust(left=0.13, right=0.99, top=0.76, bottom=0.1)
     return fig
 
 
@@ -242,11 +243,13 @@ def data_coverage():
 DATASETS = [("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0  ·  concrete only, no masks"),
             ("PHI-Net", 36_413, "36,413  ·  CC BY-NC-SA 4.0  ·  post-earthquake, no masks"),
             ("CrackSeg9k", 9_255, "9,255  ·  CC0  ·  pixel masks, mostly pavement"),
+            ("Brick masonry (Darbhanga)", 4_259, "4,259  ·  CC BY 4.0  ·  brick, one heritage building"),
+            ("Pilot phone photos", 0, "0  ·  about 30 cracks this week  ·  no risk labels"),
             ("Engineer-labelled phone photos", 0, "0  ·  to collect in Phase 2  ·  the target data")]
 
 
 def dataset_sizes():
-    fig, ax = plt.subplots(figsize=(11, 3.8))
+    fig, ax = plt.subplots(figsize=(11, 4.6))
     names = [d[0] for d in DATASETS]
     ys = range(len(DATASETS))
     ax.barh(ys, [d[1] for d in DATASETS], height=0.42, color=BLUE)
@@ -264,8 +267,9 @@ def dataset_sizes():
     ax.set_xlabel("Images")
     fig.suptitle("Public crack data is large, but none of it is the data we need",
                  x=0.02, ha="left", fontsize=14, weight="bold")
-    fig.text(0.02, 0.86, "Image counts and licences from each dataset's page", fontsize=10, color=INK_2)
-    fig.subplots_adjust(left=0.24, right=0.98, top=0.78, bottom=0.17)
+    fig.text(0.02, 0.875, "Image counts and licences from each dataset's page. Not plotted: CODEBRIM (36.4 GB, count "
+             "not stated, non-commercial) and the Dais et al. masonry subset.", fontsize=9.5, color=INK_2)
+    fig.subplots_adjust(left=0.24, right=0.98, top=0.8, bottom=0.14)
     return fig
 
 
@@ -325,6 +329,75 @@ def confusion_template():
     return fig
 
 
+# From spec/constitution/roadmap.md. (workstream, task, first week, last week, at risk)
+PLAN = [
+    ("Deliverables", "29 Oct deliverables + first real-data test", 1, 1, False),
+    ("Data", "SDNET2018 through the quality gate", 1, 1, False),
+    ("Data", "Download CrackSeg9k, Darbhanga, CODEBRIM", 2, 2, False),
+    ("Data", "Map public labels to the 5 patterns", 2, 3, False),
+    ("Pilot", "Collect pilot photos (~30 cracks)", 2, 2, False),
+    ("Pilot", "Prepare and label pilot photos", 2, 3, False),
+    ("Pilot", "Tune quality gate on pilot photos", 3, 4, False),
+    ("Pilot", "Coin detection + width measurement", 4, 6, False),
+    ("Models", "U-Net on CrackSeg9k + masonry", 3, 5, False),
+    ("Models", "Pattern model (pre-trained)", 5, 7, False),
+    ("Models", "YOLO element detector", 6, 8, False),
+    ("Engineering partner", "Contact partners", 1, 2, False),
+    ("Engineering partner", "Calibration: matrix, thresholds", 3, 6, True),
+    ("Engineering partner", "Engineer-labelled photos", 6, 10, True),
+    ("Integration", "End-to-end pipeline on pilot", 7, 8, False),
+    ("Integration", "Streamlit prototype", 8, 9, False),
+    ("Integration", "Evaluate vs baseline", 9, 10, True),
+    ("Integration", "Write-up and figures", 9, 10, False),
+]
+# (x in weeks from 26 Oct, label, at risk); 29 Oct is the Thursday of week 1.
+MILESTONES = [(0.5, "29 Oct\ndeliverables", False), (4, "Pilot done,\ngate tuned", False),
+              (6, "Matrix\nsigned off", True), (8, "End-to-end\ndemo", False), (10, "First measured\nresults", True)]
+WORKSTREAM_COLOURS = {"Deliverables": BLUE, "Data": "#eb6834", "Pilot": AQUA, "Models": "#eda100",
+                      "Engineering partner": "#e87ba4", "Integration": "#008300"}
+WEEK_STARTS = ["26 Oct", "2 Nov", "9 Nov", "16 Nov", "23 Nov", "30 Nov", "7 Dec", "14 Dec", "21 Dec", "28 Dec"]
+
+
+def timeline():
+    fig, ax = plt.subplots(figsize=(14, 8))
+    n = len(PLAN)
+    ax.axvspan(8, 10, color="#f0efec", zorder=0)
+    ax.text(9, 5, "winter break\n(assumption)", ha="center", va="center", fontsize=9, color=INK_2)
+    previous = None
+    for i, (stream, task, start, end, risk) in enumerate(PLAN):
+        colour = WORKSTREAM_COLOURS[stream]
+        if stream != previous and previous is not None:
+            ax.axhline(i - 0.5, color=GRID, lw=0.8, zorder=1)
+        previous = stream
+        ax.add_patch(FancyBboxPatch((start - 1 + 0.06, i - 0.26), end - start + 1 - 0.12, 0.52,
+                                    boxstyle="round,pad=0,rounding_size=0.12", zorder=2,
+                                    facecolor=colour if not risk else "white", edgecolor=colour,
+                                    hatch="///" if risk else None, lw=1.6))
+    for x, label, risk in MILESTONES:
+        ax.plot(x, -0.9, marker="D", ms=10, color=LEVEL["High"] if not risk else "white",
+                markeredgecolor=LEVEL["High"], mew=1.8, zorder=3)
+        ax.text(x, -1.55, label, ha="center", va="center", fontsize=8.5, color=INK)
+    ax.set_xlim(0, 10.45)
+    ax.set_ylim(n - 0.4, -2.2)
+    ax.set_xticks([w + 0.5 for w in range(10)], [f"W{w + 1}\n{d}" for w, d in enumerate(WEEK_STARTS)])
+    ax.set_yticks(range(n), [t[1] for t in PLAN])
+    ax.xaxis.tick_top()
+    for w in range(11):
+        ax.axvline(w, color=GRID, lw=0.6, zorder=0)
+    ax.tick_params(length=0)
+    for s in ax.spines.values():
+        s.set_visible(False)
+    handles = [Patch(facecolor=c, edgecolor=c, label=s) for s, c in WORKSTREAM_COLOURS.items()]
+    handles.append(Patch(facecolor="white", edgecolor=INK_2, hatch="///", label="At risk: needs engineering partner"))
+    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.42, -0.01), ncol=4, frameon=False)
+    fig.suptitle("10-week plan, 26 Oct 2026 to 3 Jan 2027", x=0.02, ha="left", fontsize=14, weight="bold")
+    fig.text(0.02, 0.935, "The engineering partner is the critical path. Fallback if none by week 4: evaluate on "
+             "pilot photos only; the matrix stays illustrative. Source: spec/constitution/roadmap.md",
+             fontsize=9.5, color=INK_2)
+    fig.subplots_adjust(left=0.24, right=0.98, top=0.84, bottom=0.12)
+    return fig
+
+
 FIGURES = {
     "01_pipeline.png": pipeline,
     "02_decision_flow.png": decision_flow,
@@ -333,6 +406,7 @@ FIGURES = {
     "05_data_coverage.png": data_coverage,
     "06_dataset_sizes.png": dataset_sizes,
     "07_confusion_template.png": confusion_template,
+    "09_timeline.png": timeline,
 }
 
 

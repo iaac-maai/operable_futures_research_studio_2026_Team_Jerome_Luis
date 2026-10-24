@@ -13,8 +13,10 @@ Every figure is drawn from the repo's own rules and data map, so it changes when
 | `05_data_coverage.png` | Which data source feeds which pipeline stage | `docs/data_map.md`, section 1 |
 | `06_dataset_sizes.png` | Image counts and licences of public sets vs our target data | `docs/data_map.md`, section 2 |
 | `07_confusion_template.png` | TP / FN / FP / TN and the full 3 x 5 confusion matrix, no counts | `spec/features/evaluation.md` |
+| `08_sdnet_quality_gate.png` | Sharpness of SDNET2018 sample images against the blur limit (made by `src/experiments/sdnet_quality.py`, not by this script) | SDNET2018, once downloaded |
+| `09_timeline.png` | 10-week plan with workstreams, milestones and tasks at risk | `spec/constitution/roadmap.md` |
 
 Colour rules: triage levels always use the same four status colours (Low green, Medium yellow, High red, Expert needed orange) and always carry a text label; coverage uses one blue ramp.
 
-When `docs/` changes, update the data constants in `figures.py` (TREE, COVERAGE, DATASETS) and rerun.
+When `docs/` changes, update the data constants in `figures.py` (TREE, COVERAGE, DATASETS, PLAN, MILESTONES) and rerun.
 Later, once engineer-labelled photos exist: a filled confusion matrix and the measured threshold curve (missed High vs referral rate).

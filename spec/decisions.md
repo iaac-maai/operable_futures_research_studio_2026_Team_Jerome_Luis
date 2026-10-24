@@ -25,3 +25,12 @@ Status: 0.8 is illustrative; the real value comes from the missed-High vs sent-t
 ## D5 (2026-10-24): every result carries a reason and a review flag
 `assess()` returns level, reason and `engineer_review` (true for High and Expert needed). `triage()` still returns the level only.
 Reason: rule 4 (an engineer confirms every High and referral) and the atomic problem ("with the reason").
+
+## D6 (2026-10-25): non-commercial datasets are for research only
+PHI-Net (CC BY-NC-SA 4.0) and CODEBRIM (non-commercial; trained models may not be used commercially) may be used to explore and pre-train in the studio.
+Any model meant for real deployment is retrained without them, on CC0 / CC BY data and our own photos.
+Reason: their licences forbid commercial use, and a deployed tool may later be run by a company or a funded programme.
+
+## D7 (2026-10-25): SDNET2018 is a code test, not training data for thresholds
+SDNET2018 is used for the 29 Oct first test on real data. It does not set any threshold, because its tiles are camera crops with no scale reference.
+Thresholds for the quality gate come from the pilot phone photos; triage thresholds come from the engineering partner.
