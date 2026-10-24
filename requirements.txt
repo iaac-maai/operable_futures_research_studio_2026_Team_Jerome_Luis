@@ -1,0 +1,8 @@
+# Currently used
+pytest
+
+# Planned (add pinned versions when each is first used)
+# ultralytics   (YOLO detector)
+# torch         (U-Net segmentation)
+# opencv-python (measurement)
+# streamlit     (prototype interface)

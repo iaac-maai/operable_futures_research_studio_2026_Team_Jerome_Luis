@@ -1,0 +1,11 @@
+data/*
+!data/.gitkeep
+models/*
+!models/README.md
+!models/.gitkeep
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+*.pt
+*.pth
+.env
