@@ -57,3 +57,7 @@ The plan runs to the final presentation on 17 Dec and the blog post by 24 Dec, w
 Laplacian variance rejected 75 to 89% of SDNET2018 wall and deck tiles, most of them in focus but smooth (visual check of 8). Hairline cracks on smooth walls would be sent to retake again and again.
 Decision: keep the check (a retake is never a Low, so it is safe), but do not tune it on public data. Choose the measure and threshold on the pilot photos, using the deliberately blurred shots as ground truth.
 Status: open; results in `docs/experiments/2026-10-25_quality_gate_first_test.md`.
+
+## D13 (2026-10-25): the name is Second Look
+The project is called Second Look everywhere: repo, decks, logo, blog post. "Crack triage" is no longer used as a name; "triage" stays only as the word for what the tool does.
+Reason: the 22 Oct deck said "Crack triage" while the repo said "Second Look"; one name for the logo and the weekly decks.

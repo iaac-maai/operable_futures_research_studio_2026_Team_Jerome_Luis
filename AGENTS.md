@@ -1,7 +1,7 @@
 # AGENTS.md: system constitution
 
 ## Project
-Second Look (crack triage): phone-photo triage (Low, Medium, High) of cracks in structural elements of buildings that nobody inspects.
+Second Look: phone-photo triage (Low, Medium, High) of cracks in structural elements of buildings that nobody inspects.
 Read `spec/constitution/mission.md`, `roadmap.md` and `tech_stack.md` before changing anything.
 
 ## Non-negotiable rules
