@@ -20,6 +20,6 @@ Reason: Laplacian variance falls as resolution rises, so without this a sharp ph
 The result lists every failed check, so the app can tell the user what to fix.
 
 ## First test on real data (29 Oct)
-Run the sharpness and brightness checks on public datasets (`src/experiments/real_data_quality.py`): crack-seg and Darbhanga done on 25 Oct, SDNET2018 when downloaded.
+Run the sharpness and brightness checks on public datasets (`src/experiments/real_data_quality.py`): crack-seg, Darbhanga and SDNET2018, done on 25 Oct.
 Report the distributions and pass rates per dataset and crack / no-crack. Results: `docs/experiments/2026-10-25_quality_gate_first_test.md`.
 Limits: these are not phone photos and have no coin, so this tests the code on real images; it does not calibrate thresholds.

@@ -333,38 +333,45 @@ def confusion_template():
 
 # From spec/constitution/roadmap.md. (workstream, task, first week, last week, at risk)
 PLAN = [
-    ("Deliverables", "29 Oct deliverables + first real-data test", 1, 1, False),
-    ("Data", "SDNET2018 through the quality gate", 1, 1, False),
-    ("Data", "Download CrackSeg9k, Darbhanga, CODEBRIM", 2, 2, False),
+    ("Deliverables", "29 Oct deliverables + real-data test (done)", 1, 1, False),
+    ("Deliverables", "Midterm deck + problem & data brief", 1, 2, False),
+    ("Deliverables", "Lean Canvas", 6, 7, False),
+    ("Deliverables", "Pitch deck, final presentation", 7, 8, False),
+    ("Deliverables", "Blog post", 8, 9, False),
+    ("Data", "Quality gate on public sets (done)", 1, 1, False),
     ("Data", "Map public labels to the 5 patterns", 2, 3, False),
     ("Pilot", "Collect pilot photos (~30 cracks)", 2, 2, False),
-    ("Pilot", "Prepare and label pilot photos", 2, 3, False),
-    ("Pilot", "Tune quality gate on pilot photos", 3, 4, False),
-    ("Pilot", "Coin detection + width measurement", 4, 6, False),
-    ("Models", "U-Net on CrackSeg9k + masonry", 3, 5, False),
-    ("Models", "Pattern model (pre-trained)", 5, 7, False),
-    ("Models", "YOLO element detector", 6, 8, False),
-    ("Engineering partner", "Contact partners", 1, 2, False),
-    ("Engineering partner", "Calibration: matrix, thresholds", 3, 6, True),
-    ("Engineering partner", "Engineer-labelled photos", 6, 10, True),
-    ("Integration", "End-to-end pipeline on pilot", 7, 8, False),
-    ("Integration", "Streamlit prototype", 8, 9, False),
-    ("Integration", "Evaluate vs baseline", 9, 10, True),
-    ("Integration", "Write-up and figures", 9, 10, False),
+    ("Pilot", "Prepare, label, tune quality gate", 2, 3, False),
+    ("Pilot", "Coin + width measurement (1st feature)", 3, 4, False),
+    ("Models", "U-Net on CrackSeg9k + crack-seg", 3, 4, False),
+    ("Models", "Pattern model (pre-trained)", 4, 5, False),
+    ("Models", "YOLO crack and element detector", 4, 6, False),
+    ("Agent and MCP", "First MCP connection attempt", 3, 3, False),
+    ("Agent and MCP", "Plan/build harness, MCP to all sources", 4, 5, False),
+    ("Engineering partners", "Scope with EWB + structural engineer", 1, 2, False),
+    ("Engineering partners", "Calibration: matrix, thresholds", 3, 5, True),
+    ("Engineering partners", "Engineer-labelled photos + baseline", 4, 6, True),
+    ("Integration", "Beta: end-to-end on pilot photos", 4, 4, False),
+    ("Integration", "Comparison vs non-AI baseline", 6, 6, True),
+    ("Integration", "Proof of concept, limits + ethics", 7, 7, False),
+    ("Integration", "Streamlit UI, realistic testing", 7, 8, False),
 ]
-# (x in weeks from 26 Oct, label, at risk); 29 Oct is the Thursday of week 1.
-MILESTONES = [(0.5, "29 Oct\ndeliverables", False), (4, "Pilot done,\ngate tuned", False),
-              (6, "Matrix\nsigned off", True), (8, "End-to-end\ndemo", False), (10, "First measured\nresults", True)]
+# (x in weeks from Monday 26 Oct, label, at risk); x = (days after 26 Oct + 0.5) / 7, from the syllabus.
+MILESTONES = [(0.5, "29 Oct\ndata map", False), (1.64, "6 Nov\nmidterm", False),
+              (2.5, "12 Nov\n1st feature", False), (3.64, "20 Nov\nbeta", False),
+              (4.5, "26 Nov\nharness + MCP", False), (5.5, "3 Dec\nbaseline", True),
+              (6.5, "10 Dec\nPoC + ethics", False), (7.5, "17 Dec\nfinal", False), (8.5, "24 Dec\nblog", False)]
 WORKSTREAM_COLOURS = {"Deliverables": BLUE, "Data": "#eb6834", "Pilot": AQUA, "Models": "#eda100",
-                      "Engineering partner": "#e87ba4", "Integration": "#008300"}
-WEEK_STARTS = ["26 Oct", "2 Nov", "9 Nov", "16 Nov", "23 Nov", "30 Nov", "7 Dec", "14 Dec", "21 Dec", "28 Dec"]
+                      "Agent and MCP": VIOLET, "Engineering partners": "#e87ba4", "Integration": "#008300"}
+WEEK_STARTS = ["26 Oct", "2 Nov", "9 Nov", "16 Nov", "23 Nov", "30 Nov", "7 Dec", "14 Dec", "21 Dec"]
 
 
 def timeline():
-    fig, ax = plt.subplots(figsize=(14, 8))
+    weeks = len(WEEK_STARTS)
+    fig, ax = plt.subplots(figsize=(14, 8.8))
     n = len(PLAN)
-    ax.axvspan(8, 10, color="#f0efec", zorder=0)
-    ax.text(9, 5, "winter break\n(assumption)", ha="center", va="center", fontsize=9, color=INK_2)
+    ax.axvspan(3, 4, color="#f0efec", zorder=0)
+    ax.text(3.5, n - 0.9, "hackathon\n(no studio)", ha="center", va="center", fontsize=8.5, color=INK_2)
     previous = None
     for i, (stream, task, start, end, risk) in enumerate(PLAN):
         colour = WORKSTREAM_COLOURS[stream]
@@ -375,28 +382,29 @@ def timeline():
                                     boxstyle="round,pad=0,rounding_size=0.12", zorder=2,
                                     facecolor=colour if not risk else "white", edgecolor=colour,
                                     hatch="///" if risk else None, lw=1.6))
-    for x, label, risk in MILESTONES:
-        ax.plot(x, -0.9, marker="D", ms=10, color=LEVEL["High"] if not risk else "white",
+    for k, (x, label, risk) in enumerate(MILESTONES):
+        ax.plot(x, -0.8, marker="D", ms=10, color=LEVEL["High"] if not risk else "white",
                 markeredgecolor=LEVEL["High"], mew=1.8, zorder=3)
-        ax.text(x, -1.55, label, ha="center", va="center", fontsize=8.5, color=INK)
-    ax.set_xlim(0, 10.45)
-    ax.set_ylim(n - 0.4, -2.2)
-    ax.set_xticks([w + 0.5 for w in range(10)], [f"W{w + 1}\n{d}" for w, d in enumerate(WEEK_STARTS)])
+        ax.text(x, -1.85 if k % 2 == 0 else -2.75, label, ha="center", va="center", fontsize=8.5, color=INK)
+    ax.set_xlim(0, weeks)
+    ax.set_ylim(n - 0.4, -3.3)
+    ax.set_xticks([w + 0.5 for w in range(weeks)], [f"W{w + 1}\n{d}" for w, d in enumerate(WEEK_STARTS)])
     ax.set_yticks(range(n), [t[1] for t in PLAN])
     ax.xaxis.tick_top()
-    for w in range(11):
+    for w in range(weeks + 1):
         ax.axvline(w, color=GRID, lw=0.6, zorder=0)
     ax.tick_params(length=0)
     for s in ax.spines.values():
         s.set_visible(False)
     handles = [Patch(facecolor=c, edgecolor=c, label=s) for s, c in WORKSTREAM_COLOURS.items()]
-    handles.append(Patch(facecolor="white", edgecolor=INK_2, hatch="///", label="At risk: needs engineering partner"))
-    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.42, -0.01), ncol=4, frameon=False)
-    fig.suptitle("10-week plan, 26 Oct 2026 to 3 Jan 2027", x=0.02, ha="left", fontsize=14, weight="bold")
-    fig.text(0.02, 0.935, "The engineering partner is the critical path. Fallback if none by week 4: evaluate on "
-             "pilot photos only; the matrix stays illustrative. Source: spec/constitution/roadmap.md",
-             fontsize=9.5, color=INK_2)
-    fig.subplots_adjust(left=0.24, right=0.98, top=0.84, bottom=0.12)
+    handles.append(Patch(facecolor="white", edgecolor=INK_2, hatch="///", label="At risk: needs engineering partners"))
+    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.4, -0.01), ncol=4, frameon=False)
+    fig.suptitle("Plan to the final presentation, 26 Oct to 24 Dec 2026", x=0.02, ha="left", fontsize=14,
+                 weight="bold")
+    fig.text(0.02, 0.9, "Milestones from the studio syllabus. Engineering partners: Engineers Without Borders and a "
+             "third-party structural engineer.\nFallback if no engineer ratings by 26 Nov: compare on pilot photos "
+             "only; the matrix stays illustrative. Source: spec/constitution/roadmap.md", fontsize=9.5, color=INK_2)
+    fig.subplots_adjust(left=0.25, right=0.98, top=0.8, bottom=0.11)
     return fig
 
 

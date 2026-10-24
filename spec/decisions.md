@@ -32,7 +32,7 @@ Any model meant for real deployment is retrained without them, on CC0 / CC BY da
 Reason: their licences forbid commercial use, and a deployed tool may later be run by a company or a funded programme.
 
 ## D7 (2026-10-25): SDNET2018 is a code test, not training data for thresholds
-Public sets (crack-seg and Darbhanga, run on 25 Oct; SDNET2018 when downloaded) are used for the 29 Oct first test on real data. They do not set any threshold, because they are not phone photos and have no scale reference.
+Public sets (crack-seg and Darbhanga, run on 25 Oct; SDNET2018) are used for the 29 Oct first test on real data. They do not set any threshold, because they are not phone photos and have no scale reference.
 Thresholds for the quality gate come from the pilot phone photos; triage thresholds come from the engineering partner.
 
 ## D8 (2026-10-25): measure sharpness at a fixed working size
@@ -44,3 +44,16 @@ Status: 512 px is illustrative; check on the pilot phone photos.
 The `ultralytics` package (YOLO) is licensed AGPL-3.0, or under a paid Enterprise licence [35]. Using it in the studio is fine; any tool offered to others over a network must publish its source under AGPL-3.0, or buy the Enterprise licence, or swap the detector.
 Decision: use it for research now; decide before any deployment. Keep the detector behind one function in `src/` so it can be swapped.
 Status: open, to revisit before Phase 3.
+
+## D10 (2026-10-25): engineering partners
+The engineering partners are Engineers Without Borders and a third-party structural engineer. The agreement with the structural engineer is under construction.
+They label photos, give the baseline ratings (an engineer's visual check), and sign off the risk matrix and thresholds.
+Status: Engineers Without Borders named; structural engineer to confirm.
+
+## D11 (2026-10-25): plan follows the syllabus dates
+The plan runs to the final presentation on 17 Dec and the blog post by 24 Dec, with the midterm on 6 Nov, the hackathon (beta) on 16 to 20 Nov and the baseline comparison on 3 Dec (`spec/constitution/roadmap.md`). It replaces the earlier plan, which assumed a winter break and ran to 3 Jan.
+
+## D12 (2026-10-25): the blur check is not trusted on smooth walls yet
+Laplacian variance rejected 75 to 89% of SDNET2018 wall and deck tiles, most of them in focus but smooth (visual check of 8). Hairline cracks on smooth walls would be sent to retake again and again.
+Decision: keep the check (a retake is never a Low, so it is safe), but do not tune it on public data. Choose the measure and threshold on the pilot photos, using the deliberately blurred shots as ground truth.
+Status: open; results in `docs/experiments/2026-10-25_quality_gate_first_test.md`.

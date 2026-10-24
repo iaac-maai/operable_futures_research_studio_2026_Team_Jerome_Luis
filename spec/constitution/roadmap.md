@@ -5,42 +5,61 @@
    Goal: flag every crack the engineer rated High, and send only a few cases to an expert.
 3. Widen the scope, only if the Phase 2 goal is met: more materials, ground fissures, multi-storey frames, offline use.
 
-## Dates (from the syllabus)
-- 29 Oct 2026: segmentation tree, full data map (availability, access, format, gaps), repository and AGENTS.md, agent working on real data as a first test.
+## Engineering partners
+- Engineers Without Borders: labelling photos, signing off the matrix and thresholds, access to assessed buildings.
+- A third-party structural engineer: independent check of thresholds and of the baseline ratings. Agreement under construction.
+Both are needed for every task marked "at risk" below (`spec/decisions.md` D10).
 
-## 10-week plan (26 Oct 2026 to 3 Jan 2027)
+## Dates (from the syllabus, 26/27 MaAI01)
+| Date | Session | Target outcome |
+|---|---|---|
+| 29 Oct | Segmentation tree, full data map, repo + AGENTS.md | Agent working on real data as a first test |
+| 5 Nov | Midterm submission deadline | |
+| 6 Nov | **Midterm presentations** | |
+| 12 Nov | Full SDD constitution, first feature with tests, first MCP connection attempt | A first feature that can be measured against the baseline |
+| 16 to 20 Nov | Hackathon week (no studio) | Beta version |
+| 26 Nov | Full plan/build harness, MCP connectors to all mapped sources | Agent works inside defined boundaries across several live sources |
+| 3 Dec | Features + tests, comparison against the non-AI method | Measurable evidence of whether the tool beats the baseline, and where it fails |
+| 10 Dec | Physical/digital proof of concept; limits and ethics check; UI build | Checked against physical reality; risks and responsibilities explicit |
+| 14 Dec | UI, testing in realistic conditions, narrative draft | The story matches what the system does |
+| 17 Dec | **Final presentations** | Live demo + pitch |
+| by 24 Dec | Blog post on blog.iaac.net (at most 1 week after the end of the studio) | |
+
+Final deliverables: problem & data brief, project repository (with the baseline comparison), operable prototype with interface and proof of concept, Lean Canvas, final presentation with a 10-slide pitch deck (`PITCH_DECK`), IAAC blog post (`docs/BLOG_POST`).
+
+## Plan to the final presentation (26 Oct to 24 Dec 2026)
 
 ![Timeline](../../figures/09_timeline.png)
 
-Weeks start on Monday. The only fixed date from the syllabus is 29 Oct; add the other review dates when they are known.
-Assumption: weeks 9 and 10 fall in the winter break, so they hold only write-up and evaluation.
-"At risk" means the task depends on the engineering partner.
+Weeks start on Monday. "At risk" means the task depends on the engineering partners.
 
 | Workstream | Task | Weeks | At risk |
 |---|---|---|---|
-| Deliverables | 29 Oct: tree, data map, repo, AGENTS.md, first test on real data | 1 | |
-| Data | SDNET2018 first test through the quality gate | 1 | |
-| Data | Download CrackSeg9k, Darbhanga, CODEBRIM; check formats and licences | 2 | |
-| Data | Map public labels to the five patterns | 2 to 3 | |
+| Deliverables | 29 Oct: tree, data map, repo, first real-data test (done) | 1 | |
+| Deliverables | Midterm deck and problem & data brief (submit 5 Nov) | 1 to 2 | |
+| Deliverables | Lean Canvas | 6 to 7 | |
+| Deliverables | 10-slide pitch deck, final presentation | 7 to 8 | |
+| Deliverables | Blog post (by 24 Dec) | 8 to 9 | |
+| Data | Quality gate on crack-seg, Darbhanga, SDNET2018 (done) | 1 | |
+| Data | Map public labels to the 5 patterns | 2 to 3 | |
 | Pilot | Collect pilot photos (about 30 cracks, `spec/features/photo_protocol.md`) | 2 | |
-| Pilot | Prepare and label the pilot photos | 2 to 3 | |
-| Pilot | Tune the quality gate on pilot photos | 3 to 4 | |
-| Pilot | Coin detection and width measurement | 4 to 6 | |
-| Models | U-Net on CrackSeg9k and masonry masks | 3 to 5 | |
-| Models | Pattern model, pre-trained on public sets | 5 to 7 | |
-| Models | YOLO element detector | 6 to 8 | |
-| Engineering partner | Contact partners (Order of Engineers Tripoli, volunteer networks) | 1 to 2 | |
-| Engineering partner | Calibration sessions: matrix, thresholds, protocol | 3 to 6 | yes |
-| Engineering partner | Engineer-labelled photos | 6 to 10 | yes |
-| Integration | End-to-end pipeline on pilot photos | 7 to 8 | |
-| Integration | Streamlit prototype | 8 to 9 | |
-| Integration | Evaluate against the baseline (confusion tables) | 9 to 10 | yes |
-| Integration | Write-up and figures | 9 to 10 | |
+| Pilot | Prepare, label, tune the quality gate | 2 to 3 | |
+| Pilot | Coin detection and width measurement: first feature against the baseline (12 Nov) | 3 to 4 | |
+| Models | U-Net on CrackSeg9k and crack-seg | 3 to 4 | |
+| Models | Pattern model, pre-trained on public sets | 4 to 5 | |
+| Models | YOLO crack and element detector | 4 to 6 | |
+| Agent and MCP | First MCP connection attempt (12 Nov) | 3 | |
+| Agent and MCP | Plan/build harness, MCP connectors to all mapped sources (26 Nov) | 4 to 5 | |
+| Engineering partners | Agree scope with Engineers Without Borders and the structural engineer | 1 to 2 | |
+| Engineering partners | Calibration: matrix, thresholds, protocol | 3 to 5 | yes |
+| Engineering partners | Engineer-labelled photos and baseline ratings | 4 to 6 | yes |
+| Integration | Beta: end-to-end pipeline on pilot photos (hackathon) | 4 | |
+| Integration | Comparison against the non-AI baseline (3 Dec) | 6 | yes |
+| Integration | Proof of concept, limits and ethics check (10 Dec) | 7 | |
+| Integration | Streamlit UI, testing in realistic conditions | 7 to 8 | |
 
-Milestones: week 1 (29 Oct) deliverables; week 4 pilot done and gate tuned; week 6 matrix signed off (at risk); week 8 end-to-end demo on pilot photos; week 10 first measured results (at risk).
-
-Fallback: if no partner has agreed by week 4, the pipeline is evaluated on pilot photos against our own width measurements only, the triage matrix stays illustrative, and the report says so.
+Fallback: if no engineer ratings exist by 26 Nov, the 3 Dec comparison uses the pilot photos against our own width measurements only, the triage matrix stays illustrative, and the report says so.
 
 ## Open items
 - Impact section: indicator with unit, baseline, target, evidence.
-- Engineering partner and labelled photos.
+- Engineering partners: agreement with the third-party structural engineer is under construction.

@@ -28,7 +28,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 | Data | Source | Availability | Access | Format | Size | Licence | Covers | Gaps |
 |---|---|---|---|---|---|---|---|---|
-| SDNET2018 | Utah State University [22] | Available | Public page; scripted download blocked (403), download in a browser | JPEG tiles, crack / no-crack by folder | "Over 56,000" images; 503.8 MB zip | CC BY 4.0 | Concrete bridge decks, walls, pavements | Concrete only; no masks, no scale, no brick, columns or beams; camera tiles, not phone photos |
+| SDNET2018 | Utah State University [22] | **Downloaded** (in a browser; scripted download blocked, 403) | Public page | JPEG tiles 256 x 256, crack / no-crack by folder | 56,092 images counted (deck 13,620, wall 18,138, pavement 24,334); 503.8 MB zip | CC BY 4.0 | Concrete bridge decks, walls, pavements | Concrete only; no masks, no scale, no brick, columns or beams; camera tiles, not phone photos |
 | CrackSeg9k | Harvard Dataverse, doi:10.7910/DVN/EGIEBY [25] | **Downloaded** (Vol1, MD5 matches; Vol2 not yet) | Public download, scriptable | Vol1: 9,159 greyscale masks at 400 x 400 with soft values (0, 1, 2, 3...), need a threshold; 5,413 of the RGB images; train/test lists; a "Heads" folder (DINO features, not masks) | 9,255 images stated, 9,159 masks found; two zips, 1.55 GB and 1.26 GB | CC0 1.0 | Ten merged sets (largest: CRACK500, Rissbilder, DeepCrack, Volker, GAPS384) plus 1,411 non-crack images; a masonry subset of 240 per [32] | Mostly pavement and concrete; masonry subset not identifiable by file name; no scale |
 | Ultralytics crack-seg | Ultralytics, from a 2022 Roboflow "crack" dataset [33][34] | **Downloaded** | Public download (GitHub release), scriptable | YOLO segmentation polygons, 1 class; all images 416 x 416 | 4,029 images (3,717 train, 200 val, 112 test; the YAML comments swap val and test); 96 MB zip; 1 empty label | Public Domain on the dataset page; the YAML file header says AGPL-3.0 (Ultralytics' own licence); licence of the original Roboflow set not checked | Cracks on roads and walls | No scale; no element type; roads and walls mixed |
 | PEER Hub ImageNet (PHI-Net) | PEER, UC Berkeley [26][27] | Available | Download page per task; registration not stated | Images with 8 classification tasks (scene, damage state, spalling, material, collapse mode, component type, damage level, damage type) | 36,413 images (as of Nov 2019) | CC BY-NC-SA 4.0 | Post-earthquake structural images | No masks, no width, no scale; non-commercial |
@@ -47,7 +47,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 | Data | Source | Availability | Access | Format | Size | Licence | Covers | Gaps |
 |---|---|---|---|---|---|---|---|---|
-| Engineers' Syndicate list of 106 buildings, Tripoli | MTV Lebanon, 25 Jan 2026 [8] | Reported in the press; list itself not found | Ask the Order of Engineers, Tripoli (assumption: not public) | Unknown | 106 buildings | Unknown | Buildings engineers already judged at risk: candidate ground truth and photo sites | Access, content and format unknown |
+| List of 106 at-risk buildings, Tripoli | MTV Lebanon, 25 Jan 2026 [8] | Reported in the press; list itself not found | No access route identified | Unknown | 106 buildings | Unknown | Buildings engineers already judged at risk: candidate ground truth and photo sites | Access, content and format unknown |
 | Municipal evacuation list, Tripoli | Government announcement, 9 Feb 2026 [3][5] | Reported; list not found | Ask the municipality (assumption) | Unknown | 114 buildings | Unknown | Same as above | Same as above; overlap with the 106 list unknown [6] |
 | BUET factory survey, Dhaka | Reported by AFP, The Daily Star [16][17] | Reported; raw survey not found | Ask BUET (assumption) | Unknown | Unknown | Unknown | Engineer assessments of factory buildings | Frames, Phase 3; old (2013) |
 | Building database for the agent (construction type, footprint) | Not chosen | - | Over MCP (planned) | To define | - | - | Context for the agent | Source, schema and access all open |
@@ -57,11 +57,11 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 - Case-study figures (deaths, evacuations): context for the problem, not training data.
 
 ## 4. Plan, in order
-1. **First test on real data (29 Oct): done** on crack-seg and Darbhanga, 8,288 images (`docs/experiments/2026-10-25_quality_gate_first_test.md`). It found and fixed a resolution bug in the blur check. SDNET2018 is added when downloaded in a browser. Tests the code, not the thresholds.
+1. **First test on real data (29 Oct): done** on crack-seg, Darbhanga and SDNET2018 (`docs/experiments/2026-10-25_quality_gate_first_test.md`). It found and fixed a resolution bug in the blur check, and showed that the blur check confuses smooth walls with blur (D12). Tests the code, not the thresholds.
 2. **U-Net training set:** CrackSeg9k, plus the Dais et al. masonry masks if their image terms allow it.
 3. **Pattern gaps:** CODEBRIM for spalling with rust (research only), Darbhanga for brick masonry.
 4. **Pilot photos this week:** about 30 cracks on public facades in Barcelona, following `spec/features/photo_protocol.md`. Tests the protocol and gives the quality gate real phone photos.
-5. **Engineering partner, now:** the Order of Engineers in Tripoli about the 106-building list, or a volunteer engineers' network. Everything in Phase 2 waits on this.
+5. **Engineering partners, now:** Engineers Without Borders and a third-party structural engineer (agreement under construction) for labelled photos, baseline ratings and sign-off. Everything in Phase 2 waits on this.
 
 ## 5. Open items
 - Consent and data rules for Phase 2: the deck says "photos stay with the household"; labelling needs copies. Write who keeps what, for how long, and how faces and addresses are removed.

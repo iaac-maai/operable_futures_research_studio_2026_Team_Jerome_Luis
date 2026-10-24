@@ -91,9 +91,13 @@ def histogram(rows: list[dict], path: Path) -> None:
     from viz.figures import BLUE, GRID, INK_2, LEVEL
 
     groups = sorted({r["group"] for r in rows})
-    fig, axes = plt.subplots(1, len(groups), figsize=(max(11, 3.6 * len(groups) + 1), 4.2), squeeze=False)
+    cols = min(3, len(groups))
+    nrows = -(-len(groups) // cols)
+    fig, axes = plt.subplots(nrows, cols, figsize=(max(11, 4.4 * cols), 3.3 * nrows + 1.6), squeeze=False)
+    for ax in axes.flat[len(groups):]:
+        ax.set_axis_off()
     bins = np.logspace(0, 4.5, 37)
-    for ax, group in zip(axes[0], groups):
+    for ax, group in zip(axes.flat, groups):
         for label, colour in (("crack", BLUE), ("no crack", "#eb6834"), ("unlabelled", "#1baf7a")):
             vals = [max(r["sharpness"], 1) for r in rows if r["group"] == group and r["label"] == label]
             if vals:
@@ -108,12 +112,14 @@ def histogram(rows: list[dict], path: Path) -> None:
             ax.spines[s].set_visible(False)
     axes[0][0].text(MIN_SHARPNESS * 1.12, 0.97, "blur limit\n(illustrative)", transform=axes[0][0].get_xaxis_transform(),
                     va="top", fontsize=8, color=INK_2)
-    axes[0][0].set_ylabel("Images")
+    for row in axes:
+        row[0].set_ylabel("Images")
     fig.suptitle("Quality gate on real images: public dataset samples", x=0.02, ha="left", fontsize=14, weight="bold")
-    fig.text(0.02, 0.82, f"Images left of the red line would be asked to retake. Brightness limits "
+    top = 1 - 1.3 / (3.3 * nrows + 1.6)
+    fig.text(0.02, top + 0.02, f"Images left of the red line would be asked to retake. Brightness limits "
              f"{MIN_BRIGHTNESS:g} to {MAX_BRIGHTNESS:g}.\nNot phone photos: tests the code, does not calibrate "
-             "thresholds.", fontsize=9.5, color=INK_2)
-    fig.subplots_adjust(left=0.07, right=0.98, top=0.7, bottom=0.15, wspace=0.18)
+             "thresholds.", fontsize=9.5, color=INK_2, va="bottom")
+    fig.subplots_adjust(left=0.07, right=0.98, top=top - 0.04, bottom=0.08, wspace=0.18, hspace=0.55)
     fig.savefig(path, dpi=200)
     plt.close(fig)
 
