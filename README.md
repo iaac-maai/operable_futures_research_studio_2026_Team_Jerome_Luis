@@ -42,6 +42,7 @@ Public crack data is mostly concrete and pavement.
 - `src/triage/`: risk matrix, decision logic and evaluation tables
 - `tests/`: tests (the comparison against the non-AI baseline runs once engineer-labelled photos exist)
 - `notebook/`, `figures/`, `models/`, `data/`: notebooks, plots, model files, local data (large files are not committed)
+- `branding/logos/`: logo ideas (SVG)
 - `requirements.txt`: Python packages
 
 ## AI usage disclosure

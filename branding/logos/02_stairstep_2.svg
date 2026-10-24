@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="480" height="480" role="img" aria-label="Second Look mark: the number 2 drawn as a stair-step crack through brick courses">
+  <rect width="120" height="120" fill="#FFFFFF"/>
+  <g stroke="#141414" stroke-width="1.2" opacity="0.28" fill="none">
+    <rect x="6" y="6" width="108" height="108"/>
+    <path d="M6 20H114M6 34H114M6 48H114M6 62H114M6 76H114M6 90H114M6 104H114"/>
+    <path d="M34 6V20M80 6V20M20 20V34M57 20V34M96 20V34M34 34V48M80 34V48M20 48V62M57 48V62M96 48V62M34 62V76M80 62V76M20 76V90M57 76V90M96 76V90M34 90V104M80 90V104M20 104V114M57 104V114M96 104V114"/>
+  </g>
+  <path d="M26 20 H94 V48 H80 V62 H57 V76 H34 V90 H26 V100 H96" fill="none" stroke="#141414" stroke-width="10" stroke-linejoin="miter" stroke-linecap="square"/>
+</svg>
