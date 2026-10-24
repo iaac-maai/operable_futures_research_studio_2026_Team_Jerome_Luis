@@ -34,7 +34,8 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 - [ ] Five or six crack patterns (`spec/decisions.md` D1) (J + L)
 
 ### Midterm (submit Wed 5 Nov, present Thu 6 Nov)
-- [ ] Outline of the midterm deck, reusing figures 01 to 09 (__)
+- [ ] Mon 26 Oct: choose one new layout for the deck (feedback: it looks too AI-generated) and restyle the figures to match (J + L, C)
+- [ ] Outline of the midterm deck in the new layout, reusing the content of figures 01 to 09 (__)
 - [ ] Problem & data brief: answer the syllabus questions (where is the problem, what data, what AI can generate, limits, who is affected) (__)
 
 ### Repo (coding agent)
