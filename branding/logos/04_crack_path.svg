@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="480" height="480" role="img" aria-label="Second Look mark: a jagged crack that straightens into an arrow">
-  <rect width="120" height="120" fill="#FFFFFF"/>
-  <polyline points="12,14 26,30 18,42 36,54 30,66 48,80" fill="none" stroke="#141414" stroke-width="5" stroke-linejoin="miter"/>
-  <polyline points="48,80 104,80" fill="none" stroke="#141414" stroke-width="9"/>
-  <polyline points="88,64 106,80 88,96" fill="none" stroke="#141414" stroke-width="9" stroke-linejoin="miter"/>
-</svg>

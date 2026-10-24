@@ -14,7 +14,6 @@ Four ideas for the Second Look logo. None is chosen yet; decide with the deck la
 ## Files
 - `0N_<idea>_lockup.svg` / `_dark.svg`: logo with name, vector, text converted to outlines (no font needed). Use these for print and slides.
 - `0N_<idea>_lockup.png` / `_dark.png`: the same at 2x, for slides and documents.
-- `0N_<idea>.svg`: mark only (icon, favicon).
 
 Rebuild after a change: `py branding/make_lockups.py <SpaceGrotesk SemiBold .ttf>` (font from Google Fonts, SIL Open Font License; not committed).
 
