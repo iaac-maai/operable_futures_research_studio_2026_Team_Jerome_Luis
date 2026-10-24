@@ -11,9 +11,9 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 | Stage | Needs | Covered by | Gap |
 |---|---|---|---|
-| Quality gate | Phone photos labelled usable / unusable (blur, light, coin visible) | Pilot photos (section 4), planned | Public sets are camera tiles; SDNET2018 only tests the code |
-| YOLO detector | Bounding boxes for element (column, beam, slab, brick wall) and crack | Partly: CODEBRIM has defect bounding boxes [28]; PHI-Net has component type as a class only [26] | No public set has element boxes; draw them on our own photos |
-| U-Net segmenter | Pixel masks of cracks | CrackSeg9k [25]; Dais et al. masonry masks [31] | Few columns and beams |
+| Quality gate | Phone photos labelled usable / unusable (blur, light, coin visible) | Pilot photos (section 4), planned. First code test on crack-seg and Darbhanga done (`docs/experiments/2026-10-25_quality_gate_first_test.md`) | Public sets are not phone photos; they test the code only |
+| YOLO detector | Bounding boxes for element (column, beam, slab, brick wall) and crack | Cracks only: crack-seg polygons [33], Darbhanga crack boxes [30], CODEBRIM defect boxes [28]; PHI-Net has component type as a class only [26] | No public set has element boxes; draw them on our own photos |
+| U-Net segmenter | Pixel masks of cracks | CrackSeg9k [25]; crack-seg polygons converted to masks [33]; Dais et al. masonry masks [31] | Few columns and beams |
 | Measurement | Crack width in mm with a coin for scale | Pilot photos with a crack-width card, planned | Nothing public has a scale reference |
 | Pattern model | Labels for the 5 patterns (`spec/decisions.md` D1) | Partly: SDNET2018 crack / no crack [22]; PHI-Net damage type [26]; CODEBRIM spalling, exposed bars, corrosion stains for `spalling_rust` [28]; Darbhanga brick masonry cracks [30] | Nobody uses our labels; needs a mapping, then our own labels |
 | Agent (building data) | Construction type, age, footprint | Candidates in section 2 | Source not chosen; access not agreed |
@@ -29,10 +29,11 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | Data | Source | Availability | Access | Format | Size | Licence | Covers | Gaps |
 |---|---|---|---|---|---|---|---|---|
 | SDNET2018 | Utah State University [22] | Available | Public page; scripted download blocked (403), download in a browser | JPEG tiles, crack / no-crack by folder | "Over 56,000" images; 503.8 MB zip | CC BY 4.0 | Concrete bridge decks, walls, pavements | Concrete only; no masks, no scale, no brick, columns or beams; camera tiles, not phone photos |
-| CrackSeg9k | Harvard Dataverse, doi:10.7910/DVN/EGIEBY [25] | Available | Public download | RGB images and masks, resized to 400 x 400; train/test split included | 9,255 images; two zips, 1.55 GB and 1.26 GB | CC0 1.0 | Ten merged crack-segmentation sets, including a masonry subset (240 images per [32], to confirm on download) | Mostly pavement and concrete; mask format to check; no scale |
+| CrackSeg9k | Harvard Dataverse, doi:10.7910/DVN/EGIEBY [25] | **Downloaded** (Vol1, MD5 matches; Vol2 not yet) | Public download, scriptable | Vol1: 9,159 greyscale masks at 400 x 400 with soft values (0, 1, 2, 3...), need a threshold; 5,413 of the RGB images; train/test lists; a "Heads" folder (DINO features, not masks) | 9,255 images stated, 9,159 masks found; two zips, 1.55 GB and 1.26 GB | CC0 1.0 | Ten merged sets (largest: CRACK500, Rissbilder, DeepCrack, Volker, GAPS384) plus 1,411 non-crack images; a masonry subset of 240 per [32] | Mostly pavement and concrete; masonry subset not identifiable by file name; no scale |
+| Ultralytics crack-seg | Ultralytics, from a 2022 Roboflow "crack" dataset [33][34] | **Downloaded** | Public download (GitHub release), scriptable | YOLO segmentation polygons, 1 class; all images 416 x 416 | 4,029 images (3,717 train, 200 val, 112 test; the YAML comments swap val and test); 96 MB zip; 1 empty label | Public Domain on the dataset page; the YAML file header says AGPL-3.0 (Ultralytics' own licence); licence of the original Roboflow set not checked | Cracks on roads and walls | No scale; no element type; roads and walls mixed |
 | PEER Hub ImageNet (PHI-Net) | PEER, UC Berkeley [26][27] | Available | Download page per task; registration not stated | Images with 8 classification tasks (scene, damage state, spalling, material, collapse mode, component type, damage level, damage type) | 36,413 images (as of Nov 2019) | CC BY-NC-SA 4.0 | Post-earthquake structural images | No masks, no width, no scale; non-commercial |
 | CODEBRIM | Zenodo record 2620293 [28], CVPR 2019 paper [29] | Available | Open record, licence file must be accepted | Original images, cropped defects with class labels from bounding boxes, classification sets | 36.4 GB in total (cropped set 7.9 GB); image count not stated on the record | Non-commercial research and education only; no redistribution; trained models may not be used commercially | Five concrete defects on 30 bridges: crack, spalling, exposed bars, efflorescence, corrosion stains | Bridges, not homes; no scale; licence blocks any product use |
-| Brick masonry cracks, Darbhanga Fort | Singh and Maity, Mendeley Data [30] | Available | Public download | Images with labels (train / val / test); label format to check on download | 4,259 images (3,407 train incl. 203 without cracks, 639 val, 213 test) | CC BY 4.0 | Superficial cracks in red brick masonry | One heritage structure, not homes; no scale; label format unknown |
+| Brick masonry cracks, Darbhanga Fort | Singh and Maity, Mendeley Data [30] | **Downloaded** (SHA-256 matches) | Public download, scriptable | YOLO bounding boxes (class x y w h), 1 class; all images 768 x 768; test set has no labels | 4,259 images (3,407 train incl. 203 without cracks, 639 val, 213 test); 363 MB zip | CC BY 4.0 | Superficial cracks in red brick masonry | One heritage structure, not homes; no scale; boxes, not masks |
 | Masonry crack masks, Dais et al. 2021 | GitHub repository [31] | Subset available | Public repository | 224 x 224 images with crack masks | Subset only; count not stated | GPL-3.0 on the repository (written for code; terms for the images to confirm with the authors) | Masonry walls, complex backgrounds | Small; part of it is already in CrackSeg9k [32] |
 
 ### Our own data
@@ -56,7 +57,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 - Case-study figures (deaths, evacuations): context for the problem, not training data.
 
 ## 4. Plan, in order
-1. **First test on real data (29 Oct):** SDNET2018 through the quality gate (`src/experiments/sdnet_quality.py`). Tests the code, not the thresholds.
+1. **First test on real data (29 Oct): done** on crack-seg and Darbhanga, 8,288 images (`docs/experiments/2026-10-25_quality_gate_first_test.md`). It found and fixed a resolution bug in the blur check. SDNET2018 is added when downloaded in a browser. Tests the code, not the thresholds.
 2. **U-Net training set:** CrackSeg9k, plus the Dais et al. masonry masks if their image terms allow it.
 3. **Pattern gaps:** CODEBRIM for spalling with rust (research only), Darbhanga for brick masonry.
 4. **Pilot photos this week:** about 30 cracks on public facades in Barcelona, following `spec/features/photo_protocol.md`. Tests the protocol and gives the quality gate real phone photos.
@@ -65,4 +66,6 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 ## 5. Open items
 - Consent and data rules for Phase 2: the deck says "photos stay with the household"; labelling needs copies. Write who keeps what, for how long, and how faces and addresses are removed.
 - Licences: PHI-Net and CODEBRIM are non-commercial (`spec/decisions.md` D6).
-- Confirm the Darbhanga label format and the Dais image terms on download.
+- Confirm the Dais image terms with the authors.
+- Pick a threshold for the CrackSeg9k soft masks; find the masonry subset's file prefix.
+- Ultralytics (YOLO) software is AGPL-3.0 (`spec/decisions.md` D9).

@@ -32,5 +32,15 @@ Any model meant for real deployment is retrained without them, on CC0 / CC BY da
 Reason: their licences forbid commercial use, and a deployed tool may later be run by a company or a funded programme.
 
 ## D7 (2026-10-25): SDNET2018 is a code test, not training data for thresholds
-SDNET2018 is used for the 29 Oct first test on real data. It does not set any threshold, because its tiles are camera crops with no scale reference.
+Public sets (crack-seg and Darbhanga, run on 25 Oct; SDNET2018 when downloaded) are used for the 29 Oct first test on real data. They do not set any threshold, because they are not phone photos and have no scale reference.
 Thresholds for the quality gate come from the pilot phone photos; triage thresholds come from the engineering partner.
+
+## D8 (2026-10-25): measure sharpness at a fixed working size
+The quality gate scales every image down to a long side of 512 px before measuring sharpness and brightness.
+Reason: the first real-data test rejected 67% of the Darbhanga brick images (768 px) as blurred; the same images scaled to 416 px failed only 11% (sample of 107 images). Laplacian variance depends on resolution, so phone photos (about 4000 px) would almost all fail.
+Status: 512 px is illustrative; check on the pilot phone photos.
+
+## D9 (2026-10-25): Ultralytics YOLO is AGPL-3.0
+The `ultralytics` package (YOLO) is licensed AGPL-3.0, or under a paid Enterprise licence [35]. Using it in the studio is fine; any tool offered to others over a network must publish its source under AGPL-3.0, or buy the Enterprise licence, or swap the detector.
+Decision: use it for research now; decide before any deployment. Keep the detector behind one function in `src/` so it can be swapped.
+Status: open, to revisit before Phase 3.

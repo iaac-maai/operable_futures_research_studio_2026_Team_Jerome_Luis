@@ -35,6 +35,18 @@ def test_unconfirmed_coin_fails(coin):
     assert not result.image_ok and "coin not confirmed" in result.failed
 
 
+def test_large_sharp_photo_is_not_called_blurred():
+    """A sharp scene photographed at phone resolution must not fail just for being large (decision D8)."""
+    small = Image.fromarray(TEXTURE.astype(np.uint8))
+    phone = np.asarray(small.resize((3000, 3000), Image.Resampling.BICUBIC), dtype=np.float64)
+    assert sharpness(phone) < 100  # raw measure collapses at high resolution
+    assert "blurred" not in check(phone, coin_visible=True).failed
+
+
+def test_small_images_are_measured_as_they_are():
+    assert check(TEXTURE, coin_visible=True).sharpness == sharpness(TEXTURE)
+
+
 def test_to_grey_reads_a_file(tmp_path):
     path = tmp_path / "x.png"
     Image.fromarray(TEXTURE.astype(np.uint8)).convert("RGB").save(path)

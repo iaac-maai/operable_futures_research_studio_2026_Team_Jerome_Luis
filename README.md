@@ -23,7 +23,8 @@ Engineer-labelled phone photos of columns, beams and brick walls are still to be
 ## Method and status
 The risk matrix and decision rules are implemented in `src/triage/` with tests. Thresholds are illustrative until calibrated with a structural engineer.
 The confusion tables (true and false positives and negatives, with missed High as the key error) are defined in `spec/features/evaluation.md` and coded in `src/triage/evaluate.py`.
-Models are not trained yet. Decisions are logged in `spec/decisions.md`.
+The quality gate (`src/quality/`) ran as a first test on 8,288 real images from two public datasets; it found and fixed a resolution bug in the blur check (`docs/experiments/`).
+Models are not trained yet. Decisions are logged in `spec/decisions.md`. The 10-week plan is in `spec/constitution/roadmap.md`.
 
 ## Results
 None yet. Success means beating the non-AI baseline (an engineer's visual check) on held-out, engineer-labelled photos, while missing almost no High cases (a target, not a result).

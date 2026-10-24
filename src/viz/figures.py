@@ -196,24 +196,25 @@ def segmentation_tree():
 
 STAGES = ["Quality gate", "YOLO detector", "U-Net segmenter", "Measurement (mm)", "Pattern model",
           "Agent: building data", "Triage rules sign-off", "Evaluation (ground truth)"]
-SOURCES = ["SDNET2018", "CrackSeg9k", "PHI-Net", "CODEBRIM", "Brick masonry\n(Darbhanga)", "Masonry masks\n(Dais et al.)",
-           "Pilot photos", "Engineer-\nlabelled photos", "Tripoli lists\n(106 / 114)", "Engineering\npartner"]
+SOURCES = ["SDNET2018", "CrackSeg9k", "crack-seg\n(Ultralytics)", "PHI-Net", "CODEBRIM", "Brick masonry\n(Darbhanga)",
+           "Masonry masks\n(Dais et al.)", "Pilot photos", "Engineer-\nlabelled photos", "Tripoli lists\n(106 / 114)",
+           "Engineering\npartner"]
 # From docs/data_map.md, section 1. Rows follow STAGES, columns follow SOURCES.
 COVERAGE = [
-    ["none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
-    ["none", "none", "partial", "partial", "none", "none", "planned", "planned", "none", "none"],
-    ["none", "covered", "none", "none", "none", "partial", "none", "planned", "none", "none"],
-    ["none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
-    ["partial", "none", "partial", "partial", "partial", "none", "none", "planned", "none", "none"],
-    ["none", "none", "none", "none", "none", "none", "none", "none", "partial", "none"],
-    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "planned"],
-    ["none", "none", "none", "none", "none", "none", "none", "planned", "partial", "planned"],
+    ["none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
+    ["none", "none", "partial", "partial", "partial", "partial", "none", "planned", "planned", "none", "none"],
+    ["none", "covered", "covered", "none", "none", "none", "partial", "none", "planned", "none", "none"],
+    ["none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
+    ["partial", "none", "none", "partial", "partial", "partial", "none", "none", "planned", "none", "none"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "partial", "none"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "planned"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "planned", "partial", "planned"],
 ]
 COVERAGE_LABEL = {"covered": "covers", "partial": "partly", "planned": "planned", "none": ""}
 
 
 def data_coverage():
-    fig, ax = plt.subplots(figsize=(15, 5.8))
+    fig, ax = plt.subplots(figsize=(16.5, 5.8))
     for r, row in enumerate(COVERAGE):
         for c, state in enumerate(row):
             ax.add_patch(FancyBboxPatch((c + 0.04, r + 0.08), 0.92, 0.84, boxstyle="round,pad=0,rounding_size=0.05",
@@ -243,13 +244,14 @@ def data_coverage():
 DATASETS = [("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0  ·  concrete only, no masks"),
             ("PHI-Net", 36_413, "36,413  ·  CC BY-NC-SA 4.0  ·  post-earthquake, no masks"),
             ("CrackSeg9k", 9_255, "9,255  ·  CC0  ·  pixel masks, mostly pavement"),
+            ("crack-seg (Ultralytics)", 4_029, "4,029  ·  Public Domain  ·  polygons, roads and walls"),
             ("Brick masonry (Darbhanga)", 4_259, "4,259  ·  CC BY 4.0  ·  brick, one heritage building"),
             ("Pilot phone photos", 0, "0  ·  about 30 cracks this week  ·  no risk labels"),
             ("Engineer-labelled phone photos", 0, "0  ·  to collect in Phase 2  ·  the target data")]
 
 
 def dataset_sizes():
-    fig, ax = plt.subplots(figsize=(11, 4.6))
+    fig, ax = plt.subplots(figsize=(11, 5.0))
     names = [d[0] for d in DATASETS]
     ys = range(len(DATASETS))
     ax.barh(ys, [d[1] for d in DATASETS], height=0.42, color=BLUE)

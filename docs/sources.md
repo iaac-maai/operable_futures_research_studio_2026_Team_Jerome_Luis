@@ -34,3 +34,6 @@ Numbered as in the 22 Oct 2026 presentation. [25] to [27] added for the data map
 30. Singh and Maity, Brick Masonry Crack Dataset, Darbhanga Fort, Mendeley Data: https://data.mendeley.com/datasets/x6y6f9mmht/1
 31. Dais et al., 2021, masonry crack code and data subset (GitHub): https://github.com/dimitrisdais/crack_detection_CNN_masonry
 32. CrackSeg9k paper (sub-dataset list): https://arxiv.org/abs/2208.13054
+33. Ultralytics docs, Crack Segmentation dataset (crack-seg): https://docs.ultralytics.com/datasets/segment/crack-seg/
+34. Ultralytics platform, crack-seg dataset page: https://platform.ultralytics.com/ultralytics/datasets/crack-seg
+35. Ultralytics licence (AGPL-3.0 or Enterprise): https://ultralytics.com/license

@@ -13,10 +13,13 @@ Decide whether a photo is usable before any model sees it. Unusable means Retake
 | Too bright | Mean grey level | above 220 |
 | Coin visible | Not implemented yet (needs a coin detector) | `coin_visible` is not `True` |
 
+Sharpness and brightness are measured on a working copy whose long side is scaled down to 512 px (illustrative); smaller images are measured as they are.
+Reason: Laplacian variance falls as resolution rises, so without this a sharp phone photo would fail as blurred (`spec/decisions.md` D8).
+
 `image_ok` is true only when every check passes. A missing coin result counts as a fail: any doubt means retake.
 The result lists every failed check, so the app can tell the user what to fix.
 
 ## First test on real data (29 Oct)
-Run the sharpness and brightness checks on a stratified sample of SDNET2018 (`src/experiments/sdnet_quality.py`).
-Report the distributions and pass rates per surface and crack / no-crack.
-Limits: SDNET2018 tiles are 256 x 256 crops from a camera, not phone photos, and have no coin, so this tests the code on real images; it does not calibrate thresholds.
+Run the sharpness and brightness checks on public datasets (`src/experiments/real_data_quality.py`): crack-seg and Darbhanga done on 25 Oct, SDNET2018 when downloaded.
+Report the distributions and pass rates per dataset and crack / no-crack. Results: `docs/experiments/2026-10-25_quality_gate_first_test.md`.
+Limits: these are not phone photos and have no coin, so this tests the code on real images; it does not calibrate thresholds.

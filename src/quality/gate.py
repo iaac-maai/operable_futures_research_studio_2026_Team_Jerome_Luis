@@ -12,6 +12,7 @@ from PIL import Image
 MIN_SHARPNESS = 100.0
 MIN_BRIGHTNESS = 40.0
 MAX_BRIGHTNESS = 220.0
+WORK_SIZE = 512  # long side in px for measuring; sharpness depends on resolution (decision D8)
 
 
 @dataclass(frozen=True)
@@ -33,9 +34,20 @@ def sharpness(grey: np.ndarray) -> float:
     return float(lap.var())
 
 
+def to_work_size(grey: np.ndarray) -> np.ndarray:
+    """Scale down so the long side is WORK_SIZE; smaller images are returned unchanged."""
+    h, w = grey.shape
+    if max(h, w) <= WORK_SIZE:
+        return grey
+    img = Image.fromarray(np.clip(grey, 0, 255).astype(np.uint8))
+    img.thumbnail((WORK_SIZE, WORK_SIZE), Image.Resampling.LANCZOS)
+    return np.asarray(img, dtype=np.float64)
+
+
 def check(grey: np.ndarray, coin_visible: bool | None = None) -> GateResult:
     """Every check must pass; a missing coin result counts as a fail."""
-    s, b = sharpness(grey), float(grey.mean())
+    work = to_work_size(grey)
+    s, b = sharpness(work), float(work.mean())
     failed = []
     if s < MIN_SHARPNESS:
         failed.append("blurred")
