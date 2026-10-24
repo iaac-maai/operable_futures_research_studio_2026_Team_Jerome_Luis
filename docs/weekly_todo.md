@@ -2,6 +2,7 @@
 
 Newest week on top. Every Monday: tick what is done, move what is not into the new week, add the new week from `spec/constitution/roadmap.md`.
 Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
+**Every week:** update the deck for Thursday's studio presentation, in the layout set on 26 Oct.
 
 ---
 
@@ -15,6 +16,8 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 ### Before Thursday 29 Oct
 - [ ] Open the repo on GitHub and check that the figures show in the docs and README (__)
 - [ ] Read `docs/experiments/2026-10-25_quality_gate_first_test.md`; be able to explain the two findings: the resolution bug and the smooth-wall blur problem (J + L)
+- [ ] Mon 26 Oct: set the deck layout and style once, as a template for every weekly presentation (feedback: it looks too AI-generated); restyle the figures to match (J + L, C)
+- [ ] Thursday's slides in the new layout: tree, data map, first real-data test and its two findings (J + L)
 - [ ] Decide who presents what on Thursday (J + L)
 
 ### Engineering partners (send early, replies take time)
@@ -34,7 +37,6 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 - [ ] Five or six crack patterns (`spec/decisions.md` D1) (J + L)
 
 ### Midterm (submit Wed 5 Nov, present Thu 6 Nov)
-- [ ] Mon 26 Oct: choose one new layout for the deck (feedback: it looks too AI-generated) and restyle the figures to match (J + L, C)
 - [ ] Outline of the midterm deck in the new layout, reusing the content of figures 01 to 09 (__)
 - [ ] Problem & data brief: answer the syllabus questions (where is the problem, what data, what AI can generate, limits, who is affected) (__)
 
