@@ -129,7 +129,7 @@ What is downloaded on Jerome's PC as of 25 Oct 2026. Anyone else downloads from 
 | `sdnet2018/` | SDNET2018 [22] | 629 MB | 56,092 | Downloaded in a browser; file sizes checked |
 | `strathclyde-brickwork/` | Brickwork cracks [44] | 19 MB | 700 | MD5 matches Zenodo |
 | `crackseg9k/` | CrackSeg9k Vol1 [25] | 1.5 GB | not extracted | MD5 matches Dataverse |
-| `haiti2010/` | Haiti Earthquake Database [41] | 12 GB extracted (+ 11.9 GB partial zip) | 4,450 photos; spreadsheet of 183 buildings | Partial zip, every recovered file CRC-checked |
+| `haiti2010/` | Haiti Earthquake Database [41] | 12 GB extracted (broken zip deleted) | 4,450 photos; spreadsheet of 183 buildings | Partial zip, every recovered file CRC-checked |
 | `nepal2015/` | Nepal 2015 surveys [42] | - | not downloaded | Nepal folder to download in a browser |
 
 Run the real-data test on all of them: `py src/experiments/real_data_quality.py data/raw/crack-seg data/raw/darbhanga data/raw/metu data/raw/sdnet2018 data/raw/strathclyde-brickwork --per-group 2000`.
