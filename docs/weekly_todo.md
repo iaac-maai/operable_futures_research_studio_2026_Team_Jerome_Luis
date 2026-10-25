@@ -25,7 +25,7 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 - [ ] Same request to the third-party structural engineer; confirm the agreement (__)
 
 ### Data
-- [ ] Haiti 2010 Earthquake Database downloaded (14 GB) and checked (C, started 25 Oct)
+- [x] Haiti 2010 Earthquake Database: 4,450 photos and the ratings of 183 buildings recovered from a broken download, run through the quality gate (C, 25 Oct)
 - [ ] Email santiago.pujol@canterbury.ac.nz (subject "datacenterhub inquiry") to confirm the Haiti licence before using any photo in slides or training; ask about the Türkiye 2023 survey too (draft in the chat of 25 Oct) (__)
 - [ ] Nepal 2015: download only the Nepal folder in a browser from https://datacenterhub.org/post-nees.html into `data/raw/nepal2015/` (__)
 - [ ] Decide how many images to label by hand with the five crack patterns, and who labels (J + L)
