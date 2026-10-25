@@ -23,7 +23,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | Low | crack-seg [33], CrackSeg9k [25] | Mostly roads and pavement; generic pre-training for crack pixels only |
 | **Off-concept** | CODEBRIM [28], SDNET2018 decks and pavement [22] | Bridges and roads, not buildings |
 
-**Closest public data:** the post-earthquake building surveys from Haiti and Nepal [41][42]. Haiti on our disk: 183 buildings rated by engineers (reinforced concrete: 74 light, 27 moderate, 70 severe; masonry walls: 47 light, 25 moderate, 90 severe) and 4,450 photos, 96% of which pass our quality gate. These surveys show real buildings in dense, poor neighbourhoods, photographed and rated by engineers. Their damage classes map onto our levels: light (no damage or hairline cracks), moderate (wider cracks or spalling), severe (see-through cracks, failure). Limits: one rating per building, not per crack; damage after an earthquake, not slow deterioration; no scale reference.
+**Closest public data:** the post-earthquake building surveys from Haiti and Nepal [41][42]. Haiti on our disk: 183 buildings rated by engineers (reinforced concrete: 74 light, 27 moderate, 70 severe; masonry walls: 47 light, 25 moderate, 90 severe) and 4,450 photos, 95% of which pass our quality gate (1,041 of them linked to their building's rating; light, moderate and severe pass at the same rate). These surveys show real buildings in dense, poor neighbourhoods, photographed and rated by engineers. Their damage classes map onto our levels: light (no damage or hairline cracks), moderate (wider cracks or spalling), severe (see-through cracks, failure). Limits: one rating per building, not per crack; damage after an earthquake, not slow deterioration; no scale reference.
 
 **Still missing:** per-crack photos with a scale from informal or self-built housing before any disaster. Only our own collection with the partners can give that.
 
@@ -33,7 +33,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 | # | Dataset | Fit to our concept | Accepted by the quality gate |
 |---|---|---|---|
-| 1 | Haiti 2010 (engineer survey) | high | 96% |
+| 1 | Haiti 2010 (engineer survey) | high | 95% |
 | 2 | Darbhanga (brick masonry) | medium | 76% |
 | 3 | Strathclyde (brick facades) | medium | 100% |
 | 4 | METU (building concrete) | low | 20% |
@@ -146,7 +146,7 @@ What is downloaded on Jerome's PC as of 25 Oct 2026. Anyone else downloads from 
 | `sdnet2018/` | SDNET2018 [22] | 629 MB | 56,092 | Downloaded in a browser; file sizes checked |
 | `strathclyde-brickwork/` | Brickwork cracks [44] | 19 MB | 700 | MD5 matches Zenodo |
 | `crackseg9k/` | CrackSeg9k Vol1 [25] | 1.5 GB | not extracted | MD5 matches Dataverse |
-| `haiti2010/` | Haiti Earthquake Database [41] | 12 GB extracted (broken zip deleted) | 4,450 photos; spreadsheet of 183 buildings | Partial zip, every recovered file CRC-checked |
+| `haiti2010/` | Haiti Earthquake Database [41] | 12 GB extracted (broken zip deleted) | 4,450 photos (1,041 linked to a building rating); spreadsheet of 183 buildings | Partial zip, every recovered file CRC-checked |
 | `nepal2015/` | Nepal 2015 surveys [42] | - | not downloaded | Nepal folder to download in a browser |
 
 Run the real-data test on all of them: `py src/experiments/real_data_quality.py data/raw/crack-seg data/raw/darbhanga data/raw/metu data/raw/sdnet2018 data/raw/strathclyde-brickwork --per-group 2000`.

@@ -5,6 +5,8 @@ Spec: spec/features/quality_gate.md. Usage, from the repository root:
 Recognised layouts (a root with no images is skipped):
 - SDNET2018: <surface>/<C|U><surface letter>/*.jpg (e.g. D/CD, W/UW)
 - METU: Positive/*.jpg (crack) and Negative/*.jpg (no crack)
+- Haiti 2010 database: Photos/<building>/...; each photo takes its building's engineer rating from the
+  database CSV (worse of RC and masonry-wall damage); photos outside a building folder are "not linked"
 - YOLO style (Ultralytics crack-seg, Darbhanga): an "images" folder with a sibling "labels" folder.
   A non-empty label file means crack, a missing or empty one no crack; no labels folder means unlabelled.
 Writes per-image results to data/processed/ (ignored) and a histogram to figures/.
@@ -13,6 +15,7 @@ Writes per-image results to data/processed/ (ignored) and a histogram to figures
 import argparse
 import csv
 import random
+import re
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -47,10 +50,38 @@ def yolo_label(path: Path) -> str | None:
     return "crack" if label.is_file() and label.read_text().strip() else "no crack"
 
 
+HAITI_CSV = "NEES_Database__The_Haiti_Earthquake_Database.csv"
+DAMAGE_ORDER = ["light", "moderate", "severe"]
+
+
+def _building_key(name: str) -> str:
+    return re.sub(r"\(.*?\)|[^A-Z0-9]", "", name.upper())
+
+
+def haiti_ratings(root: Path) -> dict[str, str]:
+    """Building key -> worse of RC and masonry-wall damage, from the Haiti database CSV."""
+    ratings = {}
+    with (root / HAITI_CSV).open(encoding="latin-1", newline="") as f:
+        for row in csv.DictReader(f):
+            building = (row.get("BuildingNumber") or "").strip()
+            levels = [(row.get(k) or "").strip().lower() for k in ("RC Damage", "MW Damage")]
+            levels = [lv for lv in levels if lv in DAMAGE_ORDER]
+            if building and levels:
+                ratings[_building_key(building)] = max(levels, key=DAMAGE_ORDER.index)
+    return ratings
+
+
 def find_images(root: Path) -> dict[tuple[str, str], list[Path]]:
     """Group images by (dataset group, crack / no crack / unlabelled) from the folder layout."""
     groups = defaultdict(list)
+    ratings = haiti_ratings(root) if (root / HAITI_CSV).is_file() else None
     for path in root.rglob("*.jp*g"):
+        if ratings is not None:
+            parts = path.relative_to(root).parts
+            rating = ratings.get(_building_key(parts[1])) if len(parts) > 2 and parts[0] == "Photos" else None
+            label = f"engineer: {rating}" if rating else "not linked to a building"
+            groups[(DATASET_NAMES.get(root.name, root.name), label)].append(path)
+            continue
         name = path.parent.name.upper()
         if len(name) == 2 and name[0] in "CU" and name[1] in SDNET_SURFACES:
             groups[(f"SDNET2018 {SDNET_SURFACES[name[1]]}", "crack" if name[0] == "C" else "no crack")].append(path)
@@ -67,9 +98,14 @@ def run(roots: list[Path], per_group: int, seed: int = 0) -> list[dict]:
     for root in roots:
         for (group, label), paths in sorted(find_images(root).items()):
             for path in rng.sample(sorted(paths), min(per_group, len(paths))):
-                r = check(to_grey(path), coin_visible=True)  # coin check not implemented; these sets have no coin
-                rows.append({"file": str(path.relative_to(root)), "group": group, "label": label,
-                             "sharpness": round(r.sharpness, 1), "brightness": round(r.brightness, 1),
+                row = {"file": str(path.relative_to(root)), "group": group, "label": label}
+                try:
+                    r = check(to_grey(path), coin_visible=True)  # coin check not implemented; these sets have no coin
+                except (OSError, ValueError):  # a broken file is a retake, not a crash
+                    rows.append({**row, "sharpness": 0.0, "brightness": 0.0, "image_ok": False,
+                                 "failed": "unreadable file"})
+                    continue
+                rows.append({**row, "sharpness": round(r.sharpness, 1), "brightness": round(r.brightness, 1),
                              "image_ok": r.image_ok, "failed": ";".join(r.failed)})
     return rows
 
@@ -111,7 +147,9 @@ def histogram(rows: list[dict], path: Path) -> None:
         ax.set_axis_off()
     bins = np.logspace(0, 4.5, 37)
     for ax, group in zip(axes.flat, groups):
-        for label, colour in (("crack", BLUE), ("no crack", "#eb6834"), ("unlabelled", "#1baf7a")):
+        for label, colour in (("crack", BLUE), ("no crack", "#eb6834"), ("unlabelled", "#1baf7a"),
+                              ("engineer: light", "#86b6ef"), ("engineer: moderate", "#3987e5"),
+                              ("engineer: severe", "#184f95"), ("not linked to a building", "#898781")):
             vals = [max(r["sharpness"], 1) for r in rows if r["group"] == group and r["label"] == label]
             if vals:
                 ax.hist(vals, bins=bins, histtype="step", lw=2, color=colour, label=label)
@@ -127,8 +165,8 @@ def histogram(rows: list[dict], path: Path) -> None:
         ax.grid(axis="y", color=GRID, lw=0.8)
         for s in ("top", "right"):
             ax.spines[s].set_visible(False)
-    axes[0][0].text(MIN_SHARPNESS * 1.12, 0.97, "blur limit\n(illustrative)", transform=axes[0][0].get_xaxis_transform(),
-                    va="top", fontsize=8, color=INK_2)
+    axes[0][0].text(MIN_SHARPNESS / 1.12, 0.97, "blur limit\n(illustrative)", transform=axes[0][0].get_xaxis_transform(),
+                    va="top", ha="right", fontsize=8, color=INK_2)
     for row in axes:
         row[0].set_ylabel("Images")
     fig.suptitle("Quality gate on real images: public dataset samples", x=0.02, ha="left", fontsize=14, weight="bold")
