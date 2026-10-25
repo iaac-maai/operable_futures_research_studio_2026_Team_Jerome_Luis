@@ -17,14 +17,19 @@ Phone photo (with a coin for scale) -> quality gate -> YOLO (finds element and c
 It never gives a permit or a clearance. Any doubt goes to an expert, and an engineer confirms every High.
 
 ## Data
-See `docs/data_map.md`. Public sets (SDNET2018, CC BY 4.0; CrackSeg9k, CC0; PEER Hub ImageNet, CC BY-NC-SA 4.0) cover concrete, pavement and post-earthquake images.
-Engineer-labelled phone photos of columns, beams and brick walls are still to be collected. Raw data is not committed; `data/` stays empty in the repository.
+The concept is cracks in buildings in slum-like, informal neighbourhoods. See `docs/data_map.md`: every source is ranked by how close it is to that case.
+- Closest public data: engineer surveys of damaged buildings after the Haiti 2010 and Nepal 2015 earthquakes, rated light / moderate / severe (one rating per building, no scale).
+- Building and masonry crack images: METU, Darbhanga, Strathclyde (crack / no crack, no scale).
+- Generic crack pixels for pre-training: CrackSeg9k, crack-seg. Bridge and pavement sets are off-concept.
+- Still to collect: our own phone photos with a coin, rated by our engineering partners (Engineers Without Borders and a third-party structural engineer).
+
+Raw data is not committed; `data/` stays empty in the repository.
 
 ## Method and status
 The risk matrix and decision rules are implemented in `src/triage/` with tests. Thresholds are illustrative until calibrated with a structural engineer.
 The confusion tables (true and false positives and negatives, with missed High as the key error) are defined in `spec/features/evaluation.md` and coded in `src/triage/evaluate.py`.
-The quality gate (`src/quality/`) ran as a first test on 8,288 real images from two public datasets; it found and fixed a resolution bug in the blur check (`docs/experiments/`).
-Models are not trained yet. Decisions are logged in `spec/decisions.md`. The 10-week plan is in `spec/constitution/roadmap.md`.
+The quality gate (`src/quality/`) ran as a first test on real images from five public datasets. It found and fixed a resolution bug in the blur check, and showed that the blur check confuses smooth plaster and concrete with blur (open, decision D12) (`docs/experiments/`).
+Models are not trained yet. Decisions are logged in `spec/decisions.md`. The plan to the final presentation (17 Dec) is in `spec/constitution/roadmap.md`; this week's tasks in `docs/weekly_todo.md`.
 
 ## Results
 None yet. Success means beating the non-AI baseline (an engineer's visual check) on held-out, engineer-labelled photos, while missing almost no High cases (a target, not a result).

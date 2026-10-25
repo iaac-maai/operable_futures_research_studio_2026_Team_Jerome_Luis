@@ -32,7 +32,7 @@ Any model meant for real deployment is retrained without them, on CC0 / CC BY da
 Reason: their licences forbid commercial use, and a deployed tool may later be run by a company or a funded programme.
 
 ## D7 (2026-10-25): SDNET2018 is a code test, not training data for thresholds
-Public sets (crack-seg and Darbhanga, run on 25 Oct; SDNET2018) are used for the 29 Oct first test on real data. They do not set any threshold, because they are not phone photos and have no scale reference.
+Public sets (crack-seg, Darbhanga, SDNET2018, METU, Strathclyde, run on 25 Oct) are used for the 29 Oct first test on real data. They do not set any threshold, because they are not phone photos and have no scale reference.
 Thresholds for the quality gate come from the pilot phone photos; triage thresholds come from the engineering partner.
 
 ## D8 (2026-10-25): measure sharpness at a fixed working size

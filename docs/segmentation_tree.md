@@ -33,7 +33,8 @@ People live in ageing, unsupervised buildings and cannot judge whether the crack
 - D3. Tripoli: some families refused to leave, fearing homelessness more than collapse [7]. **[out]**, but it shapes the advice: Medium means low-cost advice, not eviction.
 
 ### E. Data is scarce
-- E1. Public crack data is mostly concrete and pavement, with few columns, beams or brick walls (`docs/data_map.md`). **[tool]**
+- E1. Public crack data is mostly bridges, roads and pavement; almost none shows homes in informal areas (`docs/data_map.md`, section 0). **[tool]**
+- E1b. The closest public data, engineer surveys after the Haiti 2010 and Nepal 2015 earthquakes [41][42], rates whole buildings after a disaster, without scale. **[tool]** (evidence and calibration only)
 - E2. No engineer-labelled phone photos exist yet. **[tool]** (Phase 2)
 
 ## Atomic problem (work on first)

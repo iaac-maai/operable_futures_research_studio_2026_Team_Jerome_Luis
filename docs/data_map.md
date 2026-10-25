@@ -33,7 +33,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 | Stage | Needs | Covered by | Gap |
 |---|---|---|---|
-| Quality gate | Phone photos labelled usable / unusable (blur, light, coin visible) | Pilot photos (section 4), planned. First code test on crack-seg and Darbhanga done (`docs/experiments/2026-10-25_quality_gate_first_test.md`) | Public sets are not phone photos; they test the code only |
+| Quality gate | Phone photos labelled usable / unusable (blur, light, coin visible) | Pilot photos (section 4), planned. First code test on five public sets done (`docs/experiments/2026-10-25_quality_gate_first_test.md`) | Public sets are not phone photos; they test the code only |
 | YOLO detector | Bounding boxes for element (column, beam, slab, brick wall) and crack | Cracks only: crack-seg polygons [33], Darbhanga crack boxes [30], CODEBRIM defect boxes [28]; PHI-Net has component type as a class only [26] | No public set has element boxes; draw them on our own photos |
 | U-Net segmenter | Pixel masks of cracks | CrackSeg9k [25]; crack-seg polygons converted to masks [33]; Dais et al. masonry masks [31] | Few columns and beams |
 | Measurement | Crack width in mm with a coin for scale | Pilot photos with a crack-width card, planned | Nothing public has a scale reference |
@@ -57,7 +57,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | CODEBRIM | Zenodo record 2620293 [28], CVPR 2019 paper [29] | Available | Open record, licence file must be accepted | Original images, cropped defects with class labels from bounding boxes, classification sets | 36.4 GB in total (cropped set 7.9 GB); image count not stated on the record | Non-commercial research and education only; no redistribution; trained models may not be used commercially | Five concrete defects on 30 bridges: crack, spalling, exposed bars, efflorescence, corrosion stains | Bridges, not homes; no scale; licence blocks any product use |
 | Brick masonry cracks, Darbhanga Fort | Singh and Maity, Mendeley Data [30] | **Downloaded** (SHA-256 matches) | Public download, scriptable | YOLO bounding boxes (class x y w h), 1 class; all images 768 x 768; test set has no labels | 4,259 images (3,407 train incl. 203 without cracks, 639 val, 213 test); 363 MB zip | CC BY 4.0 | Superficial cracks in red brick masonry | One heritage structure, not homes; no scale; boxes, not masks |
 | METU Concrete Crack Images for Classification | Özgenel, Mendeley Data, doi:10.17632/5y9wdsg2zt.2 [36] | **Downloaded** (SHA-256 matches) | Public download, scriptable; RAR archive | JPEG tiles 227 x 227, Positive / Negative folders | 40,000 (20,000 crack, 20,000 no crack), cut from 458 photos of 4032 x 3024; 241 MB | CC BY 4.0 | Concrete surfaces of buildings on the METU campus, Ankara | Formal campus buildings, not informal homes; no masks, no scale |
-| Haiti Earthquake Database (2010) | Sedra, Eberhard, Pujol et al., DataCenterHub, doi:10.4231/D3P843W0H [41] | Available (not downloaded: 14 GB) | Public page, data in a Dropbox folder, no login stated | Spreadsheet (one row per building), photographs, field diagrams | 6,526 photos of 183 structures (170 surveyed in detail: 138 Port-au-Prince, 38 Léogâne); 14.0 GB zip | Not stated on the page: ask the authors before reuse | RC and concrete-block masonry buildings, 1 to 12 floors; damage light / moderate / severe for RC and for masonry walls, defined by crack width | One rating per building; post-earthquake; no scale |
+| Haiti Earthquake Database (2010) | Sedra, Eberhard, Pujol et al., DataCenterHub, doi:10.4231/D3P843W0H [41] | **Downloading** (14 GB, started 25 Oct) | Public page, data in a Dropbox folder, no login stated | Spreadsheet (one row per building), photographs, field diagrams | 6,526 photos of 183 structures (170 surveyed in detail: 138 Port-au-Prince, 38 Léogâne); 14.0 GB zip | Not stated on the page: ask the authors before reuse | RC and concrete-block masonry buildings, 1 to 12 floors; damage light / moderate / severe for RC and for masonry walls, defined by crack width | One rating per building; post-earthquake; no scale |
 | 2015 Nepal Earthquake Building Performance Database | Shah, Pujol, Puranam, Laughery, DataCenterHub, doi:10.7277/Z82F-0728 [42] | Available (not downloaded) | Public page | Spreadsheet per building with photos, drawings, KML map | 146 low-rise RC buildings, Kathmandu; photo count not stated | CC BY-SA 3.0 | RC with masonry infill; structural damage light / moderate / severe / collapse, infill damage light / moderate / severe | Per building; post-earthquake; no scale |
 | Building Surveys after Earthquakes | Monical, ACI Committee 133, DataCenterHub, doi:10.7277/368Q-T523 [43] | Available (not downloaded) | Public page | Per-building dimensions, ground motion, photos, figures | Counts not stated | CC BY-NC-SA 4.0 (non-commercial) | 2015 Nepal, 2016 Ecuador, 2016 Taiwan, 2017 South Korea; RC buildings | Damage scheme not stated on the page; non-commercial |
 | Brickwork Cracks Dataset | Seyedzadeh, Katsigiannis et al., Zenodo, doi:10.5281/zenodo.8014150 [44] | **Downloaded** (MD5 matches) | Open, Zenodo | 227 x 227 images, Positive / Negative folders | 700 (350 crack, 350 no crack); 9 MB | CC BY 4.0 | Brick facades | Small; no masks, no scale |
@@ -99,5 +99,21 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 - Consent and data rules for Phase 2: the deck says "photos stay with the household"; labelling needs copies. Write who keeps what, for how long, and how faces and addresses are removed.
 - Licences: PHI-Net and CODEBRIM are non-commercial (`spec/decisions.md` D6).
 - Confirm the Dais image terms with the authors.
+- Confirm the Haiti database licence with its authors before using any photo in slides or training (email drafted 25 Oct).
 - Pick a threshold for the CrackSeg9k soft masks; find the masonry subset's file prefix.
 - Ultralytics (YOLO) software is AGPL-3.0 (`spec/decisions.md` D9).
+
+## 6. Local copies (`data/raw/`, never on GitHub)
+What is downloaded on Jerome's PC as of 25 Oct 2026. Anyone else downloads from the source (section 2) into the same folder names.
+
+| Folder | Dataset | On disk | Images | Download check |
+|---|---|---|---|---|
+| `crack-seg/` | Ultralytics crack-seg [33] | 218 MB | 4,029 | Counted in the zip |
+| `darbhanga/` | Brick masonry, Darbhanga [30] | 708 MB | 4,259 | SHA-256 matches Mendeley |
+| `metu/` | METU concrete cracks [36] | 556 MB | 40,000 | SHA-256 matches Mendeley |
+| `sdnet2018/` | SDNET2018 [22] | 629 MB | 56,092 | Downloaded in a browser; file sizes checked |
+| `strathclyde-brickwork/` | Brickwork cracks [44] | 19 MB | 700 | MD5 matches Zenodo |
+| `crackseg9k/` | CrackSeg9k Vol1 [25] | 1.5 GB | not extracted | MD5 matches Dataverse |
+| `haiti2010/` | Haiti Earthquake Database [41] | 14 GB | in progress | Download started 25 Oct |
+
+Run the real-data test on all of them: `py src/experiments/real_data_quality.py data/raw/crack-seg data/raw/darbhanga data/raw/metu data/raw/sdnet2018 data/raw/strathclyde-brickwork --per-group 2000`.
