@@ -26,6 +26,11 @@ DATASET_NAMES = {"crack-seg": "crack-seg (roads, walls)", "darbhanga": "Darbhang
                  "metu": "METU (building concrete)",
                  "strathclyde-brickwork": "Strathclyde (brick facades)", "haiti2010": "Haiti 2010 (engineer survey)",
                  "nepal2015": "Nepal 2015 (engineer survey)"}
+# Panel order: fit to the concept, best first (docs/data_map.md, section 0).
+FIT_ORDER = [("Haiti 2010 (engineer survey)", "high"), ("Nepal 2015 (engineer survey)", "high"),
+             ("Darbhanga (brick masonry)", "medium"), ("Strathclyde (brick facades)", "medium"),
+             ("METU (building concrete)", "low"), ("SDNET2018 wall", "low"), ("crack-seg (roads, walls)", "low"),
+             ("SDNET2018 pavement", "off-concept"), ("SDNET2018 bridge deck", "off-concept")]
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -96,7 +101,9 @@ def histogram(rows: list[dict], path: Path) -> None:
 
     from viz.figures import BLUE, GRID, INK_2, LEVEL
 
-    groups = sorted({r["group"] for r in rows})
+    rank = {g: i for i, (g, _) in enumerate(FIT_ORDER)}
+    fit = dict(FIT_ORDER)
+    groups = sorted({r["group"] for r in rows}, key=lambda g: (rank.get(g, len(rank)), g))
     cols = min(3, len(groups))
     nrows = -(-len(groups) // cols)
     fig, axes = plt.subplots(nrows, cols, figsize=(max(11, 4.4 * cols), 3.3 * nrows + 1.6), squeeze=False)
@@ -111,7 +118,11 @@ def histogram(rows: list[dict], path: Path) -> None:
         ax.legend(frameon=False, fontsize=8.5, loc="upper right")
         ax.axvline(MIN_SHARPNESS, color=LEVEL["High"], lw=1.2)
         ax.set_xscale("log")
-        ax.set_title(group, loc="left", fontsize=10.5, weight="bold")
+        members = [r for r in rows if r["group"] == group]
+        accepted = sum(r["image_ok"] for r in members) / len(members)
+        ax.set_title(f"{groups.index(group) + 1} · {group}", loc="left", fontsize=10.5, weight="bold", pad=18)
+        ax.text(0, 1.02, f"fit to concept: {fit.get(group, 'not ranked')}  ·  {accepted:.0%} accepted",
+                transform=ax.transAxes, fontsize=8.5, color=INK_2, va="bottom")
         ax.set_xlabel("Sharpness (Laplacian variance, log)")
         ax.grid(axis="y", color=GRID, lw=0.8)
         for s in ("top", "right"):
@@ -122,10 +133,11 @@ def histogram(rows: list[dict], path: Path) -> None:
         row[0].set_ylabel("Images")
     fig.suptitle("Quality gate on real images: public dataset samples", x=0.02, ha="left", fontsize=14, weight="bold")
     top = 1 - 1.3 / (3.3 * nrows + 1.6)
-    fig.text(0.02, top + 0.02, f"Images left of the red line would be asked to retake. Brightness limits "
+    fig.text(0.02, top + 0.02, f"Panels ordered by fit to our concept, best first (docs/data_map.md). "
+             f"Images left of the red line would be asked to retake. Brightness limits "
              f"{MIN_BRIGHTNESS:g} to {MAX_BRIGHTNESS:g}.\nNot phone photos: tests the code, does not calibrate "
              "thresholds.", fontsize=9.5, color=INK_2, va="bottom")
-    fig.subplots_adjust(left=0.07, right=0.98, top=top - 0.04, bottom=0.08, wspace=0.18, hspace=0.55)
+    fig.subplots_adjust(left=0.07, right=0.98, top=top - 0.04, bottom=0.08, wspace=0.18, hspace=0.62)
     fig.savefig(path, dpi=200)
     plt.close(fig)
 

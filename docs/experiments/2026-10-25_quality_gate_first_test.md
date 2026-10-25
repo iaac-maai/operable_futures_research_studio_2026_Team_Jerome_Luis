@@ -35,6 +35,8 @@ A low score means the gate struggles with that surface, not that the data is bad
 
 ![Quality gate on real images](../../figures/08_real_data_quality_gate.png)
 
+The figure orders the datasets by fit to our concept, best first (`docs/data_map.md`, section 0); each panel shows its fit and the share of images accepted.
+
 | Dataset | Label | n | Pass rate | Median sharpness | Median brightness | Main failure |
 |---|---|---|---|---|---|---|
 | crack-seg | crack | 2,000 | 97% | 765.9 | 159.9 | too bright |
