@@ -9,7 +9,7 @@ Every figure is drawn from the repo's own rules and data map, so it changes when
 | `01_pipeline.png` | Photo-to-triage pipeline, coloured by learned / written rule / human | Deck slide 5, `tech_stack.md` |
 | `02_decision_flow.png` | Order of checks: Retake, Expert needed, matrix, engineer review | `triage.matrix.assess()` |
 | `03_risk_matrix.png` | Width band x pattern -> level | `triage.matrix.MATRIX` (read at run time) |
-| `04_segmentation_tree.png` | Macro, meso, micro, atomic, with scope tags | `docs/segmentation_tree.md` |
+| `04_segmentation_tree.png` | Decision-forest style tree: macro box, four branches of circles, results, atomic box; green = path to the atomic problem | `docs/segmentation_tree.md` |
 | `05_data_coverage.png` | Which data source feeds which pipeline stage | `docs/data_map.md`, section 1 |
 | `06_dataset_sizes.png` | Image counts and licences of public sets vs our target data | `docs/data_map.md`, section 2 |
 | `07_confusion_template.png` | TP / FN / FP / TN and the full 3 x 5 confusion matrix, no counts | `spec/features/evaluation.md` |

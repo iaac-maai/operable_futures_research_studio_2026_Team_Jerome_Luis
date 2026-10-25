@@ -1,7 +1,11 @@
 # Problem segmentation tree
 
 Version for 29 Oct 2026. Numbers in brackets refer to `docs/sources.md`.
-Scope tags: **[tool]** the tool works on it, **[later]** Phase 3, **[out]** out of scope.
+Only what the tool works on (`spec/decisions.md` D16). What it does not cover is stated once, in `spec/constitution/mission.md` (Out of scope).
+
+![Segmentation tree](../figures/04_segmentation_tree.png)
+
+Green: the path into the atomic problem. Blue: supporting context.
 
 ## Macro
 People live in ageing, unsupervised buildings and cannot judge whether the cracks they see are dangerous.
@@ -9,73 +13,54 @@ People live in ageing, unsupervised buildings and cannot judge whether the crack
 
 ## Meso and micro
 
-### A. Buildings deteriorate with nobody watching (causes)
-- A1. Ageing and no maintenance: Tripoli blocks 60 to 70 years old, past their structural life [3][9]. **[tool]**
-- A2. Added floors, poor materials, poor ground: Rana Plaza, Dhaka 2013, on a filled-in pond [15]. **[tool]** for the cracks; frames **[later]**
-- A3. Soil erosion and ground fissures: Buriticupu, Brazil [12]. **[later]**
-- A4. Unauthorised construction: 19.6 unauthorised per 100 authorised buildings in Italy, nearly 50 in the South [19]. **[out]** (no structural records)
-- A5. Earthquakes as triggers: Petrinja 2020 [20][21]. **[out]** (a trigger, not a crack signal)
+### A. Buildings deteriorate with nobody watching (why cracks appear)
+- A1. Ageing and no maintenance: Tripoli blocks 60 to 70 years old, past their structural life [3][9].
+- A2. Added floors, poor materials, poor ground: Rana Plaza, Dhaka 2013, on a filled-in pond [15].
 
-### B. Residents see the signs but cannot read them (the gap the tool targets)
-- B1. They cannot tell a harmless surface crack from a structural one. The missing piece is interpretation, not detection. **[tool]**
-- B2. A wrong all-clear lands on them. **[tool]**: Low must be earned, any doubt goes to an expert.
-- B3. Photos are hard to interpret: blur and light **[tool]** (quality gate); no scale **[tool]** (coin); element and material vary **[tool]** (element tag, YOLO).
-- B4. A surface photo cannot show rebar, concrete strength or foundations. **[out]**
+### B. Residents see the signs but cannot read them (what the tool must solve)
+- **B1.** They cannot tell a harmless surface crack from a structural one. The missing piece is interpretation, not detection.
+- **B2.** A wrong all-clear lands on them: Low must be earned, any doubt goes to an expert.
+- **B3.** Photos are hard to interpret: blur and light (quality gate), no scale (coin), element and material vary (element tag, detector).
 
-### C. Engineers are too few and reports queue up
-- C1. No ranked list of which building to visit first. **[tool]**
-- C2. Reports are not acted on: the collapsed Tripoli building had been reported to a municipal call centre; engineers had not inspected it [3][7][10]. **[tool]** (ranking)
-- C3. Scale of the backlog: in Tripoli, 114 buildings ordered evacuated (announced 9 Feb 2026) [3][5]; 21 evacuated, 9 under reinforcement by 16 Feb [6]. **[tool]** (ranking)
+### C. Engineers are too few and reports queue up (why a ranked list matters)
+- **C1.** No ranked list of which building to visit first.
+- C2. Reports are not acted on: the collapsed Tripoli building had been reported to a municipal call centre; engineers had not inspected it [3][7][10].
+- C3. Scale of the backlog: in Tripoli, 114 buildings ordered evacuated (announced 9 Feb 2026) [3][5]; 21 evacuated, 9 under reinforcement by 16 Feb [6].
 
-### D. Warnings are overridden (governance)
-- D1. Rana Plaza: cracks shown on TV the day before; the owner said the building was safe [15]. **[out]** (the tool informs, it cannot enforce)
-- D2. Lagos: a building sealed as defective, then work resumed; 90+ collapses, 350+ deaths 2012 to 2024 [13][14]. **[out]**
-- D3. Tripoli: some families refused to leave, fearing homelessness more than collapse [7]. **[out]**, but it shapes the advice: Medium means low-cost advice, not eviction.
-
-### E. Data is scarce
-- E1. Public crack data is mostly bridges, roads and pavement; almost none shows homes in informal areas (`docs/data_map.md`, section 0). **[tool]**
-- E1b. The closest public data, engineer surveys after the Haiti 2010 and Nepal 2015 earthquakes [41][42], rates whole buildings after a disaster, without scale. **[tool]** (evidence and calibration only)
-- E2. No engineer-labelled phone photos exist yet. **[tool]** (Phase 2)
+### D. Data is scarce (why we collect our own data)
+- D1. Public crack data is mostly bridges, roads and pavement; almost none shows homes in informal areas. The closest, engineer surveys after the Haiti 2010 and Nepal 2015 earthquakes [41][42], rates whole buildings after a disaster, without scale (`docs/data_map.md`, section 0).
+- D2. No engineer-labelled phone photos of single cracks exist yet; we collect them with our partners.
 
 ## Atomic problem (work on first)
-Read one photo of one crack on one element and return Low, Medium, High, "Expert needed" or "Retake", with a one-sentence reason (B1, B2, B3).
-It sits under B because, in four of the six cases in the deck, the danger was known; what was missing was a way to rank which building to inspect first.
+Read one photo of one crack on one element and return Low, Medium, High, "Expert needed" or "Retake", with a one-sentence reason. It comes from B1, B2, B3 and C1 (bold above).
+It sits under B and C because, in four of the six cases in the deck, the danger was known; what was missing was a way to read it and to rank which building to inspect first.
 
-## Diagram
-
-![Segmentation tree](../figures/04_segmentation_tree.png)
-
-Same tree as Mermaid source:
+## Same tree as Mermaid source
 
 ```mermaid
 graph TD
-  M["Macro: people cannot judge whether cracks in ageing buildings are dangerous"]
+  M["Macro: people cannot judge whether the cracks in their ageing buildings are dangerous"]
   M --> A["A. Buildings deteriorate unwatched"]
   M --> B["B. Residents cannot read the signs"]
   M --> C["C. Too few engineers"]
-  M --> D["D. Warnings overridden"]
-  M --> E["E. Data is scarce"]
+  M --> D["D. Data is scarce"]
   A --> A1["A1 Ageing, no maintenance"]
   A --> A2["A2 Added floors, poor ground"]
-  A --> A3["A3 Soil erosion (later)"]
-  A --> A4["A4 Unauthorised building (out)"]
-  A --> A5["A5 Earthquake trigger (out)"]
   B --> B1["B1 Harmless vs structural"]
   B --> B2["B2 Wrong all-clear"]
-  B --> B3["B3 Photo quality, scale, element"]
-  B --> B4["B4 Rebar, foundations (out)"]
+  B --> B3["B3 Photo quality, scale"]
   C --> C1["C1 No ranked list"]
   C --> C2["C2 Reports not acted on"]
-  D --> D1["D1 Owner says safe (out)"]
-  D --> D3["D3 Fear of eviction (out)"]
-  E --> E1["E1 Concrete and pavement only"]
-  E --> E2["E2 No engineer labels"]
+  C --> C3["C3 Backlog: 114 buildings"]
+  D --> D1["D1 Public data: bridges and roads"]
+  D --> D2["D2 No engineer labels"]
   B1 --> AT["Atomic: one photo, one crack, one element, level plus reason"]
   B2 --> AT
   B3 --> AT
   C1 --> AT
-  classDef tool fill:#dff3e8,stroke:#2e7d32;
-  classDef out fill:#eeeeee,stroke:#9e9e9e,color:#666;
-  class B1,B2,B3,C1,C2,E1,E2,A1,A2,AT tool;
-  class A4,A5,B4,D1,D3 out;
+  AT --> R["Second Look: Low, Medium, High, Expert needed, Retake"]
+  classDef path fill:#22b14c,stroke:#22b14c,color:#fff;
+  classDef context fill:#1f2a8c,stroke:#1f2a8c,color:#fff;
+  class B,C,B1,B2,B3,C1 path;
+  class A,D,A1,A2,C2,C3,D1,D2 context;
 ```

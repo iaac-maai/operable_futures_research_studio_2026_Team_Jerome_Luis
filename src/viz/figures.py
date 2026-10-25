@@ -11,6 +11,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 from matplotlib.patches import FancyBboxPatch, Patch
 
 if __package__ in (None, ""):
@@ -150,47 +151,78 @@ def risk_matrix():
     return fig
 
 
+# Only what the tool works on (decision D16); out-of-scope and Phase 3 items are in docs/segmentation_tree.md.
 TREE = {
-    "A. Buildings deteriorate\nunwatched": [("A1 Ageing, no maintenance", "tool"), ("A2 Added floors, poor ground", "tool"),
-                                            ("A3 Soil erosion", "later"), ("A4 Unauthorised building", "out"),
-                                            ("A5 Earthquake trigger", "out")],
-    "B. Residents cannot\nread the signs": [("B1 Harmless vs structural", "tool"), ("B2 Wrong all-clear", "tool"),
-                                            ("B3 Photo quality, scale", "tool"), ("B4 Rebar, foundations", "out")],
-    "C. Too few engineers": [("C1 No ranked list", "tool"), ("C2 Reports not acted on", "tool"),
-                             ("C3 Backlog: 114 buildings", "tool")],
-    "D. Warnings overridden": [("D1 Owner says safe", "out"), ("D2 Work resumes after seal", "out"),
-                               ("D3 Fear of eviction", "out")],
-    "E. Data is scarce": [("E1 Concrete, pavement only", "tool"), ("E2 No engineer labels", "tool")],
+    "A. Buildings deteriorate unwatched": ["A1 Ageing, no maintenance", "A2 Added floors, poor ground"],
+    "B. Residents cannot read the signs": ["B1 Harmless vs structural", "B2 Wrong all-clear", "B3 Photo quality, scale"],
+    "C. Too few engineers": ["C1 No ranked list", "C2 Reports not acted on", "C3 Backlog: 114 buildings"],
+    "D. Data is scarce": ["D1 Public data: bridges and roads", "D2 No engineer labels"],
 }
 ATOMIC_FROM = {"B1", "B2", "B3", "C1"}
-SCOPE = {"tool": ("#e3f5ee", AQUA, "Tool works on it"), "later": ("#fdf0d0", "#c98500", "Phase 3"),
-         "out": ("#f0efec", MUTED, "Out of scope")}
+TREE_RESULTS = {"A": "Why cracks appear", "B": "What the tool must solve", "C": "Why a ranked list matters",
+                "D": "Why we collect our own data"}
+TREE_GREEN, TREE_BLUE = "#22b14c", "#1f2a8c"
 
 
 def segmentation_tree():
-    fig, ax = _canvas(15, 8.4, "Problem segmentation tree",
-                      "Macro → meso → micro → atomic. Bold outline: feeds the atomic problem. "
-                      "Sources in docs/sources.md")
-    w, h, col = 2.6, 0.62, 3.0
-    _box(ax, 4.2, 7.0, 6.6, 0.8, "Macro: people cannot judge whether cracks\nin ageing buildings are dangerous",
-         "#dfeaf8", BLUE, size=10.5, weight="bold")
+    """Random-forest style: problem box -> branch trees of circles -> results -> atomic box -> final result.
+    Green marks the path into the atomic problem, blue the supporting context."""
+    import textwrap
+
+    fig, ax = plt.subplots(figsize=(18, 10.8))
+    ax.set_axis_off()
+    fig.suptitle("Problem segmentation tree", x=0.02, ha="left", fontsize=15, weight="bold")
+    fig.text(0.02, 0.928, "Macro problem → four branches (meso) → causes and needs (micro) → the atomic problem we work "
+             "on first. Sources in docs/sources.md", fontsize=10.5, color=INK_2)
+    col, r_meso, r_leaf, gap = 4.4, 0.45, 0.34, 1.3
+    y_box, y_meso, y_leaf, y_title, y_result, y_atomic, y_final = 11.2, 9.3, 7.55, 5.05, 4.1, 2.4, 1.05
+    width = col * len(TREE)
+    feeds = {code[0] for code in ATOMIC_FROM}
+
+    def circle(x, y, r, colour, text, size):
+        ax.add_patch(plt.Circle((x, y), r, facecolor=colour, edgecolor="none", zorder=3))
+        ax.text(x, y, text, ha="center", va="center", color="white", fontsize=size, weight="bold", zorder=4)
+
+    def arrow(x0, y0, x1, y1):
+        ax.annotate("", xy=(x1, y1), xytext=(x0, y0), zorder=2,
+                    arrowprops=dict(arrowstyle="-|>", color=INK, lw=1.3, mutation_scale=16, shrinkA=0, shrinkB=0))
+
+    box_w = 10.0
+    _box(ax, width / 2 - box_w / 2, y_box - 0.45, box_w, 0.9,
+         "Macro: people cannot judge whether the cracks in their ageing buildings are dangerous",
+         "#FFFFFF", INK, size=12.5, lw=1.4)
     for i, (meso, kids) in enumerate(TREE.items()):
-        x = i * col
-        _box(ax, x, 5.5, w, 0.85, meso, "#f0efec", INK_2, weight="bold")
-        ax.plot([7.5, x + w / 2], [7.0, 6.35], color=MUTED, lw=1)
-        for j, (kid, scope) in enumerate(kids):
-            fill, edge, _ = SCOPE[scope]
-            y = 4.6 - j * 0.8
-            bold = kid[:2] in ATOMIC_FROM
-            _box(ax, x + 0.15, y, w - 0.3, h, kid, fill, edge, size=8.8, lw=2.8 if bold else 1.2,
-                 weight="bold" if bold else "normal")
-            ax.plot([x + 0.07, x + 0.07, x + 0.15], [5.5, y + h / 2, y + h / 2], color=MUTED, lw=1)
-    _box(ax, 3.2, -0.2, 8.6, 0.8, "Atomic: one photo, one crack, one element → level + one-sentence reason\n"
-         "(from B1, B2, B3 and C1)", "#e3f5ee", AQUA, size=10, weight="bold", lw=2.8)
-    ax.legend(handles=[Patch(facecolor=f, edgecolor=e, label=l) for f, e, l in SCOPE.values()],
-              loc="upper right", bbox_to_anchor=(1.0, 1.02), ncol=3, frameon=False)
-    ax.set_xlim(-0.2, 4 * col + w + 0.2)
-    ax.set_ylim(-0.4, 8.0)
+        letter = meso[0]
+        cx = col * i + col / 2
+        arrow(width / 2, y_box - 0.45, cx, y_meso + r_meso)
+        circle(cx, y_meso, r_meso, TREE_GREEN if letter in feeds else TREE_BLUE, letter, 14)
+        xs = [cx + (j - (len(kids) - 1) / 2) * gap for j in range(len(kids))]
+        for x, kid in zip(xs, kids):
+            code, label = kid.split(" ", 1)
+            on_path = code in ATOMIC_FROM
+            ax.plot([cx, x], [y_meso - r_meso, y_leaf + r_leaf], color=INK, lw=1.2, zorder=1)
+            circle(x, y_leaf, r_leaf, TREE_GREEN if on_path else TREE_BLUE, code, 10)
+            ax.text(x, y_leaf - r_leaf - 0.14, textwrap.fill(label, 13, break_on_hyphens=False), ha="center", va="top", fontsize=10.5,
+                    color=INK, weight="bold" if on_path else "normal", linespacing=1.12)
+        ax.text(cx, y_title, meso, ha="center", va="center", fontsize=12, weight="bold", color=INK)
+        arrow(cx, y_title - 0.28, cx, y_result + 0.28)
+        ax.text(cx, y_result, TREE_RESULTS[letter], ha="center", va="center", fontsize=11, color=INK_2)
+        if letter in feeds:
+            arrow(cx, y_result - 0.28, width / 2 + (cx - width / 2) * 0.4, y_atomic + 0.45)
+    atomic_w = 11.5
+    _box(ax, width / 2 - atomic_w / 2, y_atomic - 0.45, atomic_w, 0.9,
+         "Atomic problem: one photo, one crack, one element → a level and a one-sentence reason",
+         "#FFFFFF", INK, size=12.5, lw=1.4)
+    arrow(width / 2, y_atomic - 0.45, width / 2, y_final + 0.3)
+    ax.text(width / 2, y_final, "Second Look: Low · Medium · High · Expert needed · Retake",
+            ha="center", va="center", fontsize=13.5, weight="bold", color=INK)
+    ax.legend(handles=[Line2D([], [], marker="o", ls="", markersize=12, color=TREE_GREEN,
+                              label="Path to the atomic problem"),
+                       Line2D([], [], marker="o", ls="", markersize=12, color=TREE_BLUE, label="Supporting context")],
+              loc="lower left", bbox_to_anchor=(0.0, -0.01), ncol=2, frameon=False, fontsize=10.5)
+    ax.set_xlim(-0.3, width + 0.3)
+    ax.set_ylim(0.4, 11.75)
+    ax.set_aspect("equal")
     return fig
 
 

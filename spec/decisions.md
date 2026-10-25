@@ -70,3 +70,8 @@ Reason: the team's concept; earlier data choices leaned on bridge and pavement s
 ## D15 (2026-10-25): train crack finding now; danger rating waits for our own data
 Public data is enough to train crack segmentation, crack detection and crack / no-crack (`docs/data_map.md`, section 0b). It is not enough for the crack pattern (no dataset uses our five classes), width in mm (no scale anywhere), or Low / Medium / High per crack (Haiti and Nepal rate whole buildings).
 Decision: the hackathon beta trains the crack-finding step on public data. Pattern labels, width and danger ratings come from hand labelling, the pilot photos and the engineering partners; those tasks stay on the critical path.
+
+## D16 (2026-10-26): the segmentation tree shows only what the tool works on
+Out-of-scope items (unauthorised construction, earthquake triggers, rebar and foundations, overridden warnings) and the Phase 3 item (soil erosion) are removed from the tree. The "Warnings overridden" branch is gone; "Data is scarce" becomes branch D. What the tool does not cover is stated once, in `spec/constitution/mission.md`.
+The tree figure is redrawn as a decision-forest diagram: problem box, branch trees of circles, results, atomic box, final output. Green marks the path into the atomic problem (B1, B2, B3, C1), blue the supporting context.
+Reason: team feedback; out-of-scope nodes were unnecessary detail and the old box layout was hard to read.
