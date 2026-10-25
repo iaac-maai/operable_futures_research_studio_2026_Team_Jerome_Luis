@@ -73,6 +73,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 - Example photos in the deck (slide 8): stock images, authors not identified; their risk labels are a visual guess.
 - Kaggle "Crack Dataset" (yatata1, CC BY-SA 4.0, 13.8 GB, "under development") [37]: checked 25 Oct, not used. Its description says it was assembled from existing public crack sets (Rissbilder, the Kaggle "Crack Segmentation Dataset") and UAV infrastructure inspections, so it overlaps CrackSeg9k; mostly concrete and asphalt, off-concept (D14).
 - Kaggle "Crack Detection/Classification Dataset" (Apache 2.0 as labelled by the uploader, about 20 GB, v1 Aug 2026) [38]: checked 25 Oct, not used. Nine mixed domains (roads, metal, car bodies, wood, circuit boards, welding, synthetic concrete); only `Wall_Concrete` is near the concept, and it mixes walls with bridges. The sources it aggregates are not named, so provenance and licence cannot be traced.
+- Kaggle "Building Crack Detection Dataset" (CC0 as labelled by the uploader, v1 Jul 2026) [39]: checked 25 Oct, not used. Only 51 images (17 hairline, 17 irregular, 17 wide cracks), no uncracked images despite the description, no scale, and no stated source for the photos.
 - Case-study figures (deaths, evacuations): context for the problem, not training data.
 
 ## 4. Plan, in order

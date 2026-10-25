@@ -40,3 +40,4 @@ Numbered as in the 22 Oct 2026 presentation. [25] to [27] added for the data map
 36. Özgenel, Concrete Crack Images for Classification (METU), Mendeley Data v2, doi:10.17632/5y9wdsg2zt.2: https://data.mendeley.com/datasets/5y9wdsg2zt/2
 37. Yata-ta, Crack Dataset, Kaggle (v11, checked 25 Oct 2026): https://www.kaggle.com/datasets/yatata1/crack-dataset
 38. Crack Detection/Classification Dataset, Kaggle (v1, checked 25 Oct 2026): https://www.kaggle.com/datasets/nawfeelrahman1124444/crack-detectionclassification-dataset
+39. Building Crack Detection Dataset, Kaggle (v1, checked 25 Oct 2026): https://www.kaggle.com/datasets/ziya07/building-crack-detection-dataset
