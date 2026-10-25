@@ -66,3 +66,7 @@ Reason: the 22 Oct deck said "Crack triage" while the repo said "Second Look"; o
 Second Look is for cracks in buildings in slum-like, informal or ageing unsupervised neighbourhoods, not bridges, roads or pavement.
 Data is ranked by how close it is to that case (`docs/data_map.md`, section 0). Bridge and pavement sets (CODEBRIM, SDNET2018 decks and pavement) are off-concept; road-heavy sets (crack-seg, CrackSeg9k) are generic pre-training only.
 Reason: the team's concept; earlier data choices leaned on bridge and pavement sets because they are the largest public ones.
+
+## D15 (2026-10-25): train crack finding now; danger rating waits for our own data
+Public data is enough to train crack segmentation, crack detection and crack / no-crack (`docs/data_map.md`, section 0b). It is not enough for the crack pattern (no dataset uses our five classes), width in mm (no scale anywhere), or Low / Medium / High per crack (Haiti and Nepal rate whole buildings).
+Decision: the hackathon beta trains the crack-finding step on public data. Pattern labels, width and danger ratings come from hand labelling, the pilot photos and the engineering partners; those tasks stay on the critical path.

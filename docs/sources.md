@@ -46,3 +46,4 @@ Numbered as in the 22 Oct 2026 presentation. [25] to [27] added for the data map
 42. Shah, Pujol, Puranam, Laughery, 2015 Nepal Earthquake Building Performance Database (2016), DataCenterHub, doi:10.7277/Z82F-0728: https://datacenterhub.org/landingpages/537/537_LandingPage.html
 43. Monical, Building Surveys after Earthquakes (2020), DataCenterHub, doi:10.7277/368Q-T523: https://datacenterhub.org/landingpages/137/137_LandingPage.html
 44. Seyedzadeh, Katsigiannis, Agapiou, Ramzan, Brickwork Cracks Dataset v1.0 (2023), Zenodo, doi:10.5281/zenodo.8014150: https://zenodo.org/records/8014150
+45. DataCenterHub archive, NEES and post-NEES databases (maintained by the University of Canterbury), checked 25 Oct 2026: https://datacenterhub.org/post-nees.html

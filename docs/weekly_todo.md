@@ -28,6 +28,9 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 - [ ] Haiti 2010 Earthquake Database downloaded (14 GB) and checked (C, started 25 Oct)
 - [ ] Email the Haiti database authors to confirm the licence before using any photo in slides or training (draft in the chat of 25 Oct) (__)
 
+- [ ] Nepal 2015: download only the Nepal folder in a browser from https://datacenterhub.org/post-nees.html into `data/raw/nepal2015/` (__)
+- [ ] Decide how many images to label by hand with the five crack patterns, and who labels (J + L)
+
 ### Photos
 - [ ] Set up the iPhone: Most Compatible (JPEG), grid on, Camera location off (J + L)
 - [ ] Print the crack-width card (C makes the PDF)

@@ -27,6 +27,20 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 **Still missing:** per-crack photos with a scale from informal or self-built housing before any disaster. Only our own collection with the partners can give that.
 
+## 0b. What we can train now, and what we cannot (25 Oct 2026)
+
+| Step | Enough data now? | What we have | What is missing | How we get it |
+|---|---|---|---|---|
+| Find crack pixels (U-Net) | **Yes** | CrackSeg9k and crack-seg: about 13,000 images with crack outlines | Plaster and brick walls of homes are rare in them | Pre-train on these, fine-tune on our own photos |
+| Detect cracks (YOLO) | **Yes, for cracks** | Darbhanga crack boxes on brick walls, crack-seg polygons | Boxes for the element (column, beam, slab, wall) | Draw element boxes on our own photos |
+| Crack or no crack | **Yes** | METU, Strathclyde, SDNET2018: over 90,000 images | Smooth plaster walls of homes | Our pilot photos |
+| Crack pattern (5 classes) | **No** | No dataset uses our five patterns | Labels | Label a few hundred images by hand (number: assumption, to set when we start) |
+| Width in mm | **No** | Nothing public has a coin or any scale | Photos with a coin and a known width | Pilot photos with the crack-width card |
+| Low / Medium / High | **No** | Haiti and Nepal rate whole buildings, after an earthquake | A rating per crack, by an engineer | Our photos rated by Engineers Without Borders and the structural engineer |
+| Proof that the tool works (3 Dec baseline) | **No** | Nothing | Held-out photos rated per crack, plus an engineer's photo-only rating | Same as above; at least 30 High cases (`spec/features/evaluation.md`) |
+
+**In one line:** we can train the "find the crack" step now (hackathon target); the "how dangerous is it" step, and the proof that it works, still depend on our own photos and the engineers (`spec/decisions.md` D15).
+
 ## 1. What each pipeline stage needs, and where it comes from
 
 ![Data coverage](../figures/05_data_coverage.png)
@@ -58,8 +72,8 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | Brick masonry cracks, Darbhanga Fort | Singh and Maity, Mendeley Data [30] | **Downloaded** (SHA-256 matches) | Public download, scriptable | YOLO bounding boxes (class x y w h), 1 class; all images 768 x 768; test set has no labels | 4,259 images (3,407 train incl. 203 without cracks, 639 val, 213 test); 363 MB zip | CC BY 4.0 | Superficial cracks in red brick masonry | One heritage structure, not homes; no scale; boxes, not masks |
 | METU Concrete Crack Images for Classification | Özgenel, Mendeley Data, doi:10.17632/5y9wdsg2zt.2 [36] | **Downloaded** (SHA-256 matches) | Public download, scriptable; RAR archive | JPEG tiles 227 x 227, Positive / Negative folders | 40,000 (20,000 crack, 20,000 no crack), cut from 458 photos of 4032 x 3024; 241 MB | CC BY 4.0 | Concrete surfaces of buildings on the METU campus, Ankara | Formal campus buildings, not informal homes; no masks, no scale |
 | Haiti Earthquake Database (2010) | Sedra, Eberhard, Pujol et al., DataCenterHub, doi:10.4231/D3P843W0H [41] | **Downloading** (14 GB, started 25 Oct) | Public page, data in a Dropbox folder, no login stated | Spreadsheet (one row per building), photographs, field diagrams | 6,526 photos of 183 structures (170 surveyed in detail: 138 Port-au-Prince, 38 Léogâne); 14.0 GB zip | Not stated on the page: ask the authors before reuse | RC and concrete-block masonry buildings, 1 to 12 floors; damage light / moderate / severe for RC and for masonry walls, defined by crack width | One rating per building; post-earthquake; no scale |
-| 2015 Nepal Earthquake Building Performance Database | Shah, Pujol, Puranam, Laughery, DataCenterHub, doi:10.7277/Z82F-0728 [42] | Available (not downloaded) | Public page | Spreadsheet per building with photos, drawings, KML map | 146 low-rise RC buildings, Kathmandu; photo count not stated | CC BY-SA 3.0 | RC with masonry infill; structural damage light / moderate / severe / collapse, infill damage light / moderate / severe | Per building; post-earthquake; no scale |
-| Building Surveys after Earthquakes | Monical, ACI Committee 133, DataCenterHub, doi:10.7277/368Q-T523 [43] | Available (not downloaded) | Public page | Per-building dimensions, ground motion, photos, figures | Counts not stated | CC BY-NC-SA 4.0 (non-commercial) | 2015 Nepal, 2016 Ecuador, 2016 Taiwan, 2017 South Korea; RC buildings | Damage scheme not stated on the page; non-commercial |
+| 2015 Nepal Earthquake Building Performance Database | Shah, Pujol, Puranam, Laughery, DataCenterHub, doi:10.7277/Z82F-0728 [42] | Not downloaded: the archive now only offers Nepal inside a 228 GB zip with Ecuador, Taiwan and Korea (more than our free disk) | DataCenterHub is now a static archive run by the University of Canterbury [45]; download only the Nepal folder from the Dropbox page in a browser | Spreadsheet per building with photos, drawings, KML map | 146 low-rise RC buildings, Kathmandu; photo count not stated | CC BY-SA 3.0 | RC with masonry infill; structural damage light / moderate / severe / collapse, infill damage light / moderate / severe | Per building; post-earthquake; no scale |
+| Building Surveys after Earthquakes | Monical, ACI Committee 133, DataCenterHub, doi:10.7277/368Q-T523 [43] | Not downloaded (one 228 GB zip) | Public page | Per-building dimensions, ground motion, photos, figures | Counts not stated | CC BY-NC-SA 4.0 (non-commercial) | 2015 Nepal, 2016 Ecuador, 2016 Taiwan, 2017 South Korea; RC buildings | Damage scheme not stated on the page; non-commercial |
 | Brickwork Cracks Dataset | Seyedzadeh, Katsigiannis et al., Zenodo, doi:10.5281/zenodo.8014150 [44] | **Downloaded** (MD5 matches) | Open, Zenodo | 227 x 227 images, Positive / Negative folders | 700 (350 crack, 350 no crack); 9 MB | CC BY 4.0 | Brick facades | Small; no masks, no scale |
 | Masonry crack masks, Dais et al. 2021 | GitHub repository [31] | Subset available | Public repository | 224 x 224 images with crack masks | Subset only; count not stated | GPL-3.0 on the repository (written for code; terms for the images to confirm with the authors) | Masonry walls, complex backgrounds | Small; part of it is already in CrackSeg9k [32] |
 
@@ -99,7 +113,8 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 - Consent and data rules for Phase 2: the deck says "photos stay with the household"; labelling needs copies. Write who keeps what, for how long, and how faces and addresses are removed.
 - Licences: PHI-Net and CODEBRIM are non-commercial (`spec/decisions.md` D6).
 - Confirm the Dais image terms with the authors.
-- Confirm the Haiti database licence with its authors before using any photo in slides or training (email drafted 25 Oct).
+- Confirm the Haiti database licence before using any photo in slides or training (email drafted 25 Oct). The archive's contact is santiago.pujol@canterbury.ac.nz, subject "datacenterhub inquiry" [45]; ask in the same email about the Türkiye 2023 (ACI 133) survey, whose link returned an empty file.
+- Nepal 2015: download only the Nepal folder in a browser into `data/raw/nepal2015/`.
 - Pick a threshold for the CrackSeg9k soft masks; find the masonry subset's file prefix.
 - Ultralytics (YOLO) software is AGPL-3.0 (`spec/decisions.md` D9).
 
@@ -115,5 +130,6 @@ What is downloaded on Jerome's PC as of 25 Oct 2026. Anyone else downloads from 
 | `strathclyde-brickwork/` | Brickwork cracks [44] | 19 MB | 700 | MD5 matches Zenodo |
 | `crackseg9k/` | CrackSeg9k Vol1 [25] | 1.5 GB | not extracted | MD5 matches Dataverse |
 | `haiti2010/` | Haiti Earthquake Database [41] | 14 GB | in progress | Download started 25 Oct |
+| `nepal2015/` | Nepal 2015 surveys [42] | - | not downloaded | Nepal folder to download in a browser |
 
 Run the real-data test on all of them: `py src/experiments/real_data_quality.py data/raw/crack-seg data/raw/darbhanga data/raw/metu data/raw/sdnet2018 data/raw/strathclyde-brickwork --per-group 2000`.
