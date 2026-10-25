@@ -24,6 +24,10 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 - [ ] Send a dated request to Engineers Without Borders: rate about 150 to 200 crack photos Low / Medium / High, at least 30 High, by 20 Nov; put a coin next to cracks in their own inspection photos (__)
 - [ ] Same request to the third-party structural engineer; confirm the agreement (__)
 
+### Data
+- [ ] Haiti 2010 Earthquake Database downloaded (14 GB) and checked (C, started 25 Oct)
+- [ ] Email the Haiti database authors to confirm the licence before using any photo in slides or training (draft in the chat of 25 Oct) (__)
+
 ### Photos
 - [ ] Set up the iPhone: Most Compatible (JPEG), grid on, Camera location off (J + L)
 - [ ] Print the crack-width card (C makes the PDF)
