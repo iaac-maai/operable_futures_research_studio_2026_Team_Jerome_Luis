@@ -27,6 +27,23 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 **Still missing:** per-crack photos with a scale from informal or self-built housing before any disaster. Only our own collection with the partners can give that.
 
+### Gate result on the datasets we hold, in order of fit
+
+![Quality gate on real images](../figures/08_real_data_quality_gate.png)
+
+| # | Dataset | Fit to our concept | Accepted by the quality gate |
+|---|---|---|---|
+| 1 | Haiti 2010 (engineer survey) | high | 96% |
+| 2 | Darbhanga (brick masonry) | medium | 76% |
+| 3 | Strathclyde (brick facades) | medium | 100% |
+| 4 | METU (building concrete) | low | 20% |
+| 5 | SDNET2018 wall | low | 16% |
+| 6 | crack-seg (roads, walls) | low | 97% |
+| 7 | SDNET2018 pavement | off-concept | 87% |
+| 8 | SDNET2018 bridge deck | off-concept | 19% |
+
+"Accepted" counts cracked and uncracked images together (up to 2,000 per group, last run on 25 Oct 2026); the split is in `docs/experiments/2026-10-25_quality_gate_first_test.md`. A low share means the gate struggles with that surface (smooth plaster and concrete, D12), not that the data is bad.
+
 ## 0b. What we can train now, and what we cannot (25 Oct 2026)
 
 | Step | Enough data now? | What we have | What is missing | How we get it |

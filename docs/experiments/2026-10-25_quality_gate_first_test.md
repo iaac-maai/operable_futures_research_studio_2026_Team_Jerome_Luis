@@ -37,6 +37,21 @@ A low score means the gate struggles with that surface, not that the data is bad
 
 The figure orders the datasets by fit to our concept, best first (`docs/data_map.md`, section 0); each panel shows its fit and the share of images accepted.
 
+### Datasets by fit to our concept, with the gate result
+
+| # | Dataset | Fit to our concept | Accepted by the quality gate |
+|---|---|---|---|
+| 1 | Haiti 2010 (engineer survey) | high | 96% |
+| 2 | Darbhanga (brick masonry) | medium | 76% |
+| 3 | Strathclyde (brick facades) | medium | 100% |
+| 4 | METU (building concrete) | low | 20% |
+| 5 | SDNET2018 wall | low | 16% |
+| 6 | crack-seg (roads, walls) | low | 97% |
+| 7 | SDNET2018 pavement | off-concept | 87% |
+| 8 | SDNET2018 bridge deck | off-concept | 19% |
+
+"Accepted" counts cracked and uncracked images together (up to 2,000 per group, last run on 25 Oct 2026); the split is in the results table below. A low share means the gate struggles with that surface (smooth plaster and concrete, D12), not that the data is bad.
+
 | Dataset | Label | n | Pass rate | Median sharpness | Median brightness | Main failure |
 |---|---|---|---|---|---|---|
 | crack-seg | crack | 2,000 | 97% | 765.9 | 159.9 | too bright |
