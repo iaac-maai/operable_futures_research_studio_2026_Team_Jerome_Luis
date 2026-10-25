@@ -73,5 +73,5 @@ Decision: the hackathon beta trains the crack-finding step on public data. Patte
 
 ## D16 (2026-10-26): the segmentation tree shows only what the tool works on
 Out-of-scope items (unauthorised construction, earthquake triggers, rebar and foundations, overridden warnings) and the Phase 3 item (soil erosion) are removed from the tree. The "Warnings overridden" branch is gone; "Data is scarce" becomes branch D. What the tool does not cover is stated once, in `spec/constitution/mission.md`.
-The tree figure is redrawn as a decision-forest diagram: problem box, branch trees of circles, results, atomic box, final output. Green marks the path into the atomic problem (B1, B2, B3, C1), blue the supporting context.
+The tree figure is redrawn as a flowchart: rounded pills for the macro problem and the four branches, letter tags on the connectors, circles for the micro items, then the atomic problem and the final output. Yellow marks the path into the atomic problem (B, C, B1, B2, B3, C1), navy the supporting context.
 Reason: team feedback; out-of-scope nodes were unnecessary detail and the old box layout was hard to read.

@@ -5,7 +5,7 @@ Only what the tool works on (`spec/decisions.md` D16). What it does not cover is
 
 ![Segmentation tree](../figures/04_segmentation_tree.png)
 
-Green: the path into the atomic problem. Blue: supporting context.
+Yellow: the path into the atomic problem. Navy: supporting context.
 
 ## Macro
 People live in ageing, unsupervised buildings and cannot judge whether the cracks they see are dangerous.
@@ -59,8 +59,8 @@ graph TD
   B3 --> AT
   C1 --> AT
   AT --> R["Second Look: Low, Medium, High, Expert needed, Retake"]
-  classDef path fill:#22b14c,stroke:#22b14c,color:#fff;
-  classDef context fill:#1f2a8c,stroke:#1f2a8c,color:#fff;
+  classDef path fill:#F2C14E,stroke:#F2C14E,color:#2F4B7C;
+  classDef context fill:#2F4B7C,stroke:#2F4B7C,color:#fff;
   class B,C,B1,B2,B3,C1 path;
   class A,D,A1,A2,C2,C3,D1,D2 context;
 ```

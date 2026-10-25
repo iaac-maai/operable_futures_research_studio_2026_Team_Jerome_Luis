@@ -159,69 +159,97 @@ TREE = {
     "D. Data is scarce": ["D1 Public data: bridges and roads", "D2 No engineer labels"],
 }
 ATOMIC_FROM = {"B1", "B2", "B3", "C1"}
-TREE_RESULTS = {"A": "Why cracks appear", "B": "What the tool must solve", "C": "Why a ranked list matters",
-                "D": "Why we collect our own data"}
-TREE_GREEN, TREE_BLUE = "#22b14c", "#1f2a8c"
+TREE_YELLOW, TREE_NAVY = "#F2C14E", "#2F4B7C"
+
+
+def _pill(ax, x, y, w, h, text, fill, ink, size):
+    ax.add_patch(FancyBboxPatch((x - w / 2, y - h / 2), w, h, boxstyle=f"round,pad=0,rounding_size={h / 2}",
+                                facecolor=fill, edgecolor="none", zorder=3))
+    ax.text(x, y, text, ha="center", va="center", color=ink, fontsize=size, weight="bold", zorder=4)
+
+
+def _elbow(ax, x0, y0, x1, y1, ymid, colour, r=0.28):
+    """Vertical down from (x0, y0), across at ymid with rounded corners, down to (x1, y1)."""
+    from matplotlib.path import Path as MPath
+
+    dx = x1 - x0
+    if abs(dx) < 1e-6:
+        verts, codes = [(x0, y0), (x1, y1)], [MPath.MOVETO, MPath.LINETO]
+    else:
+        s, r = (1 if dx > 0 else -1), min(r, abs(dx) / 2)
+        verts = [(x0, y0), (x0, ymid + r), (x0, ymid), (x0 + s * r, ymid), (x1 - s * r, ymid), (x1, ymid),
+                 (x1, ymid - r), (x1, y1)]
+        codes = [MPath.MOVETO, MPath.LINETO, MPath.CURVE3, MPath.CURVE3, MPath.LINETO, MPath.CURVE3, MPath.CURVE3,
+                 MPath.LINETO]
+    from matplotlib.patches import PathPatch
+    ax.add_patch(PathPatch(MPath(verts, codes), facecolor="none", edgecolor=colour, lw=2.2, zorder=1,
+                           capstyle="round"))
+
+
+def _tag(ax, x, y, text, colour):
+    ax.add_patch(plt.Circle((x, y), 0.33, facecolor="white", edgecolor=colour, lw=2.2, zorder=3))
+    ax.text(x, y, text, ha="center", va="center", fontsize=11, weight="bold", color=TREE_NAVY, zorder=4)
 
 
 def segmentation_tree():
-    """Random-forest style: problem box -> branch trees of circles -> results -> atomic box -> final result.
-    Green marks the path into the atomic problem, blue the supporting context."""
+    """Flowchart style: pill nodes, rounded connectors with letter tags, circle leaves with caps labels.
+    Yellow marks the path into the atomic problem, navy the supporting context."""
     import textwrap
 
-    fig, ax = plt.subplots(figsize=(18, 10.8))
+    fig, ax = plt.subplots(figsize=(18, 10.2))
     ax.set_axis_off()
     fig.suptitle("Problem segmentation tree", x=0.02, ha="left", fontsize=15, weight="bold")
-    fig.text(0.02, 0.928, "Macro problem → four branches (meso) → causes and needs (micro) → the atomic problem we work "
-             "on first. Sources in docs/sources.md", fontsize=10.5, color=INK_2)
-    col, r_meso, r_leaf, gap = 4.4, 0.45, 0.34, 1.3
-    y_box, y_meso, y_leaf, y_title, y_result, y_atomic, y_final = 11.2, 9.3, 7.55, 5.05, 4.1, 2.4, 1.05
-    width = col * len(TREE)
+    fig.text(0.02, 0.925, "Macro problem → four branches (meso) → causes and needs (micro) → the atomic problem we work "
+             "on first. Yellow: path into the atomic problem. Navy: supporting context. Sources in docs/sources.md",
+             fontsize=10.5, color=INK_2)
+    leaf_gap, group_gap, r_leaf = 1.75, 0.9, 0.62
+    y_top, y_meso, y_leaf, y_atomic, y_final = 11.0, 8.6, 5.7, 2.55, 1.15
+    xs, x = {}, 0.0
+    for meso, kids in TREE.items():
+        xs[meso] = []
+        for _ in kids:
+            xs[meso].append(x)
+            x += leaf_gap
+        x += group_gap
+    width = x - group_gap - leaf_gap
+    centre = width / 2
     feeds = {code[0] for code in ATOMIC_FROM}
 
-    def circle(x, y, r, colour, text, size):
-        ax.add_patch(plt.Circle((x, y), r, facecolor=colour, edgecolor="none", zorder=3))
-        ax.text(x, y, text, ha="center", va="center", color="white", fontsize=size, weight="bold", zorder=4)
-
-    def arrow(x0, y0, x1, y1):
-        ax.annotate("", xy=(x1, y1), xytext=(x0, y0), zorder=2,
-                    arrowprops=dict(arrowstyle="-|>", color=INK, lw=1.3, mutation_scale=16, shrinkA=0, shrinkB=0))
-
-    box_w = 10.0
-    _box(ax, width / 2 - box_w / 2, y_box - 0.45, box_w, 0.9,
-         "Macro: people cannot judge whether the cracks in their ageing buildings are dangerous",
-         "#FFFFFF", INK, size=12.5, lw=1.4)
+    _pill(ax, centre, y_top, 14.2, 0.95, "PEOPLE CANNOT JUDGE WHETHER THE CRACKS IN THEIR AGEING BUILDINGS ARE DANGEROUS",
+          TREE_YELLOW, TREE_NAVY, 12.5)
+    n = len(TREE)
     for i, (meso, kids) in enumerate(TREE.items()):
         letter = meso[0]
-        cx = col * i + col / 2
-        arrow(width / 2, y_box - 0.45, cx, y_meso + r_meso)
-        circle(cx, y_meso, r_meso, TREE_GREEN if letter in feeds else TREE_BLUE, letter, 14)
-        xs = [cx + (j - (len(kids) - 1) / 2) * gap for j in range(len(kids))]
-        for x, kid in zip(xs, kids):
+        on_path = letter in feeds
+        colour = TREE_YELLOW if on_path else TREE_NAVY
+        mx = sum(xs[meso]) / len(xs[meso])
+        # outer branches leave the top pill further out and turn higher, so no two connectors cross
+        offset = (i - (n - 1) / 2) * 1.15
+        ymid = y_top - 0.95 if abs(offset) > 1 else y_top - 1.55
+        x0 = centre + offset
+        _elbow(ax, x0, y_top - 0.48, mx, y_meso + 0.36, ymid, colour)
+        _tag(ax, (x0 + mx) / 2, ymid, letter, colour)
+        title = meso.split(". ", 1)[1].upper()
+        _pill(ax, mx, y_meso, max(3.0, 0.145 * len(title)), 0.72, title, colour,
+              TREE_NAVY if on_path else "white", 10.5)
+        for lx, kid in zip(xs[meso], kids):
             code, label = kid.split(" ", 1)
-            on_path = code in ATOMIC_FROM
-            ax.plot([cx, x], [y_meso - r_meso, y_leaf + r_leaf], color=INK, lw=1.2, zorder=1)
-            circle(x, y_leaf, r_leaf, TREE_GREEN if on_path else TREE_BLUE, code, 10)
-            ax.text(x, y_leaf - r_leaf - 0.14, textwrap.fill(label, 13, break_on_hyphens=False), ha="center", va="top", fontsize=10.5,
-                    color=INK, weight="bold" if on_path else "normal", linespacing=1.12)
-        ax.text(cx, y_title, meso, ha="center", va="center", fontsize=12, weight="bold", color=INK)
-        arrow(cx, y_title - 0.28, cx, y_result + 0.28)
-        ax.text(cx, y_result, TREE_RESULTS[letter], ha="center", va="center", fontsize=11, color=INK_2)
-        if letter in feeds:
-            arrow(cx, y_result - 0.28, width / 2 + (cx - width / 2) * 0.4, y_atomic + 0.45)
-    atomic_w = 11.5
-    _box(ax, width / 2 - atomic_w / 2, y_atomic - 0.45, atomic_w, 0.9,
-         "Atomic problem: one photo, one crack, one element → a level and a one-sentence reason",
-         "#FFFFFF", INK, size=12.5, lw=1.4)
-    arrow(width / 2, y_atomic - 0.45, width / 2, y_final + 0.3)
-    ax.text(width / 2, y_final, "Second Look: Low · Medium · High · Expert needed · Retake",
-            ha="center", va="center", fontsize=13.5, weight="bold", color=INK)
-    ax.legend(handles=[Line2D([], [], marker="o", ls="", markersize=12, color=TREE_GREEN,
-                              label="Path to the atomic problem"),
-                       Line2D([], [], marker="o", ls="", markersize=12, color=TREE_BLUE, label="Supporting context")],
-              loc="lower left", bbox_to_anchor=(0.0, -0.01), ncol=2, frameon=False, fontsize=10.5)
-    ax.set_xlim(-0.3, width + 0.3)
-    ax.set_ylim(0.4, 11.75)
+            leaf_on_path = code in ATOMIC_FROM
+            lc = TREE_YELLOW if leaf_on_path else TREE_NAVY
+            _elbow(ax, mx, y_meso - 0.36, lx, y_leaf + r_leaf, y_meso - 1.15, lc)
+            ax.add_patch(plt.Circle((lx, y_leaf), r_leaf, facecolor="white", edgecolor=lc, lw=3, zorder=3))
+            ax.text(lx, y_leaf, code, ha="center", va="center", fontsize=15, weight="bold", color=TREE_NAVY, zorder=4)
+            ax.text(lx, y_leaf - r_leaf - 0.2, textwrap.fill(label.upper(), 14, break_on_hyphens=False),
+                    ha="center", va="top", fontsize=8.8, color=INK, linespacing=1.15)
+            if leaf_on_path:
+                _elbow(ax, lx, y_leaf - r_leaf - 1.0, centre, y_atomic + 0.4, y_atomic + 0.85, TREE_YELLOW)
+    _pill(ax, centre, y_atomic, 13.2, 0.8, "ATOMIC PROBLEM: ONE PHOTO, ONE CRACK, ONE ELEMENT → A LEVEL AND A REASON",
+          TREE_YELLOW, TREE_NAVY, 12)
+    _elbow(ax, centre, y_atomic - 0.4, centre, y_final + 0.36, y_final + 0.9, TREE_NAVY)
+    _pill(ax, centre, y_final, 11.5, 0.72, "SECOND LOOK:  LOW · MEDIUM · HIGH · EXPERT NEEDED · RETAKE",
+          TREE_NAVY, "white", 11.5)
+    ax.set_xlim(-2.0, width + 2.0)
+    ax.set_ylim(0.6, 11.6)
     ax.set_aspect("equal")
     return fig
 
