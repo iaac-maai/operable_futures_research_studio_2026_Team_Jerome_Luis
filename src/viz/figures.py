@@ -196,25 +196,25 @@ def segmentation_tree():
 
 STAGES = ["Quality gate", "YOLO detector", "U-Net segmenter", "Measurement (mm)", "Pattern model",
           "Agent: building data", "Triage rules sign-off", "Evaluation (ground truth)"]
-SOURCES = ["SDNET2018", "CrackSeg9k", "crack-seg\n(Ultralytics)", "PHI-Net", "CODEBRIM", "Brick masonry\n(Darbhanga)",
-           "Masonry masks\n(Dais et al.)", "Pilot photos", "Engineer-\nlabelled photos", "Tripoli lists\n(106 / 114)",
-           "Engineering\npartner"]
+SOURCES = ["SDNET2018", "CrackSeg9k", "crack-seg\n(Ultralytics)", "PHI-Net", "CODEBRIM", "Haiti + Nepal\nsurveys",
+           "Brick masonry\n(Darbhanga)", "Masonry masks\n(Dais et al.)", "Pilot photos", "Engineer-\nlabelled photos",
+           "Tripoli lists\n(106 / 114)", "Engineering\npartner"]
 # From docs/data_map.md, section 1. Rows follow STAGES, columns follow SOURCES.
 COVERAGE = [
-    ["none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
-    ["none", "none", "partial", "partial", "partial", "partial", "none", "planned", "planned", "none", "none"],
-    ["none", "covered", "covered", "none", "none", "none", "partial", "none", "planned", "none", "none"],
-    ["none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
-    ["partial", "none", "none", "partial", "partial", "partial", "none", "none", "planned", "none", "none"],
-    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "partial", "none"],
-    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "planned"],
-    ["none", "none", "none", "none", "none", "none", "none", "none", "planned", "partial", "planned"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
+    ["none", "none", "partial", "partial", "partial", "none", "partial", "none", "planned", "planned", "none", "none"],
+    ["none", "covered", "covered", "none", "none", "none", "none", "partial", "none", "planned", "none", "none"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
+    ["partial", "none", "none", "partial", "partial", "partial", "partial", "none", "none", "planned", "none", "none"],
+    ["none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "partial", "none"],
+    ["none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "planned"],
+    ["none", "none", "none", "none", "none", "partial", "none", "none", "none", "planned", "partial", "planned"],
 ]
 COVERAGE_LABEL = {"covered": "covers", "partial": "partly", "planned": "planned", "none": ""}
 
 
 def data_coverage():
-    fig, ax = plt.subplots(figsize=(16.5, 5.8))
+    fig, ax = plt.subplots(figsize=(18, 5.8))
     for r, row in enumerate(COVERAGE):
         for c, state in enumerate(row):
             ax.add_patch(FancyBboxPatch((c + 0.04, r + 0.08), 0.92, 0.84, boxstyle="round,pad=0,rounding_size=0.05",
@@ -246,13 +246,15 @@ DATASETS = [("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0  ·  mostly bridges an
             ("PHI-Net", 36_413, "36,413  ·  CC BY-NC-SA 4.0  ·  post-earthquake, no masks"),
             ("CrackSeg9k", 9_255, "9,255  ·  CC0  ·  pixel masks, mostly pavement"),
             ("crack-seg (Ultralytics)", 4_029, "4,029  ·  Public Domain  ·  polygons, roads and walls"),
+            ("Haiti 2010 survey", 6_526, "6,526 photos of 183 buildings  ·  engineer-rated  ·  licence not stated"),
             ("Brick masonry (Darbhanga)", 4_259, "4,259  ·  CC BY 4.0  ·  brick, one heritage building"),
+            ("Brick facades (Strathclyde)", 700, "700  ·  CC BY 4.0  ·  brick facades"),
             ("Pilot phone photos", 0, "0  ·  about 30 cracks this week  ·  no risk labels"),
             ("Engineer-labelled phone photos", 0, "0  ·  to collect in Phase 2  ·  the target data")]
 
 
 def dataset_sizes():
-    fig, ax = plt.subplots(figsize=(11, 5.0))
+    fig, ax = plt.subplots(figsize=(11, 5.6))
     names = [d[0] for d in DATASETS]
     ys = range(len(DATASETS))
     ax.barh(ys, [d[1] for d in DATASETS], height=0.42, color=BLUE)
@@ -268,7 +270,7 @@ def dataset_sizes():
     for s in ("top", "right", "left"):
         ax.spines[s].set_visible(False)
     ax.set_xlabel("Images")
-    fig.suptitle("Public crack data is large, but none of it shows homes in informal areas",
+    fig.suptitle("Public crack data is large; the closest to our homes are small engineer surveys",
                  x=0.02, ha="left", fontsize=14, weight="bold")
     fig.text(0.02, 0.875, "Image counts and licences from each dataset's page. Not plotted: CODEBRIM (36.4 GB, count "
              "not stated, non-commercial) and the Dais et al. masonry subset.", fontsize=9.5, color=INK_2)

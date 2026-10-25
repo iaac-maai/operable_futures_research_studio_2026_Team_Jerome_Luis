@@ -10,6 +10,10 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | Fit | Data | Why |
 |---|---|---|
 | **Target** | Engineer-labelled phone photos from informal neighbourhoods (to collect with the partners) | The exact case: homes, phone photos, coin, engineer rating |
+| **High (closest public)** | Haiti 2010 Earthquake Database [41] | Engineers' photos of 183 real buildings in Port-au-Prince and Léogâne, reinforced concrete and concrete-block masonry, each rated light / moderate / severe with crack-based definitions; ratings are per building, after an earthquake, no scale |
+| **High (closest public)** | 2015 Nepal Earthquake Building Performance Database [42] | 146 low-rise RC buildings with masonry infill in Kathmandu, photos, rated light / moderate / severe / collapse; per building, no scale |
+| Medium | Building Surveys after Earthquakes (Nepal, Ecuador, Taiwan, Korea) [43] | Same kind of per-building engineer surveys with photos; non-commercial |
+| Medium | Strathclyde brickwork cracks [44] | 700 brick facade images, crack / no crack; small |
 | Medium | PHI-Net [26] | Real damaged buildings after earthquakes, with component and damage labels; not pre-failure cracks; non-commercial |
 | Medium | Darbhanga brick masonry [30] | Brick walls, the material of many informal homes; one heritage fort, not homes |
 | Medium | Dais et al. masonry masks [31] | Masonry walls with pixel masks; small |
@@ -19,7 +23,9 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | Low | crack-seg [33], CrackSeg9k [25] | Mostly roads and pavement; generic pre-training for crack pixels only |
 | **Off-concept** | CODEBRIM [28], SDNET2018 decks and pavement [22] | Bridges and roads, not buildings |
 
-**Still missing:** crack photos from informal or self-built housing. To search: post-disaster housing surveys and reconnaissance photo sets (for example the StEER reports [20]) and humanitarian shelter assessments.
+**Closest public data:** the post-earthquake building surveys from Haiti and Nepal [41][42]: real buildings in dense, poor neighbourhoods, photographed and rated by engineers. Their damage classes map onto our levels: light (no damage or hairline cracks), moderate (wider cracks or spalling), severe (see-through cracks, failure). Limits: one rating per building, not per crack; damage after an earthquake, not slow deterioration; no scale reference.
+
+**Still missing:** per-crack photos with a scale from informal or self-built housing before any disaster. Only our own collection with the partners can give that.
 
 ## 1. What each pipeline stage needs, and where it comes from
 
@@ -51,6 +57,10 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | CODEBRIM | Zenodo record 2620293 [28], CVPR 2019 paper [29] | Available | Open record, licence file must be accepted | Original images, cropped defects with class labels from bounding boxes, classification sets | 36.4 GB in total (cropped set 7.9 GB); image count not stated on the record | Non-commercial research and education only; no redistribution; trained models may not be used commercially | Five concrete defects on 30 bridges: crack, spalling, exposed bars, efflorescence, corrosion stains | Bridges, not homes; no scale; licence blocks any product use |
 | Brick masonry cracks, Darbhanga Fort | Singh and Maity, Mendeley Data [30] | **Downloaded** (SHA-256 matches) | Public download, scriptable | YOLO bounding boxes (class x y w h), 1 class; all images 768 x 768; test set has no labels | 4,259 images (3,407 train incl. 203 without cracks, 639 val, 213 test); 363 MB zip | CC BY 4.0 | Superficial cracks in red brick masonry | One heritage structure, not homes; no scale; boxes, not masks |
 | METU Concrete Crack Images for Classification | Özgenel, Mendeley Data, doi:10.17632/5y9wdsg2zt.2 [36] | **Downloaded** (SHA-256 matches) | Public download, scriptable; RAR archive | JPEG tiles 227 x 227, Positive / Negative folders | 40,000 (20,000 crack, 20,000 no crack), cut from 458 photos of 4032 x 3024; 241 MB | CC BY 4.0 | Concrete surfaces of buildings on the METU campus, Ankara | Formal campus buildings, not informal homes; no masks, no scale |
+| Haiti Earthquake Database (2010) | Sedra, Eberhard, Pujol et al., DataCenterHub, doi:10.4231/D3P843W0H [41] | Available (not downloaded: 14 GB) | Public page, data in a Dropbox folder, no login stated | Spreadsheet (one row per building), photographs, field diagrams | 6,526 photos of 183 structures (170 surveyed in detail: 138 Port-au-Prince, 38 Léogâne); 14.0 GB zip | Not stated on the page: ask the authors before reuse | RC and concrete-block masonry buildings, 1 to 12 floors; damage light / moderate / severe for RC and for masonry walls, defined by crack width | One rating per building; post-earthquake; no scale |
+| 2015 Nepal Earthquake Building Performance Database | Shah, Pujol, Puranam, Laughery, DataCenterHub, doi:10.7277/Z82F-0728 [42] | Available (not downloaded) | Public page | Spreadsheet per building with photos, drawings, KML map | 146 low-rise RC buildings, Kathmandu; photo count not stated | CC BY-SA 3.0 | RC with masonry infill; structural damage light / moderate / severe / collapse, infill damage light / moderate / severe | Per building; post-earthquake; no scale |
+| Building Surveys after Earthquakes | Monical, ACI Committee 133, DataCenterHub, doi:10.7277/368Q-T523 [43] | Available (not downloaded) | Public page | Per-building dimensions, ground motion, photos, figures | Counts not stated | CC BY-NC-SA 4.0 (non-commercial) | 2015 Nepal, 2016 Ecuador, 2016 Taiwan, 2017 South Korea; RC buildings | Damage scheme not stated on the page; non-commercial |
+| Brickwork Cracks Dataset | Seyedzadeh, Katsigiannis et al., Zenodo, doi:10.5281/zenodo.8014150 [44] | **Downloaded** (MD5 matches) | Open, Zenodo | 227 x 227 images, Positive / Negative folders | 700 (350 crack, 350 no crack); 9 MB | CC BY 4.0 | Brick facades | Small; no masks, no scale |
 | Masonry crack masks, Dais et al. 2021 | GitHub repository [31] | Subset available | Public repository | 224 x 224 images with crack masks | Subset only; count not stated | GPL-3.0 on the repository (written for code; terms for the images to confirm with the authors) | Masonry walls, complex backgrounds | Small; part of it is already in CrackSeg9k [32] |
 
 ### Our own data
@@ -80,7 +90,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 ## 4. Plan, in order
 1. **First test on real data (29 Oct): done** on crack-seg, Darbhanga and SDNET2018 (`docs/experiments/2026-10-25_quality_gate_first_test.md`). It found and fixed a resolution bug in the blur check, and showed that the blur check confuses smooth walls with blur (D12). Tests the code, not the thresholds.
 2. **U-Net pre-training:** CrackSeg9k for generic crack pixels, then fine-tune on masonry (Dais et al., if their image terms allow it) and on our own building photos.
-3. **Building-like data first:** Darbhanga (brick), PHI-Net (damaged buildings), METU (building concrete). CODEBRIM is off-concept (bridges): use it only if no building photos of spalling with rust turn up.
+3. **Building-like data first:** Haiti and Nepal engineer surveys (real buildings, engineer ratings), then Darbhanga and Strathclyde (brick), PHI-Net (damaged buildings), METU (building concrete). CODEBRIM is off-concept (bridges): use it only if no building photos of spalling with rust turn up.
 4. **Find informal-housing crack photos:** post-disaster housing surveys, reconnaissance photo sets, shelter assessments (section 0).
 5. **Pilot photos this week:** about 30 cracks on public facades in Barcelona, following `spec/features/photo_protocol.md`. Tests the protocol and gives the quality gate real phone photos.
 6. **Engineering partners, now:** Engineers Without Borders and a third-party structural engineer (agreement under construction) for labelled photos, baseline ratings and sign-off. Everything in Phase 2 waits on this.

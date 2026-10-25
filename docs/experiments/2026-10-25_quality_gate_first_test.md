@@ -4,7 +4,7 @@ Deliverable for 29 Oct: "agent working on real data as a first test".
 Spec: `spec/features/quality_gate.md`. Code: `src/experiments/real_data_quality.py`. Figure: `figures/08_real_data_quality_gate.png`.
 
 ## What was run
-The quality gate's image checks (sharpness, brightness) on four public datasets, downloaded into `data/raw/` (git-ignored). First run: every image of crack-seg and Darbhanga (8,288). Later runs added SDNET2018 and METU: up to 2,000 random images per group (20,417 in the last run).
+The quality gate's image checks (sharpness, brightness) on five public datasets, downloaded into `data/raw/` (git-ignored). First run: every image of crack-seg and Darbhanga (8,288). Later runs added SDNET2018 and METU: up to 2,000 random images per group (20,417 in the last run).
 
 | Dataset | Images | Size | Labels | Check of the download |
 |---|---|---|---|---|
@@ -25,6 +25,8 @@ The coin check is not implemented, so every image was treated as if the coin wer
 | Darbhanga | crack | 2,000 | 73% | 219.6 | 123.9 | blurred |
 | Darbhanga | no crack | 203 | 95% | 233.9 | 149.9 | blurred |
 | Darbhanga | unlabelled (test) | 213 | 89% | 286.6 | 121.7 | blurred |
+| Strathclyde brick facades | crack | 350 | 100% | 1,418.7 | 135.6 | - |
+| Strathclyde brick facades | no crack | 350 | 100% | 964.6 | 151.4 | - |
 | METU building concrete | crack | 2,000 | 39% | 82.0 | 165.0 | blurred |
 | METU building concrete | no crack | 2,000 | 3% | 21.5 | 183.5 | blurred |
 | SDNET2018 bridge deck | crack | 2,000 | 25% | 58.2 | 178.6 | blurred |
@@ -40,7 +42,7 @@ First run on every crack-seg image (4,029): 97% pass, 118 too bright, 14 blurred
 1. **The code runs on real images end to end**: three datasets, up to 16,417 images per run, measured and logged, with a figure.
 2. **Bug found and fixed: sharpness depended on resolution.** Before the fix the gate rejected 63% of all Darbhanga images as blurred. Scaling the same images to 416 px dropped the blurred share from 67% to 11% (sample of 107 images). A phone photo at about 4000 px would almost always have failed. The gate now measures on a copy scaled to 512 px (`spec/decisions.md` D8). This is why a test on real data was worth doing before the pilot.
 3. **Cracked brick images score lower on sharpness than uncracked ones** (73% vs 95% pass). Possible reasons: close-ups of cracks, smoother surfaces, or real blur. Not tested; we need to look at the rejected images before changing anything.
-4. **Second problem found: the blur measure confuses smooth surfaces with blur.** The gate rejects 75 to 89% of SDNET2018 wall and deck tiles, but only 9 to 16% of pavement. These are 256 px tiles, so it is not the resolution bug. A visual check of 8 rejected cracked-wall tiles: most are in focus, smooth low-contrast concrete with hairline cracks; a few look slightly soft. Laplacian variance measures texture as much as focus. On real walls this means **hairline cracks on smooth plaster or concrete would be sent back for retake again and again**. That is safe (a retake is never a Low) but makes the tool unusable for exactly the walls we care about. **Confirmed on building walls:** on METU (concrete surfaces of campus buildings, the closest of these sets to our concept, D14) the gate rejects 61% of cracked and 97% of uncracked tiles. Not fixed yet: we need photos with known blur to choose a better measure (`spec/decisions.md` D12).
+4. **Second problem found: the blur measure confuses smooth surfaces with blur.** The gate rejects 75 to 89% of SDNET2018 wall and deck tiles, but only 9 to 16% of pavement. These are 256 px tiles, so it is not the resolution bug. A visual check of 8 rejected cracked-wall tiles: most are in focus, smooth low-contrast concrete with hairline cracks; a few look slightly soft. Laplacian variance measures texture as much as focus. On real walls this means **hairline cracks on smooth plaster or concrete would be sent back for retake again and again**. That is safe (a retake is never a Low) but makes the tool unusable for exactly the walls we care about. **Confirmed on building walls:** on METU (concrete surfaces of campus buildings, the closest of these sets to our concept, D14) the gate rejects 61% of cracked and 97% of uncracked tiles. Textured brick passes (Strathclyde brick facades: 100%), so the problem is specific to smooth surfaces: plaster and concrete. Not fixed yet: we need photos with known blur to choose a better measure (`spec/decisions.md` D12).
 5. **"Too bright" is the main failure on crack-seg** (118 of 4,029). Many images are pale concrete or pavement; the 220 limit may be too strict for light walls. To check on the pilot phone photos.
 
 ## Limits

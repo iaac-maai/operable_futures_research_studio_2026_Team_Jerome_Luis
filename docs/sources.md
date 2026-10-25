@@ -42,3 +42,7 @@ Numbered as in the 22 Oct 2026 presentation. [25] to [27] added for the data map
 38. Crack Detection/Classification Dataset, Kaggle (v1, checked 25 Oct 2026): https://www.kaggle.com/datasets/nawfeelrahman1124444/crack-detectionclassification-dataset
 39. Building Crack Detection Dataset, Kaggle (v1, checked 25 Oct 2026): https://www.kaggle.com/datasets/ziya07/building-crack-detection-dataset
 40. Techsalerator, Satellite Imagery Data for Haiti, Kaggle (v1, checked 25 Oct 2026): https://www.kaggle.com/datasets/techsalerator/satellite-imagery-data-for-haiti
+41. Sedra, Eberhard, Irfanoglu, Matamoros, Pujol et al., NEES: The Haiti Earthquake Database (2017), DataCenterHub, doi:10.4231/D3P843W0H: https://datacenterhub.org/resources/263
+42. Shah, Pujol, Puranam, Laughery, 2015 Nepal Earthquake Building Performance Database (2016), DataCenterHub, doi:10.7277/Z82F-0728: https://datacenterhub.org/landingpages/537/537_LandingPage.html
+43. Monical, Building Surveys after Earthquakes (2020), DataCenterHub, doi:10.7277/368Q-T523: https://datacenterhub.org/landingpages/137/137_LandingPage.html
+44. Seyedzadeh, Katsigiannis, Agapiou, Ramzan, Brickwork Cracks Dataset v1.0 (2023), Zenodo, doi:10.5281/zenodo.8014150: https://zenodo.org/records/8014150

@@ -23,7 +23,8 @@ from quality.gate import MAX_BRIGHTNESS, MIN_BRIGHTNESS, MIN_SHARPNESS, check, t
 
 SDNET_SURFACES = {"D": "bridge deck", "W": "wall", "P": "pavement"}
 DATASET_NAMES = {"crack-seg": "crack-seg (roads, walls)", "darbhanga": "Darbhanga (brick masonry)",
-                 "metu": "METU (building concrete)"}
+                 "metu": "METU (building concrete)",
+                 "strathclyde-brickwork": "Strathclyde (brick facades)"}
 ROOT = Path(__file__).resolve().parents[2]
 
 
