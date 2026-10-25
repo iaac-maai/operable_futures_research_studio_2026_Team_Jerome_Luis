@@ -57,6 +57,14 @@ def test_find_images_darbhanga(tmp_path):
     assert {k[1]: len(v) for k, v in find_images(root).items()} == {"crack": 1, "no crack": 1, "unlabelled": 2}
 
 
+def test_find_images_metu(tmp_path):
+    root = tmp_path / "metu"
+    _save(root / "Positive", 2)
+    _save(root / "Negative", 3)
+    assert {k: len(v) for k, v in find_images(root).items()} == {
+        ("METU (building concrete)", "crack"): 2, ("METU (building concrete)", "no crack"): 3}
+
+
 def test_main_runs_both_and_skips_empty_roots(tmp_path):
     _fake_sdnet(tmp_path / "sdnet")
     _fake_crackseg(tmp_path / "crack-seg")

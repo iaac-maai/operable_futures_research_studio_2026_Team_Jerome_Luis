@@ -4,6 +4,7 @@ Spec: spec/features/quality_gate.md. Usage, from the repository root:
     py src/experiments/real_data_quality.py data/raw/crack-seg data/raw/sdnet2018 --per-group 200
 Recognised layouts (a root with no images is skipped):
 - SDNET2018: <surface>/<C|U><surface letter>/*.jpg (e.g. D/CD, W/UW)
+- METU: Positive/*.jpg (crack) and Negative/*.jpg (no crack)
 - YOLO style (Ultralytics crack-seg, Darbhanga): an "images" folder with a sibling "labels" folder.
   A non-empty label file means crack, a missing or empty one no crack; no labels folder means unlabelled.
 Writes per-image results to data/processed/ (ignored) and a histogram to figures/.
@@ -21,7 +22,8 @@ if __package__ in (None, ""):
 from quality.gate import MAX_BRIGHTNESS, MIN_BRIGHTNESS, MIN_SHARPNESS, check, to_grey
 
 SDNET_SURFACES = {"D": "bridge deck", "W": "wall", "P": "pavement"}
-DATASET_NAMES = {"crack-seg": "crack-seg (roads, walls)", "darbhanga": "Darbhanga (brick masonry)"}
+DATASET_NAMES = {"crack-seg": "crack-seg (roads, walls)", "darbhanga": "Darbhanga (brick masonry)",
+                 "metu": "METU (building concrete)"}
 ROOT = Path(__file__).resolve().parents[2]
 
 
@@ -45,6 +47,8 @@ def find_images(root: Path) -> dict[tuple[str, str], list[Path]]:
         name = path.parent.name.upper()
         if len(name) == 2 and name[0] in "CU" and name[1] in SDNET_SURFACES:
             groups[(f"SDNET2018 {SDNET_SURFACES[name[1]]}", "crack" if name[0] == "C" else "no crack")].append(path)
+        elif name in ("POSITIVE", "NEGATIVE"):  # METU layout
+            groups[(DATASET_NAMES.get(root.name, root.name), "crack" if name == "POSITIVE" else "no crack")].append(path)
         else:
             groups[(DATASET_NAMES.get(root.name, root.name), yolo_label(path) or "unlabelled")].append(path)
     return dict(groups)

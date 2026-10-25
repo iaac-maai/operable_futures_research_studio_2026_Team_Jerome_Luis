@@ -241,7 +241,8 @@ def data_coverage():
 
 
 # From docs/data_map.md, section 2 (checked on the source pages, 24 Oct 2026).
-DATASETS = [("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0  ·  concrete only, no masks"),
+DATASETS = [("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0  ·  mostly bridges and pavement (off-concept)"),
+            ("METU", 40_000, "40,000  ·  CC BY 4.0  ·  concrete walls of campus buildings"),
             ("PHI-Net", 36_413, "36,413  ·  CC BY-NC-SA 4.0  ·  post-earthquake, no masks"),
             ("CrackSeg9k", 9_255, "9,255  ·  CC0  ·  pixel masks, mostly pavement"),
             ("crack-seg (Ultralytics)", 4_029, "4,029  ·  Public Domain  ·  polygons, roads and walls"),
@@ -267,7 +268,7 @@ def dataset_sizes():
     for s in ("top", "right", "left"):
         ax.spines[s].set_visible(False)
     ax.set_xlabel("Images")
-    fig.suptitle("Public crack data is large, but none of it is the data we need",
+    fig.suptitle("Public crack data is large, but none of it shows homes in informal areas",
                  x=0.02, ha="left", fontsize=14, weight="bold")
     fig.text(0.02, 0.875, "Image counts and licences from each dataset's page. Not plotted: CODEBRIM (36.4 GB, count "
              "not stated, non-commercial) and the Dais et al. masonry subset.", fontsize=9.5, color=INK_2)
