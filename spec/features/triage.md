@@ -23,6 +23,8 @@ The tool never outputs "safe", a clearance or a permit.
 ## Decision order
 1. `image_ok` is false -> Retake.
 2. Any doubt -> Expert needed:
+   - material confidence missing, invalid or below 0.8 (illustrative) -> "Material unclear";
+   - material not reinforced concrete -> "Material not supported" (decision D17);
    - unknown pattern;
    - confidence missing, not a number, outside 0 to 1, or below the threshold (0.8, illustrative);
    - width missing, not a number, negative or infinite (measurement failed).
@@ -31,14 +33,14 @@ The tool never outputs "safe", a clearance or a permit.
 The confidence threshold is a module constant, not a function argument, so it can only change in a reviewed commit.
 
 ## Patterns (provisional, see `spec/decisions.md` D1)
-`plaster_crazing`, `wall_vertical`, `diagonal_step` (diagonal and stair-step in brick), `column_or_beam`, `spalling_rust`.
+`plaster_crazing`, `wall_vertical`, `diagonal` (diagonal shear crack in concrete), `column_or_beam`, `spalling_rust`. Concrete only (decision D17); the brick stair-step pattern is no longer assessed.
 
 ## Width bands (illustrative)
 Lower bound inclusive, upper bound exclusive. A crack exactly on a boundary goes to the wider band (safer).
 `under_0.3`: [0, 0.3) · `0.3_to_1`: [0.3, 1) · `1_to_3`: [1, 3) · `over_3`: [3, inf).
 
 ## Risk matrix (illustrative, deck slide 7)
-| Width | plaster_crazing | wall_vertical | diagonal_step | column_or_beam | spalling_rust |
+| Width | plaster_crazing | wall_vertical | diagonal | column_or_beam | spalling_rust |
 |---|---|---|---|---|---|
 | under 0.3 mm | Low | Low | Medium | Medium | Medium |
 | 0.3 to 1 mm | Low | Medium | Medium | High | High |

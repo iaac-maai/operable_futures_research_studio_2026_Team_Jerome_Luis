@@ -14,6 +14,7 @@ Both are needed for every task marked "at risk" below (`spec/decisions.md` D10).
 | Date | Session | Target outcome |
 |---|---|---|
 | 29 Oct | Segmentation tree, full data map, repo + AGENTS.md | Agent working on real data as a first test |
+| 2 Nov | Expert package sent to the professor (team milestone) | Contact with the thesis author |
 | 5 Nov | Midterm submission deadline | |
 | 6 Nov | **Midterm presentations** | |
 | 12 Nov | Full SDD constitution, first feature with tests, first MCP connection attempt | A first feature that can be measured against the baseline |
@@ -36,11 +37,14 @@ Weeks start on Monday. "At risk" means the task depends on the engineering partn
 | Workstream | Task | Weeks | At risk |
 |---|---|---|---|
 | Deliverables | 29 Oct: tree, data map, repo, first real-data test (done) | 1 | |
+| Deliverables | State-of-the-art review based on the reference thesis | 1 | |
+| Deliverables | Expert package to the professor: review, pipeline, material test, one-page pitch (send Mon 2 Nov) | 1 | |
 | Deliverables | Midterm deck and problem & data brief (submit 5 Nov) | 1 to 2 | |
 | Deliverables | Lean Canvas | 6 to 7 | |
 | Deliverables | 10-slide pitch deck, final presentation | 7 to 8 | |
 | Deliverables | Blog post (by 24 Dec) | 8 to 9 | |
-| Data | Quality gate on crack-seg, Darbhanga, SDNET2018 (done) | 1 | |
+| Data | Quality gate on public sets (done) | 1 | |
+| Data | Material check: concrete vs not concrete, first training test | 1 | |
 | Data | Map public labels to the 5 patterns | 2 to 3 | |
 | Pilot | Collect pilot photos (about 30 cracks, `spec/features/photo_protocol.md`) | 2 | |
 | Pilot | Prepare, label, tune the quality gate | 2 to 3 | |
@@ -53,7 +57,9 @@ Weeks start on Monday. "At risk" means the task depends on the engineering partn
 | Engineering partners | Agree scope with Engineers Without Borders and the structural engineer | 1 to 2 | |
 | Engineering partners | Calibration: matrix, thresholds, protocol | 3 to 5 | yes |
 | Engineering partners | Engineer-labelled photos and baseline ratings | 4 to 6 | yes |
+| Integration | Engineer review screen (mock-up) | 1 to 2 | |
 | Integration | Beta: end-to-end pipeline on pilot photos (hackathon) | 4 | |
+| Integration | Corrections logged and retraining loop (human-in-the-loop learning) | 5 to 6 | yes |
 | Integration | Comparison against the non-AI baseline (3 Dec) | 6 | yes |
 | Integration | Proof of concept, limits and ethics check (10 Dec) | 7 | |
 | Integration | Streamlit UI, testing in realistic conditions | 7 to 8 | |

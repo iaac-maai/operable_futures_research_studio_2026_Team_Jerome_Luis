@@ -6,8 +6,8 @@ Every figure is drawn from the repo's own rules and data map, so it changes when
 
 | File | Shows | Drawn from |
 |---|---|---|
-| `01_pipeline.png` | Photo-to-triage pipeline, coloured by learned / written rule / human | Deck slide 5, `tech_stack.md` |
-| `02_decision_flow.png` | Order of checks: Retake, Expert needed, matrix, engineer review | `triage.matrix.assess()` |
+| `01_pipeline.png` | Pipeline v2: ten stages from capture to engineer review and retraining, with the human-in-the-loop learning loop | `spec/features/pipeline.md` |
+| `02_decision_flow.png` | Order of checks: photo usable, reinforced concrete, model sure; then matrix, engineer review, correction logged | `triage.matrix.assess()` |
 | `03_risk_matrix.png` | Width band x pattern -> level | `triage.matrix.MATRIX` (read at run time) |
 | `04_segmentation_tree.png` | Flowchart-style tree: macro pill, four branch pills with letter tags, micro circles, atomic pill, final output; yellow = path to the atomic problem, navy = context | `docs/segmentation_tree.md` |
 | `05_data_coverage.png` | Which data source feeds which pipeline stage | `docs/data_map.md`, section 1 |

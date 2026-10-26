@@ -66,63 +66,92 @@ def _canvas(w, h, title, subtitle=None):
 
 
 def pipeline():
-    fig, ax = _canvas(13, 5.2, "From phone photo to triage",
-                      "Learned models suggest; written rules decide; a human confirms every High and every referral")
-    learned, rules, human = (VIOLET, "#ecebfb"), (AQUA, "#e3f5ee"), (MUTED, "#f0efec")
+    """Pipeline v2 (spec/features/pipeline.md): ten stages, two users, and the human-in-the-loop learning loop."""
+    fig, ax = _canvas(15, 7.4, "Second Look pipeline: from photo to engineer review and retraining",
+                      "Every stage reports its result with a confidence. Learned models suggest, written rules decide, "
+                      "an engineer confirms every High and every referral, and the corrections retrain the models")
+    learned, rules, human, data = (VIOLET, "#ecebfb"), (AQUA, "#e3f5ee"), (MUTED, "#f0efec"), (BLUE, "#e4eefb")
     steps = [
-        ("Phone photo\ncoin for scale, element tag", human),
-        ("Quality gate\nblur, light, coin visible", rules),
-        ("Detect and segment\nYOLO element, U-Net crack", learned),
-        ("Measurement\nwidth, length, angle", rules),
-        ("Pattern model\ncrack type + confidence", learned),
-        ("AI agent\nbuilding data over MCP", learned),
-        ("Triage rules\nsrc/triage/matrix.py", rules),
-        ("Engineer\nconfirms High and referrals", human),
+        ("1  Capture (resident)", "photo + coin + element tag", human),
+        ("2  Quality check", "usable? if not: Retake", rules),
+        ("3  Material check", "concrete? confidence\nif not or unsure: Expert", learned),
+        ("4  Find the crack", "crack pixels + element\nconfidence", learned),
+        ("5  Measure", "width mm ± uncertainty\nlength, orientation", rules),
+        ("6  Pattern", "crack type\nprobability", learned),
+        ("7  Triage rules", "level + reason\noverall confidence", rules),
+        ("8  Engineer review", "confirms or corrects\nevery High and referral", human),
+        ("9  Corrections logged", "labelled examples\n(with consent)", data),
+        ("10  Retraining", "new model version\nchecked before use", learned),
     ]
-    w, h, gap = 2.6, 1.2, 0.6
-    xs = [i * (w + gap) for i in range(4)]
-    pos = [(x, 2.6) for x in xs] + [(x, 0.4) for x in reversed(xs)]
-    for (text, (edge, fill)), (x, y) in zip(steps, pos):
-        _box(ax, x, y, w, h, text, fill, edge)
-    for i in range(3):
-        _arrow(ax, (pos[i][0] + w, 3.2), (pos[i + 1][0], 3.2))
-    _arrow(ax, (pos[3][0] + w / 2, 2.6), (pos[4][0] + w / 2, 1.6))
-    for i in range(4, 7):
-        _arrow(ax, (pos[i][0], 1.0), (pos[i + 1][0] + w, 1.0))
-    ax.set_xlim(-0.2, xs[-1] + w + 0.2)
-    ax.set_ylim(-0.5, 4.1)
+    w, h, gap = 2.55, 1.35, 0.5
+    xs = [i * (w + gap) for i in range(5)]
+    pos = [(x, 3.3) for x in xs] + [(x, 0.6) for x in reversed(xs)]
+    for (title, sub, (edge, fill)), (x, y) in zip(steps, pos):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0,rounding_size=0.08",
+                                    facecolor=fill, edgecolor=edge, linewidth=1.4))
+        ax.text(x + w / 2, y + h - 0.3, title, ha="center", va="center", fontsize=10, weight="bold", color=INK)
+        ax.text(x + w / 2, y + 0.48, sub, ha="center", va="center", fontsize=8.6, color=INK_2, linespacing=1.15)
+    for i in range(4):
+        _arrow(ax, (pos[i][0] + w, 3.3 + h / 2), (pos[i + 1][0], 3.3 + h / 2))
+    _arrow(ax, (pos[4][0] + w / 2, 3.3), (pos[5][0] + w / 2, 0.6 + h))
+    for i in range(5, 9):
+        _arrow(ax, (pos[i][0], 0.6 + h / 2), (pos[i + 1][0] + w, 0.6 + h / 2))
+    # learning loop: retraining feeds the learned models (stages 3, 4, 6)
+    loop_x = pos[9][0] - 0.35
+    ax.plot([pos[9][0] + w / 2, pos[9][0] + w / 2, loop_x], [0.6, 0.25, 0.25], color=VIOLET, lw=1.6, ls="--")
+    ax.plot([loop_x, loop_x], [0.25, 5.0], color=VIOLET, lw=1.6, ls="--")
+    for target in (2, 3):
+        tx = pos[target][0] + w / 2
+        ax.plot([loop_x, tx], [5.0, 5.0], color=VIOLET, lw=1.6, ls="--")
+        _arrow(ax, (tx, 5.0), (tx, 3.3 + h))
+    ax.plot([loop_x, pos[5][0] + w / 2], [0.25, 0.25], color=VIOLET, lw=1.6, ls="--")
+    _arrow(ax, (pos[5][0] + w / 2, 0.25), (pos[5][0] + w / 2, 0.6))
+    ax.text(loop_x + 0.1, 5.12, "human-in-the-loop learning: retrains stages 3, 4 and 6", fontsize=9, color=VIOLET,
+            va="bottom")
+    ax.text(pos[6][0] + w / 2, 0.08, "the risk matrix never changes automatically", fontsize=8.5, color=INK_2,
+            ha="center", va="top")
+    ax.set_xlim(-0.7, xs[-1] + w + 0.2)
+    ax.set_ylim(-0.6, 5.7)
     ax.legend(handles=[Patch(facecolor=f, edgecolor=e, label=l) for l, (e, f) in
-                       [("Learned model", learned), ("Written rule, auditable", rules), ("Human or input", human)]],
-              loc="lower center", bbox_to_anchor=(0.5, -0.12), ncol=3, frameon=False)
+                       [("Learned model", learned), ("Written rule, auditable", rules), ("Human (resident, engineer)",
+                                                                                         human), ("Data", data)]],
+              loc="lower center", bbox_to_anchor=(0.5, -0.1), ncol=4, frameon=False)
     return fig
 
 
 def decision_flow():
-    fig, ax = _canvas(12, 6.4, "Decision logic: every doubt ends at an expert",
-                      "Order of checks in triage.matrix.assess(); Low is reachable only after both checks say yes")
+    fig, ax = _canvas(13, 8.2, "Decision logic: every doubt ends at an expert",
+                      "Order of checks in triage.matrix.assess(); Low is reachable only after all three checks say yes. "
+                      "Thresholds illustrative")
     q_fill, q_edge = "#f0efec", MUTED
-    _box(ax, 0, 5, 3.6, 1, "Image usable?\nblur, light, coin visible", q_fill, q_edge)
-    _box(ax, 0, 3.2, 3.6, 1, "Pattern known, confidence ≥ 0.8,\nwidth measured?", q_fill, q_edge)
-    _box(ax, 0, 1.4, 3.6, 1, "Look up pattern × width\nrisk matrix (illustrative)", q_fill, q_edge)
-    _box(ax, 5.2, 5, 2.6, 1, "Retake", LEVEL["Retake"], LEVEL["Retake"], color="white", weight="bold")
-    _box(ax, 5.2, 3.2, 2.6, 1, "Expert needed", LEVEL["Expert needed"], LEVEL["Expert needed"],
-         color="white", weight="bold")
+    _box(ax, 0, 6.6, 3.8, 1, "1  Image usable?\nblur, light, coin visible", q_fill, q_edge)
+    _box(ax, 0, 4.8, 3.8, 1, "2  Reinforced concrete?\nmaterial confidence ≥ 0.8", q_fill, q_edge)
+    _box(ax, 0, 3.0, 3.8, 1, "3  Pattern known, confidence ≥ 0.8,\nwidth measured?", q_fill, q_edge)
+    _box(ax, 0, 1.2, 3.8, 1, "Look up pattern × width\nrisk matrix (illustrative)", q_fill, q_edge)
+    _box(ax, 5.4, 6.6, 2.8, 1, "Retake", LEVEL["Retake"], LEVEL["Retake"], color="white", weight="bold")
+    _box(ax, 5.4, 4.8, 2.8, 1, "Expert needed\nmaterial not supported\nor unclear", LEVEL["Expert needed"],
+         LEVEL["Expert needed"], color="white", weight="bold", size=9)
+    _box(ax, 5.4, 3.0, 2.8, 1, "Expert needed\nmodel unsure", LEVEL["Expert needed"], LEVEL["Expert needed"],
+         color="white", weight="bold", size=9)
     for i, lvl in enumerate(["Low", "Medium", "High"]):
-        x = -0.6 + i * 2.5
+        x = -0.6 + i * 2.6
         sub = {"Low": "routine monitoring", "Medium": "low-cost advice, recheck", "High": "engineer must confirm"}[lvl]
-        _box(ax, x, -0.6, 2.2, 1, f"{lvl}\n{sub}", LEVEL[lvl], LEVEL[lvl], color=ON_FILL.get(lvl, "white"),
+        _box(ax, x, -0.8, 2.3, 1, f"{lvl}\n{sub}", LEVEL[lvl], LEVEL[lvl], color=ON_FILL.get(lvl, "white"),
              weight="bold", size=9)
-        _arrow(ax, (1.8, 1.4), (x + 1.1, 0.4))
-    _box(ax, 9.2, 1.9, 2.6, 1.6, "Engineer review\nevery High and\nevery Expert needed", "#f0efec", INK_2,
+        _arrow(ax, (1.9, 1.2), (x + 1.15, 0.2))
+    _box(ax, 9.6, 2.6, 2.9, 1.6, "Engineer review\nevery High and\nevery Expert needed", "#f0efec", INK_2,
          weight="bold")
-    _arrow(ax, (3.6, 5.5), (5.2, 5.5), "no")
-    _arrow(ax, (3.6, 3.7), (5.2, 3.7), "no")
-    _arrow(ax, (1.8, 5), (1.8, 4.2), "yes", (0.25, 0))
-    _arrow(ax, (1.8, 3.2), (1.8, 2.4), "yes", (0.25, 0))
-    _arrow(ax, (7.8, 3.7), (9.2, 3.0))
-    _arrow(ax, (6.6, -0.1), (9.2, 2.2))
-    ax.set_xlim(-0.8, 12)
-    ax.set_ylim(-0.9, 6.3)
+    _box(ax, 9.6, 0.3, 2.9, 1.3, "Correction logged\n→ retrains the models", "#e4eefb", BLUE, size=9.5)
+    for y in (7.1, 5.3, 3.5):
+        _arrow(ax, (3.8, y), (5.4, y), "no")
+    for y0, y1 in ((6.6, 5.8), (4.8, 4.0), (3.0, 2.2)):
+        _arrow(ax, (1.9, y0), (1.9, y1), "yes", (0.28, 0))
+    _arrow(ax, (8.2, 5.3), (9.6, 4.0))
+    _arrow(ax, (8.2, 3.5), (9.6, 3.4))
+    _arrow(ax, (6.9, -0.3), (9.6, 2.7))
+    _arrow(ax, (11.05, 2.6), (11.05, 1.6))
+    ax.set_xlim(-0.8, 12.8)
+    ax.set_ylim(-1.1, 7.9)
     return fig
 
 
@@ -144,7 +173,7 @@ def risk_matrix():
     ax.tick_params(length=0)
     for s in ax.spines.values():
         s.set_visible(False)
-    fig.suptitle("Risk matrix: crack width × pattern", x=0.02, ha="left", fontsize=14, weight="bold")
+    fig.suptitle("Risk matrix for reinforced concrete: crack width × pattern", x=0.02, ha="left", fontsize=14, weight="bold")
     fig.text(0.02, 0.02, "Read from src/triage/matrix.py. Illustrative thresholds, to be calibrated with a "
              "structural engineer. Boundary widths go to the wider band.", fontsize=9, color=INK_2)
     fig.subplots_adjust(left=0.13, right=0.98, top=0.8, bottom=0.1)
@@ -154,11 +183,12 @@ def risk_matrix():
 # Only what the tool works on (decision D16); out-of-scope and Phase 3 items are in docs/segmentation_tree.md.
 TREE = {
     "A. Buildings deteriorate unwatched": ["A1 Ageing, no maintenance", "A2 Added floors, poor ground"],
-    "B. Residents cannot read the signs": ["B1 Harmless vs structural", "B2 Wrong all-clear", "B3 Photo quality, scale"],
+    "B. Residents cannot read the signs": ["B1 Harmless vs structural", "B2 Wrong all-clear", "B3 Photo quality, scale",
+                                           "B4 Not every wall is concrete"],
     "C. Too few engineers": ["C1 No ranked list", "C2 Reports not acted on", "C3 Backlog: 114 buildings"],
     "D. Data is scarce": ["D1 Public data: bridges and roads", "D2 No engineer labels"],
 }
-ATOMIC_FROM = {"B1", "B2", "B3", "C1"}
+ATOMIC_FROM = {"B1", "B2", "B3", "B4", "C1"}
 TREE_YELLOW, TREE_NAVY = "#F2C14E", "#2F4B7C"
 
 
@@ -230,7 +260,7 @@ def segmentation_tree():
         _elbow(ax, x0, y_top - 0.48, mx, y_meso + 0.36, ymid, colour)
         _tag(ax, (x0 + mx) / 2, ymid, letter, colour)
         title = meso.split(". ", 1)[1].upper()
-        _pill(ax, mx, y_meso, max(3.0, 0.145 * len(title)), 0.72, title, colour,
+        _pill(ax, mx, y_meso, max(3.0, 0.172 * len(title)), 0.72, title, colour,
               TREE_NAVY if on_path else "white", 10.5)
         for lx, kid in zip(xs[meso], kids):
             code, label = kid.split(" ", 1)
@@ -243,7 +273,7 @@ def segmentation_tree():
                     ha="center", va="top", fontsize=8.8, color=INK, linespacing=1.15)
             if leaf_on_path:
                 _elbow(ax, lx, y_leaf - r_leaf - 1.0, centre, y_atomic + 0.4, y_atomic + 0.85, TREE_YELLOW)
-    _pill(ax, centre, y_atomic, 13.2, 0.8, "ATOMIC PROBLEM: ONE PHOTO, ONE CRACK, ONE ELEMENT → A LEVEL AND A REASON",
+    _pill(ax, centre, y_atomic, 16.5, 0.8, "ATOMIC PROBLEM: ONE PHOTO, ONE CRACK, ONE CONCRETE ELEMENT → LEVEL, CONFIDENCE, REASON",
           TREE_YELLOW, TREE_NAVY, 12)
     _elbow(ax, centre, y_atomic - 0.4, centre, y_final + 0.36, y_final + 0.9, TREE_NAVY)
     _pill(ax, centre, y_final, 11.5, 0.72, "SECOND LOOK:  LOW · MEDIUM · HIGH · EXPERT NEEDED · RETAKE",
@@ -254,27 +284,29 @@ def segmentation_tree():
     return fig
 
 
-STAGES = ["Quality gate", "YOLO detector", "U-Net segmenter", "Measurement (mm)", "Pattern model",
-          "Agent: building data", "Triage rules sign-off", "Evaluation (ground truth)"]
+STAGES = ["Quality gate", "Material check", "YOLO detector", "U-Net segmenter", "Measurement (mm)", "Pattern model",
+          "Agent: building data", "Triage rules sign-off", "Engineer review + retraining", "Evaluation (ground truth)"]
 SOURCES = ["SDNET2018", "CrackSeg9k", "crack-seg\n(Ultralytics)", "PHI-Net", "CODEBRIM", "Haiti + Nepal\nsurveys",
            "Brick masonry\n(Darbhanga)", "Masonry masks\n(Dais et al.)", "Pilot photos", "Engineer-\nlabelled photos",
            "Tripoli lists\n(106 / 114)", "Engineering\npartner"]
 # From docs/data_map.md, section 1. Rows follow STAGES, columns follow SOURCES.
 COVERAGE = [
     ["none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
+    ["partial", "none", "none", "partial", "partial", "none", "partial", "partial", "planned", "planned", "none", "none"],
     ["none", "none", "partial", "partial", "partial", "none", "partial", "none", "planned", "planned", "none", "none"],
     ["none", "covered", "covered", "none", "none", "none", "none", "partial", "none", "planned", "none", "none"],
     ["none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
     ["partial", "none", "none", "partial", "partial", "partial", "partial", "none", "none", "planned", "none", "none"],
     ["none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "partial", "none"],
     ["none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "planned"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "planned", "none", "planned"],
     ["none", "none", "none", "none", "none", "partial", "none", "none", "none", "planned", "partial", "planned"],
 ]
 COVERAGE_LABEL = {"covered": "covers", "partial": "partly", "planned": "planned", "none": ""}
 
 
 def data_coverage():
-    fig, ax = plt.subplots(figsize=(18, 5.8))
+    fig, ax = plt.subplots(figsize=(18, 6.8))
     for r, row in enumerate(COVERAGE):
         for c, state in enumerate(row):
             ax.add_patch(FancyBboxPatch((c + 0.04, r + 0.08), 0.92, 0.84, boxstyle="round,pad=0,rounding_size=0.05",
@@ -397,11 +429,14 @@ def confusion_template():
 # From spec/constitution/roadmap.md. (workstream, task, first week, last week, at risk)
 PLAN = [
     ("Deliverables", "29 Oct deliverables + real-data test (done)", 1, 1, False),
+    ("Deliverables", "State-of-the-art review (reference thesis)", 1, 1, False),
+    ("Deliverables", "Expert package to the professor (Mon 2 Nov)", 1, 1, False),
     ("Deliverables", "Midterm deck + problem & data brief", 1, 2, False),
     ("Deliverables", "Lean Canvas", 6, 7, False),
     ("Deliverables", "Pitch deck, final presentation", 7, 8, False),
     ("Deliverables", "Blog post", 8, 9, False),
     ("Data", "Quality gate on public sets (done)", 1, 1, False),
+    ("Data", "Material check: concrete vs not, first test", 1, 1, False),
     ("Data", "Map public labels to the 5 patterns", 2, 3, False),
     ("Pilot", "Collect pilot photos (~30 cracks)", 2, 2, False),
     ("Pilot", "Prepare, label, tune quality gate", 2, 3, False),
@@ -414,13 +449,15 @@ PLAN = [
     ("Engineering partners", "Scope with EWB + structural engineer", 1, 2, False),
     ("Engineering partners", "Calibration: matrix, thresholds", 3, 5, True),
     ("Engineering partners", "Engineer-labelled photos + baseline", 4, 6, True),
+    ("Integration", "Engineer review screen (mock-up)", 1, 2, False),
     ("Integration", "Beta: end-to-end on pilot photos", 4, 4, False),
+    ("Integration", "Corrections logged + retraining loop", 5, 6, True),
     ("Integration", "Comparison vs non-AI baseline", 6, 6, True),
     ("Integration", "Proof of concept, limits + ethics", 7, 7, False),
     ("Integration", "Streamlit UI, realistic testing", 7, 8, False),
 ]
 # (x in weeks from Monday 26 Oct, label, at risk); x = (days after 26 Oct + 0.5) / 7, from the syllabus.
-MILESTONES = [(0.5, "29 Oct\ndata map", False), (1.64, "6 Nov\nmidterm", False),
+MILESTONES = [(0.5, "29 Oct\ndata map", False), (1.07, "2 Nov\nexpert package", False), (1.64, "6 Nov\nmidterm", False),
               (2.5, "12 Nov\n1st feature", False), (3.64, "20 Nov\nbeta", False),
               (4.5, "26 Nov\nharness + MCP", False), (5.5, "3 Dec\nbaseline", True),
               (6.5, "10 Dec\nPoC + ethics", False), (7.5, "17 Dec\nfinal", False), (8.5, "24 Dec\nblog", False)]
@@ -431,7 +468,7 @@ WEEK_STARTS = ["26 Oct", "2 Nov", "9 Nov", "16 Nov", "23 Nov", "30 Nov", "7 Dec"
 
 def timeline():
     weeks = len(WEEK_STARTS)
-    fig, ax = plt.subplots(figsize=(14, 8.8))
+    fig, ax = plt.subplots(figsize=(14, 10.2))
     n = len(PLAN)
     ax.axvspan(3, 4, color="#f0efec", zorder=0)
     ax.text(3.5, n - 0.9, "hackathon\n(no studio)", ha="center", va="center", fontsize=8.5, color=INK_2)

@@ -19,7 +19,7 @@ def test_unknown_pattern_goes_to_expert():
 
 
 def test_diagonal_crack_over_1mm_is_high():
-    assert triage("diagonal_step", 1.5, 0.9, image_ok=True) == "High"
+    assert triage("diagonal", 1.5, 0.9, image_ok=True) == "High"
 
 
 def test_fine_plaster_crazing_is_low():
@@ -74,7 +74,28 @@ def test_low_medium_retake_do_not_flag_engineer(args):
 
 
 def test_every_result_has_a_reason_and_no_safe_claim():
-    result = assess("diagonal_step", 1.5, 0.9, True)
-    assert result.reason == "diagonal / stair-step crack, 1.5 mm wide (1 to 3 mm band): High."
+    result = assess("diagonal", 1.5, 0.9, True)
+    assert result.reason == "diagonal (shear) crack, 1.5 mm wide (1 to 3 mm band): High."
     for pattern, width in itertools.product(PATTERNS, [0.1, 0.5, 2, 5]):
         assert "safe" not in assess(pattern, width, 0.9, True).reason.lower()
+
+
+@pytest.mark.parametrize("material", ["brick", "stone", "unknown", ""])
+def test_unsupported_material_goes_to_expert(material):
+    result = assess("plaster_crazing", 0.1, 0.99, True, material=material, material_confidence=0.95)
+    assert result.level == "Expert needed" and result.engineer_review
+    assert "Material not supported" in result.reason
+
+
+@pytest.mark.parametrize("material_confidence", [0.5, 0.79, math.nan, -1, 1.2, None])
+def test_unsure_material_goes_to_expert(material_confidence):
+    result = assess("plaster_crazing", 0.1, 0.99, True, material="concrete", material_confidence=material_confidence)
+    assert result.level == "Expert needed" and "Material unclear" in result.reason
+
+
+def test_confident_concrete_reaches_the_matrix():
+    assert triage("plaster_crazing", 0.1, 0.99, True, material="concrete", material_confidence=0.9) == "Low"
+
+
+def test_bad_photo_is_retake_before_material_check():
+    assert triage("plaster_crazing", 0.1, 0.99, False, material="brick", material_confidence=0.2) == "Retake"

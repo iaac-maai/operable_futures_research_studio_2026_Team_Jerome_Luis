@@ -12,8 +12,9 @@ Tripoli, February 2026: two blocks collapsed on 8 February (14 to 15 dead, per A
 Rana Plaza, Dhaka, 2013: cracks were visible the day before the collapse.
 
 ## What it does
-Phone photo (with a coin for scale) -> quality gate -> YOLO (finds element and crack) -> U-Net (crack pixels) -> measurement (width, length, angle)
--> pattern model and AI agent (building data over MCP) -> written triage rules -> Low, Medium, High, "Expert needed" or "Retake", each with a one-sentence reason.
+Phone photo (with a coin for scale) -> quality check -> **material check (reinforced concrete only)** -> find the crack (YOLO, U-Net) -> measure (width in mm with uncertainty, length, orientation)
+-> pattern model and AI agent (building data over MCP) -> written triage rules -> Low, Medium, High, "Expert needed" or "Retake", each with its confidence and a one-sentence reason
+-> **engineer review screen** (confirms or corrects every High and referral) -> corrections retrain the models (human-in-the-loop learning). Full pipeline: `spec/features/pipeline.md`.
 It never gives a permit or a clearance. Any doubt goes to an expert, and an engineer confirms every High.
 
 ## Data

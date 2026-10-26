@@ -13,6 +13,14 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 - [x] First test on real data: quality gate on crack-seg, Darbhanga, SDNET2018 (C, 25 Oct)
 - [x] Plan aligned with the syllabus dates (C, 25 Oct)
 
+### Professor's feedback (26 Oct): answer before contacting the expert
+- [x] Pipeline v2 specified: material check, confidence on every result, engineer review, human-in-the-loop learning (C, 26 Oct)
+- [x] Figures updated: pipeline, decision flow, matrix, tree, data coverage, timeline (C, 26 Oct)
+- [ ] Material check: concrete vs not concrete, first training test (C, Tue 27 Oct)
+- [ ] State-of-the-art review based on the reference thesis (C drafts Wed 28 Oct, J + L correct)
+- [ ] Engineer review screen mock-up and one-page pitch (C, Fri 30 Oct to Sun 1 Nov)
+- [ ] Send the expert package to the professor (J + L, Mon 2 Nov)
+
 ### Before Thursday 29 Oct
 - [ ] Open the repo on GitHub and check that the figures show in the docs and README (__)
 - [ ] Read `docs/experiments/2026-10-25_quality_gate_first_test.md`; be able to explain the two findings: the resolution bug and the smooth-wall blur problem (J + L)

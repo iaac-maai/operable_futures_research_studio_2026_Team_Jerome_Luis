@@ -10,8 +10,12 @@ and 114 buildings were ordered evacuated. Rana Plaza, Dhaka, 2013: cracks were v
 ## Mission
 Give residents and field workers a fast, cheap early-warning triage from a phone photo, and give scarce engineers a ranked list of which buildings to visit first.
 
+## Scope
+Cracks in reinforced concrete elements (walls, columns, beams, slabs). Other materials go to an engineer (`spec/decisions.md` D17).
+
 ## Users
-Residents of old buildings, field workers and community leaders, and engineers or municipalities who decide where to inspect first.
+- Residents of old buildings, field workers and community leaders: take the photo and receive a level, a reason and a next step.
+- Structural engineers: review every High and every referral, confirm or correct it, and so improve the models (`spec/features/pipeline.md`). Engineers and municipalities also use the ranked list to decide where to inspect first.
 
 ## Success (works, used, matters)
 - Works: beats the non-AI baseline (an engineer's visual check) on held-out, engineer-labelled photos.
@@ -22,4 +26,4 @@ Residents of old buildings, field workers and community leaders, and engineers o
 We stop or redesign if the tool misses High cases that engineers would flag.
 
 ## Out of scope
-Permits, legal clearances, foundation or rebar assessment, any claim a surface photo cannot support.
+Permits, legal clearances, foundation or rebar assessment, any claim a surface photo cannot support. Materials other than reinforced concrete are not assessed (they are referred).

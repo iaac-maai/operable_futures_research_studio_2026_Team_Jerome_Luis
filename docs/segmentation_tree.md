@@ -20,7 +20,8 @@ People live in ageing, unsupervised buildings and cannot judge whether the crack
 ### B. Residents see the signs but cannot read them (what the tool must solve)
 - **B1.** They cannot tell a harmless surface crack from a structural one. The missing piece is interpretation, not detection.
 - **B2.** A wrong all-clear lands on them: Low must be earned, any doubt goes to an expert.
-- **B3.** Photos are hard to interpret: blur and light (quality gate), no scale (coin), element and material vary (element tag, detector).
+- **B3.** Photos are hard to interpret: blur and light (quality gate), no scale (coin), element varies (element tag, detector).
+- **B4.** Not every wall is concrete: the tool checks the material first and refers anything else to an engineer (`spec/decisions.md` D17).
 
 ### C. Engineers are too few and reports queue up (why a ranked list matters)
 - **C1.** No ranked list of which building to visit first.
@@ -32,7 +33,7 @@ People live in ageing, unsupervised buildings and cannot judge whether the crack
 - D2. No engineer-labelled phone photos of single cracks exist yet; we collect them with our partners.
 
 ## Atomic problem (work on first)
-Read one photo of one crack on one element and return Low, Medium, High, "Expert needed" or "Retake", with a one-sentence reason. It comes from B1, B2, B3 and C1 (bold above).
+Read one photo of one crack on one reinforced concrete element and return Low, Medium, High, "Expert needed" or "Retake", with its confidence and a one-sentence reason. It comes from B1, B2, B3, B4 and C1 (bold above).
 It sits under B and C because, in four of the six cases in the deck, the danger was known; what was missing was a way to read it and to rank which building to inspect first.
 
 ## Same tree as Mermaid source
@@ -49,18 +50,20 @@ graph TD
   B --> B1["B1 Harmless vs structural"]
   B --> B2["B2 Wrong all-clear"]
   B --> B3["B3 Photo quality, scale"]
+  B --> B4["B4 Not every wall is concrete"]
   C --> C1["C1 No ranked list"]
   C --> C2["C2 Reports not acted on"]
   C --> C3["C3 Backlog: 114 buildings"]
   D --> D1["D1 Public data: bridges and roads"]
   D --> D2["D2 No engineer labels"]
-  B1 --> AT["Atomic: one photo, one crack, one element, level plus reason"]
+  B1 --> AT["Atomic: one photo, one crack, one concrete element, level plus confidence plus reason"]
   B2 --> AT
   B3 --> AT
+  B4 --> AT
   C1 --> AT
   AT --> R["Second Look: Low, Medium, High, Expert needed, Retake"]
   classDef path fill:#F2C14E,stroke:#F2C14E,color:#2F4B7C;
   classDef context fill:#2F4B7C,stroke:#2F4B7C,color:#fff;
-  class B,C,B1,B2,B3,C1 path;
+  class B,C,B1,B2,B3,B4,C1 path;
   class A,D,A1,A2,C2,C3,D1,D2 context;
 ```

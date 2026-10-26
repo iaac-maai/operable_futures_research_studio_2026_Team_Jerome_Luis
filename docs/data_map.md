@@ -65,6 +65,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | Stage | Needs | Covered by | Gap |
 |---|---|---|---|
 | Quality gate | Phone photos labelled usable / unusable (blur, light, coin visible) | Pilot photos (section 4), planned. First code test on five public sets done (`docs/experiments/2026-10-25_quality_gate_first_test.md`) | Public sets are not phone photos; they test the code only |
+| Material check | Images labelled concrete / not concrete (`spec/decisions.md` D17) | Concrete: METU, SDNET2018, CODEBRIM; not concrete: Darbhanga and Strathclyde brick, Dais masonry; PHI-Net has a material task [26] | Plaster hides the material; our phone photos needed |
 | YOLO detector | Bounding boxes for element (column, beam, slab, brick wall) and crack | Cracks only: crack-seg polygons [33], Darbhanga crack boxes [30], CODEBRIM defect boxes [28]; PHI-Net has component type as a class only [26] | No public set has element boxes; draw them on our own photos |
 | U-Net segmenter | Pixel masks of cracks | CrackSeg9k [25]; crack-seg polygons converted to masks [33]; Dais et al. masonry masks [31] | Few columns and beams |
 | Measurement | Crack width in mm with a coin for scale | Pilot photos with a crack-width card, planned | Nothing public has a scale reference |

@@ -6,14 +6,15 @@ Spec: spec/features/triage.md. Decisions: spec/decisions.md.
 import math
 from dataclasses import dataclass
 
-PATTERNS = ["plaster_crazing", "wall_vertical", "diagonal_step", "column_or_beam", "spalling_rust"]
+PATTERNS = ["plaster_crazing", "wall_vertical", "diagonal", "column_or_beam", "spalling_rust"]
 PATTERN_NAMES = {
     "plaster_crazing": "plaster crazing",
     "wall_vertical": "vertical wall crack",
-    "diagonal_step": "diagonal / stair-step crack",
+    "diagonal": "diagonal (shear) crack",
     "column_or_beam": "column or beam crack",
     "spalling_rust": "spalling with rust",
 }
+SUPPORTED_MATERIALS = {"concrete"}  # reinforced concrete only (decision D17)
 # rows: width bands; columns: PATTERNS
 MATRIX = {
     "under_0.3": ["Low", "Low", "Medium", "Medium", "Medium"],
@@ -23,6 +24,7 @@ MATRIX = {
 }
 BAND_NAMES = {"under_0.3": "under 0.3 mm", "0.3_to_1": "0.3 to 1 mm", "1_to_3": "1 to 3 mm", "over_3": "over 3 mm"}
 CONFIDENCE_THRESHOLD = 0.8  # illustrative; fixed here so callers cannot lower it
+MATERIAL_THRESHOLD = 0.8  # illustrative; below it the material counts as unsure
 NEEDS_ENGINEER = {"High", "Expert needed"}
 
 
@@ -52,10 +54,16 @@ def _result(level: str, reason: str) -> Result:
     return Result(level, reason, level in NEEDS_ENGINEER)
 
 
-def assess(pattern: str, width_mm: float, confidence: float, image_ok: bool) -> Result:
-    """Return level, one-sentence reason and engineer-review flag. Any doubt goes to an expert."""
+def assess(pattern: str, width_mm: float, confidence: float, image_ok: bool, *,
+           material: str = "concrete", material_confidence: float = 1.0) -> Result:
+    """Return level, one-sentence reason and engineer-review flag. Any doubt goes to an expert.
+    Order (spec/features/pipeline.md): photo usable -> material supported -> pattern -> confidence -> width."""
     if image_ok is not True:
         return _result("Retake", "Photo not usable (blur, light or coin missing): retake it.")
+    if not _valid(material_confidence) or not MATERIAL_THRESHOLD <= material_confidence <= 1:
+        return _result("Expert needed", "Material unclear from the photo: an engineer decides.")
+    if material not in SUPPORTED_MATERIALS:
+        return _result("Expert needed", f"Material not supported ({material}): an engineer decides.")
     if pattern not in PATTERNS:
         return _result("Expert needed", "Crack pattern not recognised.")
     if not _valid(confidence) or not 0 <= confidence <= 1:
@@ -70,6 +78,6 @@ def assess(pattern: str, width_mm: float, confidence: float, image_ok: bool) -> 
     return _result(level, reason)
 
 
-def triage(pattern: str, width_mm: float, confidence: float, image_ok: bool) -> str:
+def triage(pattern: str, width_mm: float, confidence: float, image_ok: bool, **material) -> str:
     """Return Low, Medium, High, 'Retake' or 'Expert needed'."""
-    return assess(pattern, width_mm, confidence, image_ok).level
+    return assess(pattern, width_mm, confidence, image_ok, **material).level

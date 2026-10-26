@@ -1,4 +1,4 @@
 photo_id,crack_id,shot,element,material,pattern_guess,width_mm_card,length_cm_estimate,coin_visible,deliberately_bad,notes
-P0001,P01,A,brick wall,brick,diagonal_step,,,no,no,example row: context shot
-P0002,P01,B,brick wall,brick,diagonal_step,,80,yes,no,example row
-P0003,P01,C,brick wall,brick,diagonal_step,0.5,,yes,no,example row: width read from the card
+P0001,P01,A,wall,concrete,diagonal,,,no,no,example row: context shot
+P0002,P01,B,wall,concrete,diagonal,,80,yes,no,example row
+P0003,P01,C,wall,concrete,diagonal,0.5,,yes,no,example row: width read from the card

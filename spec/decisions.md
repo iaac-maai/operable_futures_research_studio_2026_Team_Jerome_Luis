@@ -75,3 +75,15 @@ Decision: the hackathon beta trains the crack-finding step on public data. Patte
 Out-of-scope items (unauthorised construction, earthquake triggers, rebar and foundations, overridden warnings) and the Phase 3 item (soil erosion) are removed from the tree. The "Warnings overridden" branch is gone; "Data is scarce" becomes branch D. What the tool does not cover is stated once, in `spec/constitution/mission.md`.
 The tree figure is redrawn as a flowchart: rounded pills for the macro problem and the four branches, letter tags on the connectors, circles for the micro items, then the atomic problem and the final output. Yellow marks the path into the atomic problem (B, C, B1, B2, B3, C1), navy the supporting context.
 Reason: team feedback; out-of-scope nodes were unnecessary detail and the old box layout was hard to read.
+
+## D17 (2026-10-26): scope is reinforced concrete; a material check comes first
+Following the professor's feedback (26 Oct): the tool assesses cracks in reinforced concrete elements only (walls, columns, beams, slabs). A material check runs right after the quality check: concrete continues; not concrete or unsure goes to an engineer ("Expert needed: material not supported"). Brick image sets (Darbhanga, Strathclyde) become the "not concrete" examples for training this check.
+Consequence: the brick stair-step pattern leaves the matrix; the diagonal pattern now means a diagonal (shear) crack in concrete.
+Reason: fits the timeline, the professor's advice, the reference thesis (reinforced concrete) and the Haiti and Nepal surveys (concrete-frame buildings).
+
+## D18 (2026-10-26): two users and a human-in-the-loop learning loop
+The resident takes the photo; the engineer reviews every High and every referral on a review screen and confirms or corrects it. Corrections are stored as labels and the learned models (material, crack, pattern) are retrained in batches, each new version checked on held-out engineer-rated photos before use.
+We call it human-in-the-loop learning, not reinforcement learning: it is supervised retraining with expert feedback. The risk matrix never changes automatically (AGENTS.md rule 5).
+
+## D19 (2026-10-26): every result carries confidence, not only a colour
+Each stage reports its output with a confidence: material, crack found, width in mm with an uncertainty range, pattern probability, and an overall confidence with the level. Full list in `spec/features/pipeline.md`.
