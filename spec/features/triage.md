@@ -1,12 +1,15 @@
 # Feature: triage rules (`src/triage/matrix.py`)
 
-Status: implemented. Thresholds are illustrative until calibrated with a structural engineer.
+Status: implemented with risk matrix v2.0-illustrative (`spec/features/risk_matrix.md`). All thresholds are illustrative until calibrated with the engineering partners.
 
 ## Inputs
-- `pattern`: one of the five patterns below, from the pattern model.
-- `width_mm`: crack width in millimetres, from the measurement step (coin scale).
+- `pattern`: one of the seven reinforced-concrete patterns in `spec/features/risk_matrix.md`, from the pattern model.
+- `element`: column, beam, slab, load-bearing wall or infill wall, from the detector or the element tag.
+- `width_mm` and `width_uncertainty_mm`: crack width and its uncertainty in millimetres, from the measurement step (coin scale).
 - `confidence`: pattern-model confidence, 0 to 1.
 - `image_ok`: result of the quality gate (blur, light, coin visible).
+- `material` and `material_confidence`: result of the material check (decision D17).
+- `escalators`: warning signs (growing, rust staining, sticking openings, recent earthquake, added floors, offset, sagging).
 
 ## Outputs
 | Level | Meaning (deck, slide 6) | Engineer review |
@@ -17,7 +20,7 @@ Status: implemented. Thresholds are illustrative until calibrated with a structu
 | Medium | Low-cost advice, recheck | No |
 | High | Engineer must confirm | Yes |
 
-Every result carries a one-sentence reason, e.g. "diagonal / stair-step crack, 1.5 mm wide (1 to 3 mm band): High."
+Every result carries a one-sentence reason and a next step with a recheck interval, e.g. "diagonal shear crack in a beam, 1.5 mm wide, 1 to 3 mm band: High; raised because rust staining along the crack." / "An engineer must confirm; the case is sent now."
 The tool never outputs "safe", a clearance or a permit.
 
 ## Decision order
@@ -25,33 +28,21 @@ The tool never outputs "safe", a clearance or a permit.
 2. Any doubt -> Expert needed:
    - material confidence missing, invalid or below 0.8 (illustrative) -> "Material unclear";
    - material not reinforced concrete -> "Material not supported" (decision D17);
-   - unknown pattern;
+   - unknown element or pattern, or a pattern that does not fit the element;
    - confidence missing, not a number, outside 0 to 1, or below the threshold (0.8, illustrative);
-   - width missing, not a number, negative or infinite (measurement failed).
-3. Otherwise read the matrix: width band x pattern.
+   - width or its uncertainty missing, not a number, negative or infinite (measurement failed).
+3. Base level from pattern x width band, using the upper end of the measured width.
+4. Element criticality and warning signs raise the level (never lower it); capped at High.
 
-The confidence threshold is a module constant, not a function argument, so it can only change in a reviewed commit.
-
-## Patterns (provisional, see `spec/decisions.md` D1)
-`plaster_crazing`, `wall_vertical`, `diagonal` (diagonal shear crack in concrete), `column_or_beam`, `spalling_rust`. Concrete only (decision D17); the brick stair-step pattern is no longer assessed.
-
-## Width bands (illustrative)
-Lower bound inclusive, upper bound exclusive. A crack exactly on a boundary goes to the wider band (safer).
-`under_0.3`: [0, 0.3) · `0.3_to_1`: [0.3, 1) · `1_to_3`: [1, 3) · `over_3`: [3, inf).
-
-## Risk matrix (illustrative, deck slide 7)
-| Width | plaster_crazing | wall_vertical | diagonal | column_or_beam | spalling_rust |
-|---|---|---|---|---|---|
-| under 0.3 mm | Low | Low | Medium | Medium | Medium |
-| 0.3 to 1 mm | Low | Medium | Medium | High | High |
-| 1 to 3 mm | Medium | Medium | High | High | High |
-| over 3 mm | Medium | High | High | High | High |
+The confidence thresholds are module constants, not function arguments, so they can only change in a reviewed commit. The matrix values live in `src/triage/risk_matrix_v2.json`.
 
 ## Tests (`tests/test_matrix.py`)
 - Bad photo -> Retake; low, NaN or out-of-range confidence -> Expert needed (never Low).
-- Bad width (NaN, negative, infinite) -> Expert needed.
-- Low only when image usable, confidence over threshold and matrix says Low (exhaustive check).
-- Every High and every Expert needed sets `engineer_review`.
+- Bad width or uncertainty -> Expert needed; the upper end of the width is used.
+- Unknown element or pattern, or a pattern on the wrong element -> Expert needed.
+- Columns raise one level; every warning sign raises and never lowers; offset and sagging go straight to High; unknown warning signs are an error.
+- Low only when image usable, confidence over threshold, not a column, no warning sign and the matrix says Low (exhaustive check).
+- Every High and every Expert needed sets `engineer_review`; every result has a reason and a next step.
 - Band boundaries go to the wider band.
 
 ## Not yet covered

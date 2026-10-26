@@ -45,7 +45,7 @@ Weeks start on Monday. "At risk" means the task depends on the engineering partn
 | Deliverables | Blog post (by 24 Dec) | 8 to 9 | |
 | Data | Quality gate on public sets (done) | 1 | |
 | Data | Material check: concrete vs not concrete, first training test | 1 | |
-| Data | Map public labels to the 5 patterns | 2 to 3 | |
+| Data | Map public labels to the 7 patterns | 2 to 3 | |
 | Pilot | Collect pilot photos (about 30 cracks, `spec/features/photo_protocol.md`) | 2 | |
 | Pilot | Prepare, label, tune the quality gate | 2 to 3 | |
 | Pilot | Coin detection and width measurement: first feature against the baseline (12 Nov) | 3 to 4 | |

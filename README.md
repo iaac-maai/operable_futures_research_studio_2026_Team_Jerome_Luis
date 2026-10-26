@@ -24,7 +24,7 @@ The concept is cracks in buildings in slum-like, informal neighbourhoods. See `d
 - Generic crack pixels for pre-training: CrackSeg9k, crack-seg. Bridge and pavement sets are off-concept.
 - Still to collect: our own phone photos with a coin, rated by our engineering partners (Engineers Without Borders and a third-party structural engineer).
 
-**Can we train with it?** Partly. There is enough public data to train the step that finds cracks (segmentation and detection). There is not enough to train or prove the step that rates danger: no public dataset has our five crack patterns, a scale for width in mm, or an engineer's rating per crack. Those come only from our own photos and the engineering partners (`docs/data_map.md`, section 0b).
+**Can we train with it?** Partly. There is enough public data to train the step that finds cracks (segmentation and detection). There is not enough to train or prove the step that rates danger: no public dataset has our seven crack patterns, a scale for width in mm, or an engineer's rating per crack. Those come only from our own photos and the engineering partners (`docs/data_map.md`, section 0b).
 
 Raw data is not committed; `data/` stays empty in the repository.
 

@@ -1,0 +1,43 @@
+{
+  "version": "2.0-illustrative",
+  "status": "Illustrative until calibrated with the engineering partners (spec/features/risk_matrix.md).",
+  "levels": ["Low", "Medium", "High"],
+  "width_bands": [
+    {"key": "under_0.3", "name": "under 0.3 mm", "upper_mm": 0.3},
+    {"key": "0.3_to_1", "name": "0.3 to 1 mm", "upper_mm": 1.0},
+    {"key": "1_to_3", "name": "1 to 3 mm", "upper_mm": 3.0},
+    {"key": "over_3", "name": "over 3 mm", "upper_mm": null}
+  ],
+  "elements": {
+    "column": {"name": "column", "raise": 1},
+    "beam": {"name": "beam", "raise": 0},
+    "slab": {"name": "slab", "raise": 0},
+    "load_bearing_wall": {"name": "load-bearing wall", "raise": 0},
+    "infill_wall": {"name": "infill wall", "raise": 0}
+  },
+  "patterns": {
+    "surface_map": {"name": "surface map cracking", "levels": ["Low", "Low", "Medium", "Medium"], "elements": "all"},
+    "flexural": {"name": "flexural crack", "levels": ["Low", "Medium", "High", "High"], "elements": "all"},
+    "diagonal_shear": {"name": "diagonal shear crack", "levels": ["Medium", "High", "High", "High"], "elements": "all"},
+    "along_bar": {"name": "crack along a bar", "levels": ["Medium", "Medium", "High", "High"], "elements": "all"},
+    "column_horizontal": {"name": "horizontal crack in a column", "levels": ["Medium", "High", "High", "High"], "elements": ["column"]},
+    "spalling_exposed_bar": {"name": "spalling with exposed bar", "levels": ["Medium", "High", "High", "High"], "elements": "all"},
+    "joint": {"name": "beam-column joint crack", "levels": ["Medium", "High", "High", "High"], "elements": ["column", "beam"]}
+  },
+  "escalators": {
+    "growing": {"name": "the crack has grown since the last photo", "effect": "+1"},
+    "rust_stain": {"name": "rust staining along the crack", "effect": "+1"},
+    "sticking_openings": {"name": "doors or windows started to stick", "effect": "+1"},
+    "recent_earthquake": {"name": "an earthquake since the crack was last seen", "effect": "+1"},
+    "added_floors": {"name": "floors were added to the building", "effect": "+1"},
+    "offset": {"name": "one side of the crack is displaced", "effect": "High"},
+    "sagging": {"name": "visible sagging of a beam or slab", "effect": "High"}
+  },
+  "next_steps": {
+    "Low": "Routine monitoring: photograph the same crack again in 6 months.",
+    "Medium": "Low-cost advice; photograph the same crack again in 1 month. If it has grown, it goes to an engineer.",
+    "High": "An engineer must confirm; the case is sent now.",
+    "Expert needed": "An engineer decides; the case is sent now.",
+    "Retake": "Retake the photo following the protocol."
+  }
+}

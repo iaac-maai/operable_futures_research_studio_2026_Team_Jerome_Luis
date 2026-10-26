@@ -31,7 +31,7 @@ For quality-gate testing, also take **one deliberately bad shot per five cracks*
 ## Label sheet (`data/pilot/labels.csv`)
 Columns, one row per shot:
 `photo_id, crack_id, shot (A/B/C), element, material, pattern_guess, width_mm_card, length_cm_estimate, coin_visible (yes/no), deliberately_bad (yes/no), notes`
-`pattern_guess` uses the five patterns in `spec/features/triage.md` or `unsure`; it is our guess, to compare later with an engineer.
+`pattern_guess` uses the seven patterns in `spec/features/risk_matrix.md` or `unsure`; `element` uses column, beam, slab, load_bearing_wall or infill_wall; it is our guess, to compare later with an engineer.
 A template is in `docs/templates/pilot_labels.csv`.
 
 ## Preparation

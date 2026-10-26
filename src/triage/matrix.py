@@ -1,28 +1,31 @@
-"""Risk matrix and decision rules. Thresholds are illustrative until calibrated with a structural engineer.
+"""Risk matrix v2 and decision rules. Every value is illustrative until calibrated with the engineering partners.
 
-Spec: spec/features/triage.md. Decisions: spec/decisions.md.
+Spec: spec/features/risk_matrix.md (matrix) and spec/features/triage.md (decision order). Decisions: spec/decisions.md.
+The numbers live in risk_matrix_v2.json; this module only applies them.
 """
 
+import json
 import math
 from dataclasses import dataclass
+from pathlib import Path
 
-PATTERNS = ["plaster_crazing", "wall_vertical", "diagonal", "column_or_beam", "spalling_rust"]
-PATTERN_NAMES = {
-    "plaster_crazing": "plaster crazing",
-    "wall_vertical": "vertical wall crack",
-    "diagonal": "diagonal (shear) crack",
-    "column_or_beam": "column or beam crack",
-    "spalling_rust": "spalling with rust",
-}
+_DATA = json.loads((Path(__file__).with_name("risk_matrix_v2.json")).read_text(encoding="utf-8"))
+
+VERSION = _DATA["version"]
+LEVELS = _DATA["levels"]  # Low < Medium < High
+BANDS = [b["key"] for b in _DATA["width_bands"]]
+BAND_NAMES = {b["key"]: b["name"] for b in _DATA["width_bands"]}
+_BAND_UPPER = [b["upper_mm"] for b in _DATA["width_bands"]]
+PATTERNS = list(_DATA["patterns"])
+PATTERN_NAMES = {k: v["name"] for k, v in _DATA["patterns"].items()}
+MATRIX = {band: [_DATA["patterns"][p]["levels"][i] for p in PATTERNS] for i, band in enumerate(BANDS)}
+ELEMENTS = {k: v["name"] for k, v in _DATA["elements"].items()}
+ELEMENT_RAISE = {k: v["raise"] for k, v in _DATA["elements"].items()}
+ESCALATORS = {k: v["name"] for k, v in _DATA["escalators"].items()}
+_ESCALATOR_EFFECT = {k: v["effect"] for k, v in _DATA["escalators"].items()}
+NEXT_STEPS = _DATA["next_steps"]
 SUPPORTED_MATERIALS = {"concrete"}  # reinforced concrete only (decision D17)
-# rows: width bands; columns: PATTERNS
-MATRIX = {
-    "under_0.3": ["Low", "Low", "Medium", "Medium", "Medium"],
-    "0.3_to_1": ["Low", "Medium", "Medium", "High", "High"],
-    "1_to_3": ["Medium", "Medium", "High", "High", "High"],
-    "over_3": ["Medium", "High", "High", "High", "High"],
-}
-BAND_NAMES = {"under_0.3": "under 0.3 mm", "0.3_to_1": "0.3 to 1 mm", "1_to_3": "1 to 3 mm", "over_3": "over 3 mm"}
+
 CONFIDENCE_THRESHOLD = 0.8  # illustrative; fixed here so callers cannot lower it
 MATERIAL_THRESHOLD = 0.8  # illustrative; below it the material counts as unsure
 NEEDS_ENGINEER = {"High", "Expert needed"}
@@ -33,17 +36,20 @@ class Result:
     level: str  # Low, Medium, High, Retake or Expert needed
     reason: str
     engineer_review: bool
+    next_step: str
 
 
 def width_band(width_mm: float) -> str:
     """Lower bound inclusive: a crack on a boundary goes to the wider band."""
-    if width_mm < 0.3:
-        return "under_0.3"
-    if width_mm < 1:
-        return "0.3_to_1"
-    if width_mm < 3:
-        return "1_to_3"
-    return "over_3"
+    for key, upper in zip(BANDS, _BAND_UPPER):
+        if upper is None or width_mm < upper:
+            return key
+    return BANDS[-1]
+
+
+def _allowed(pattern: str, element: str) -> bool:
+    allowed = _DATA["patterns"][pattern]["elements"]
+    return allowed == "all" or element in allowed
 
 
 def _valid(x) -> bool:
@@ -51,33 +57,55 @@ def _valid(x) -> bool:
 
 
 def _result(level: str, reason: str) -> Result:
-    return Result(level, reason, level in NEEDS_ENGINEER)
+    return Result(level, reason, level in NEEDS_ENGINEER, NEXT_STEPS[level])
 
 
-def assess(pattern: str, width_mm: float, confidence: float, image_ok: bool, *,
-           material: str = "concrete", material_confidence: float = 1.0) -> Result:
-    """Return level, one-sentence reason and engineer-review flag. Any doubt goes to an expert.
-    Order (spec/features/pipeline.md): photo usable -> material supported -> pattern -> confidence -> width."""
+def assess(pattern: str, element: str, width_mm: float, confidence: float, image_ok: bool, *,
+           width_uncertainty_mm: float = 0.0, material: str = "concrete", material_confidence: float = 1.0,
+           escalators: tuple[str, ...] = ()) -> Result:
+    """Return level, one-sentence reason, engineer-review flag and next step. Any doubt goes to an expert.
+    Order: photo usable -> material -> element and pattern -> confidence -> width -> base level -> raises."""
+    unknown = [e for e in escalators if e not in ESCALATORS]
+    if unknown:
+        raise ValueError(f"unknown escalators: {unknown}")
     if image_ok is not True:
         return _result("Retake", "Photo not usable (blur, light or coin missing): retake it.")
     if not _valid(material_confidence) or not MATERIAL_THRESHOLD <= material_confidence <= 1:
         return _result("Expert needed", "Material unclear from the photo: an engineer decides.")
     if material not in SUPPORTED_MATERIALS:
         return _result("Expert needed", f"Material not supported ({material}): an engineer decides.")
+    if element not in ELEMENTS:
+        return _result("Expert needed", "Structural element not recognised.")
     if pattern not in PATTERNS:
         return _result("Expert needed", "Crack pattern not recognised.")
+    if not _allowed(pattern, element):
+        return _result("Expert needed",
+                       f"A {PATTERN_NAMES[pattern]} on a {ELEMENTS[element]} does not fit: an engineer decides.")
     if not _valid(confidence) or not 0 <= confidence <= 1:
         return _result("Expert needed", "Model confidence missing or invalid.")
     if confidence < CONFIDENCE_THRESHOLD:
         return _result("Expert needed", f"Model not confident enough ({confidence:.2f}).")
-    if not _valid(width_mm) or width_mm < 0:
+    if not _valid(width_mm) or width_mm < 0 or not _valid(width_uncertainty_mm) or width_uncertainty_mm < 0:
         return _result("Expert needed", "Crack width could not be measured.")
-    band = width_band(width_mm)
-    level = MATRIX[band][PATTERNS.index(pattern)]
-    reason = f"{PATTERN_NAMES[pattern]}, {width_mm:g} mm wide ({BAND_NAMES[band]} band): {level}."
+
+    upper = width_mm + width_uncertainty_mm  # the safe end of the measurement
+    band = width_band(upper)
+    rank = LEVELS.index(MATRIX[band][PATTERNS.index(pattern)])
+    raised_by = []
+    if ELEMENT_RAISE[element]:
+        rank += ELEMENT_RAISE[element]
+        raised_by.append(f"it is a {ELEMENTS[element]}")
+    for e in dict.fromkeys(escalators):  # each sign counts once
+        rank = len(LEVELS) - 1 if _ESCALATOR_EFFECT[e] == "High" else rank + 1
+        raised_by.append(ESCALATORS[e])
+    level = LEVELS[min(rank, len(LEVELS) - 1)]
+
+    width_text = f"{width_mm:g} mm wide" + (f" (up to {upper:g} mm)" if width_uncertainty_mm else "")
+    reason = f"{PATTERN_NAMES[pattern]} in a {ELEMENTS[element]}, {width_text}, {BAND_NAMES[band]} band: {level}"
+    reason += f"; raised because {', '.join(raised_by)}." if raised_by else "."
     return _result(level, reason)
 
 
-def triage(pattern: str, width_mm: float, confidence: float, image_ok: bool, **material) -> str:
+def triage(pattern: str, element: str, width_mm: float, confidence: float, image_ok: bool, **kwargs) -> str:
     """Return Low, Medium, High, 'Retake' or 'Expert needed'."""
-    return assess(pattern, width_mm, confidence, image_ok, **material).level
+    return assess(pattern, element, width_mm, confidence, image_ok, **kwargs).level

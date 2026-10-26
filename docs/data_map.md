@@ -51,7 +51,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | Find crack pixels (U-Net) | **Yes** | CrackSeg9k and crack-seg: about 13,000 images with crack outlines | Plaster and brick walls of homes are rare in them | Pre-train on these, fine-tune on our own photos |
 | Detect cracks (YOLO) | **Yes, for cracks** | Darbhanga crack boxes on brick walls, crack-seg polygons | Boxes for the element (column, beam, slab, wall) | Draw element boxes on our own photos |
 | Crack or no crack | **Yes** | METU, Strathclyde, SDNET2018: over 90,000 images | Smooth plaster walls of homes | Our pilot photos |
-| Crack pattern (5 classes) | **No** | No dataset uses our five patterns | Labels | Label a few hundred images by hand (number: assumption, to set when we start) |
+| Crack pattern (7 classes) | **No** | No dataset uses our seven patterns | Labels | Label a few hundred images by hand (number: assumption, to set when we start) |
 | Width in mm | **No** | Nothing public has a coin or any scale | Photos with a coin and a known width | Pilot photos with the crack-width card |
 | Low / Medium / High | **No** | Haiti and Nepal rate whole buildings, after an earthquake | A rating per crack, by an engineer | Our photos rated by Engineers Without Borders and the structural engineer |
 | Proof that the tool works (3 Dec baseline) | **No** | Nothing | Held-out photos rated per crack, plus an engineer's photo-only rating | Same as above; at least 30 High cases (`spec/features/evaluation.md`) |
@@ -69,7 +69,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | YOLO detector | Bounding boxes for element (column, beam, slab, brick wall) and crack | Cracks only: crack-seg polygons [33], Darbhanga crack boxes [30], CODEBRIM defect boxes [28]; PHI-Net has component type as a class only [26] | No public set has element boxes; draw them on our own photos |
 | U-Net segmenter | Pixel masks of cracks | CrackSeg9k [25]; crack-seg polygons converted to masks [33]; Dais et al. masonry masks [31] | Few columns and beams |
 | Measurement | Crack width in mm with a coin for scale | Pilot photos with a crack-width card, planned | Nothing public has a scale reference |
-| Pattern model | Labels for the 5 patterns (`spec/decisions.md` D1) | Partly: SDNET2018 crack / no crack [22]; PHI-Net damage type [26]; CODEBRIM spalling, exposed bars, corrosion stains for `spalling_rust` [28]; Darbhanga brick masonry cracks [30] | Nobody uses our labels; needs a mapping, then our own labels |
+| Pattern model | Labels for the 7 reinforced-concrete patterns (`spec/features/risk_matrix.md`) | Partly: SDNET2018 crack / no crack [22]; PHI-Net damage type [26]; CODEBRIM spalling, exposed bars, corrosion stains for `spalling_exposed_bar` [28]; Darbhanga brick masonry cracks [30] | Nobody uses our labels; needs a mapping, then our own labels |
 | Agent (building data) | Construction type, age, footprint | Candidates in section 2 | Source not chosen; access not agreed |
 | Triage rules | Signed-off matrix and thresholds | Illustrative matrix (`spec/features/triage.md`) | Engineer sign-off (Phase 1) |
 | Evaluation | On-site engineer rating per crack (ground truth) and an engineer's photo-only rating (baseline) | Nothing yet | Engineering partner (`spec/features/evaluation.md`) |

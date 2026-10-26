@@ -87,3 +87,8 @@ We call it human-in-the-loop learning, not reinforcement learning: it is supervi
 
 ## D19 (2026-10-26): every result carries confidence, not only a colour
 Each stage reports its output with a confidence: material, crack found, width in mm with an uncertainty range, pattern probability, and an overall confidence with the level. Full list in `spec/features/pipeline.md`.
+
+## D20 (2026-10-26): risk matrix v2, with elements, warning signs and next steps
+The matrix now has three parts: a base level from seven reinforced-concrete patterns x four width bands; element criticality (a column raises one level); and seven warning signs that can only raise the level (growing, rust staining, sticking openings, recent earthquake, added floors: +1; offset and sagging: straight to High). The width used is the upper end of the measurement. Every result adds a next step with a recheck interval. The values live in `src/triage/risk_matrix_v2.json` (version 2.0-illustrative), readable and editable by an engineer; each change is a new version recorded here.
+Supersedes D1 (five patterns): surface map cracking replaces plaster crazing; vertical wall crack and column-or-beam are replaced by the element axis and by flexural, horizontal-column, along-bar and joint patterns.
+Calibration plan in `spec/features/risk_matrix.md`: literature anchors (to verify in the sources), a sense check on the Haiti definitions, an engineer card session, a test on engineer-rated photos, and versioning. All values stay illustrative until then.

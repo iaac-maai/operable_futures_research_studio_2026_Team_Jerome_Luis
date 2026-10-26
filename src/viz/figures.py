@@ -16,7 +16,8 @@ from matplotlib.patches import FancyBboxPatch, Patch
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from triage.matrix import BAND_NAMES, MATRIX, PATTERN_NAMES, PATTERNS
+from triage.matrix import (_ESCALATOR_EFFECT, BAND_NAMES, BANDS, ELEMENT_RAISE, ELEMENTS, ESCALATORS, MATRIX,
+                           PATTERN_NAMES, PATTERNS, VERSION)
 
 # Palette: reference instance of the dataviz skill (light mode).
 SURFACE, INK, INK_2, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9"
@@ -126,8 +127,9 @@ def decision_flow():
     q_fill, q_edge = "#f0efec", MUTED
     _box(ax, 0, 6.6, 3.8, 1, "1  Image usable?\nblur, light, coin visible", q_fill, q_edge)
     _box(ax, 0, 4.8, 3.8, 1, "2  Reinforced concrete?\nmaterial confidence ≥ 0.8", q_fill, q_edge)
-    _box(ax, 0, 3.0, 3.8, 1, "3  Pattern known, confidence ≥ 0.8,\nwidth measured?", q_fill, q_edge)
-    _box(ax, 0, 1.2, 3.8, 1, "Look up pattern × width\nrisk matrix (illustrative)", q_fill, q_edge)
+    _box(ax, 0, 3.0, 3.8, 1, "3  Element and pattern known and fit,\nconfidence ≥ 0.8, width measured?", q_fill, q_edge)
+    _box(ax, 0, 1.2, 3.8, 1, "Matrix v2: pattern × width (upper end),\nthen element and warning signs raise", q_fill,
+         q_edge, size=9)
     _box(ax, 5.4, 6.6, 2.8, 1, "Retake", LEVEL["Retake"], LEVEL["Retake"], color="white", weight="bold")
     _box(ax, 5.4, 4.8, 2.8, 1, "Expert needed\nmaterial not supported\nor unclear", LEVEL["Expert needed"],
          LEVEL["Expert needed"], color="white", weight="bold", size=9)
@@ -156,27 +158,48 @@ def decision_flow():
 
 
 def risk_matrix():
-    fig, ax = plt.subplots(figsize=(10, 4.6))
-    bands = list(MATRIX)
-    for r, band in enumerate(bands):
-        for c, pattern in enumerate(PATTERNS):
-            lvl = MATRIX[band][c]
-            ax.add_patch(FancyBboxPatch((c + 0.04, r + 0.06), 0.92, 0.88, boxstyle="round,pad=0,rounding_size=0.06",
+    """Matrix v2: base level per pattern x width band, plus what can raise it (read from risk_matrix_v2.json)."""
+    fig = plt.figure(figsize=(15, 7.2))
+    ax = fig.add_axes([0.2, 0.12, 0.47, 0.66])
+    for r, pattern in enumerate(PATTERNS):
+        for c, band in enumerate(BANDS):
+            lvl = MATRIX[band][r]
+            ax.add_patch(FancyBboxPatch((c + 0.04, r + 0.07), 0.92, 0.86, boxstyle="round,pad=0,rounding_size=0.06",
                                         facecolor=LEVEL[lvl], edgecolor="none"))
-            ax.text(c + 0.5, r + 0.5, lvl, ha="center", va="center", weight="bold",
+            ax.text(c + 0.5, r + 0.5, lvl, ha="center", va="center", weight="bold", fontsize=10.5,
                     color=ON_FILL.get(lvl, "white"))
-    ax.set_xlim(0, len(PATTERNS))
-    ax.set_ylim(len(bands), 0)
-    ax.set_xticks([c + 0.5 for c in range(len(PATTERNS))], [PATTERN_NAMES[p] for p in PATTERNS])
-    ax.set_yticks([r + 0.5 for r in range(len(bands))], [BAND_NAMES[b] for b in bands])
+    ax.set_xlim(0, len(BANDS))
+    ax.set_ylim(len(PATTERNS), 0)
+    ax.set_xticks([c + 0.5 for c in range(len(BANDS))], [BAND_NAMES[b] for b in BANDS], fontsize=10.5)
+    ax.set_yticks([r + 0.5 for r in range(len(PATTERNS))], [PATTERN_NAMES[p] for p in PATTERNS], fontsize=10.5)
     ax.xaxis.tick_top()
     ax.tick_params(length=0)
     for s in ax.spines.values():
         s.set_visible(False)
-    fig.suptitle("Risk matrix for reinforced concrete: crack width × pattern", x=0.02, ha="left", fontsize=14, weight="bold")
-    fig.text(0.02, 0.02, "Read from src/triage/matrix.py. Illustrative thresholds, to be calibrated with a "
-             "structural engineer. Boundary widths go to the wider band.", fontsize=9, color=INK_2)
-    fig.subplots_adjust(left=0.13, right=0.98, top=0.8, bottom=0.1)
+    ax.text(len(BANDS) / 2, -0.75, "Crack width (upper end of the measurement)", ha="center", fontsize=10, color=INK_2)
+
+    side = fig.add_axes([0.71, 0.12, 0.27, 0.66])
+    side.set_axis_off()
+    side.set_xlim(0, 1)
+    side.set_ylim(0, 1)
+    side.text(0, 0.98, "What raises the level (never lowers it)", fontsize=11.5, weight="bold", va="top")
+    lines = [(f"It is a {ELEMENTS[e]}", f"+{n}") for e, n in ELEMENT_RAISE.items() if n]
+    lines += [(name[0].upper() + name[1:], "to High" if effect == "High" else effect)
+              for name, effect in ((ESCALATORS[k], _ESCALATOR_EFFECT[k]) for k in ESCALATORS)]
+    for i, (text, effect) in enumerate(lines):
+        y = 0.86 - i * 0.092
+        side.add_patch(FancyBboxPatch((0, y - 0.035), 0.17, 0.07, boxstyle="round,pad=0,rounding_size=0.02",
+                                      facecolor="#f0efec" if effect != "to High" else LEVEL["High"], edgecolor="none"))
+        side.text(0.085, y, effect, ha="center", va="center", fontsize=9.5, weight="bold",
+                  color=INK if effect != "to High" else "white")
+        side.text(0.2, y, text, va="center", fontsize=9.8, color=INK)
+    side.text(0, 0.03, "Levels stop at High. Any doubt (photo, material,\nelement, pattern, width) goes to Expert needed.",
+              fontsize=9, color=INK_2, va="bottom")
+
+    fig.suptitle(f"Risk matrix for reinforced concrete, v{VERSION}", x=0.02, ha="left", fontsize=14, weight="bold")
+    fig.text(0.02, 0.905, "Base level from crack pattern × width; the element and warning signs can only raise it. "
+             "All values illustrative until calibrated with the engineering partners. Source: src/triage/risk_matrix_v2.json",
+             fontsize=10, color=INK_2)
     return fig
 
 
@@ -437,7 +460,7 @@ PLAN = [
     ("Deliverables", "Blog post", 8, 9, False),
     ("Data", "Quality gate on public sets (done)", 1, 1, False),
     ("Data", "Material check: concrete vs not, first test", 1, 1, False),
-    ("Data", "Map public labels to the 5 patterns", 2, 3, False),
+    ("Data", "Map public labels to the 7 patterns", 2, 3, False),
     ("Pilot", "Collect pilot photos (~30 cracks)", 2, 2, False),
     ("Pilot", "Prepare, label, tune quality gate", 2, 3, False),
     ("Pilot", "Coin + width measurement (1st feature)", 3, 4, False),
