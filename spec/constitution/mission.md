@@ -1,6 +1,6 @@
 # Mission
 
-Second Look: a second look at a crack, before it is too late.
+Second Look is a human-in-the-loop triage system for cracks in reinforced concrete. It checks the photo and the material, finds and measures the crack in millimetres, classifies its pattern, and applies written, auditable risk rules, returning a level with its confidence. An engineer confirms every High and every referral, and their corrections retrain the models. It never issues a safety clearance.
 
 ## Problem
 In dense, ageing neighbourhoods, residents see cracks every day but cannot tell a harmless one from a sign of structural failure.

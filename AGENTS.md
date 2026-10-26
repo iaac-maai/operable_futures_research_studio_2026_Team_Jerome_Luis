@@ -1,7 +1,7 @@
 # AGENTS.md: system constitution
 
 ## Project
-Second Look: phone-photo triage (Low, Medium, High) of cracks in structural elements of buildings that nobody inspects.
+Second Look is a human-in-the-loop triage system for cracks in reinforced concrete. It checks the photo and the material, finds and measures the crack in millimetres, classifies its pattern, and applies written, auditable risk rules, returning a level with its confidence. An engineer confirms every High and every referral, and their corrections retrain the models. It never issues a safety clearance. Context: buildings in informal neighbourhoods that nobody inspects.
 Read `spec/constitution/mission.md`, `roadmap.md` and `tech_stack.md` before changing anything.
 
 ## Non-negotiable rules

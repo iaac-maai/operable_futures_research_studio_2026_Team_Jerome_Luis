@@ -1,6 +1,6 @@
 # Second Look
 
-A second look at cracks in buildings nobody inspects. Phone photo in, risk level out, engineer confirms every High.
+Second Look is a human-in-the-loop triage system for cracks in reinforced concrete. It checks the photo and the material, finds and measures the crack in millimetres, classifies its pattern, and applies written, auditable risk rules, returning a level with its confidence. An engineer confirms every High and every referral, and their corrections retrain the models. It never issues a safety clearance.
 
 IAAC Barcelona, MaAI, Research Studio "Operable Futures", 2026-27.
 Team: Jerome Eid (@jeromgeid-ui), Luis Sebastian Wulf (@wulfluis).
