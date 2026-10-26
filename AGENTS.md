@@ -36,7 +36,7 @@ Every output carries a one-sentence reason. Never output "safe", a clearance or 
 
 ## Map
 - `spec/constitution/`: mission, roadmap, tech stack. `spec/features/`: one spec per feature. `spec/decisions.md`: decisions log.
-- `docs/`: segmentation tree, data map (ranked by fit to the concept), sources, experiments, weekly to-do.
+- `docs/`: segmentation tree, data map (ranked by fit to the concept), sources, experiments, literature notes (reference thesis: `docs/literature/corres_sojo_2024.md`), weekly to-do.
 - `src/triage/matrix.py`: risk matrix and decision rules. `src/triage/evaluate.py`: confusion tables and metrics.
 - `src/quality/gate.py`: photo quality gate. `src/pilot/prepare.py`: strips photo metadata. `src/experiments/`: tests on real data. `src/viz/figures.py`: figures.
 - `branding/logos/`: logo ideas. `data/`: local datasets, never committed.

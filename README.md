@@ -46,7 +46,7 @@ Public crack data is mostly concrete and pavement.
 - `AGENTS.md`: system constitution for coding agents
 - `spec/constitution/`: mission, roadmap, tech stack
 - `spec/features/`: triage and evaluation specs; `spec/decisions.md`: decisions log
-- `docs/`: segmentation tree, data map, sources, experiments, weekly to-do (`docs/weekly_todo.md`)
+- `docs/`: segmentation tree, data map, sources, experiments, literature notes (`docs/literature/`), weekly to-do (`docs/weekly_todo.md`)
 - `src/triage/`: risk matrix, decision logic and evaluation tables
 - `tests/`: tests (the comparison against the non-AI baseline runs once engineer-labelled photos exist)
 - `notebook/`, `figures/`, `models/`, `data/`: notebooks, plots, model files, local data (large files are not committed)

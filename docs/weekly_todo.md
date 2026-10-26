@@ -17,6 +17,7 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 - [x] Pipeline v2 specified: material check, confidence on every result, engineer review, human-in-the-loop learning (C, 26 Oct)
 - [x] Figures updated: pipeline, decision flow, matrix, tree, data coverage, timeline (C, 26 Oct)
 - [ ] Material check: concrete vs not concrete, first training test (C, Tue 27 Oct)
+- [x] Reference thesis read; notes and proposed features in `docs/literature/corres_sojo_2024.md` (C, 26 Oct)
 - [ ] State-of-the-art review based on the reference thesis (C drafts Wed 28 Oct, J + L correct)
 - [ ] Engineer review screen mock-up and one-page pitch (C, Fri 30 Oct to Sun 1 Nov)
 - [ ] Send the expert package to the professor (J + L, Mon 2 Nov)

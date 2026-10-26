@@ -47,3 +47,10 @@ Numbered as in the 22 Oct 2026 presentation. [25] to [27] added for the data map
 43. Monical, Building Surveys after Earthquakes (2020), DataCenterHub, doi:10.7277/368Q-T523: https://datacenterhub.org/landingpages/137/137_LandingPage.html
 44. Seyedzadeh, Katsigiannis, Agapiou, Ramzan, Brickwork Cracks Dataset v1.0 (2023), Zenodo, doi:10.5281/zenodo.8014150: https://zenodo.org/records/8014150
 45. DataCenterHub archive, NEES and post-NEES databases (maintained by the University of Canterbury), checked 25 Oct 2026: https://datacenterhub.org/post-nees.html
+46. Corres Sojo E., Contributions to rebar-to-concrete interaction and its structural implications for design and monitoring applications, PhD thesis 10772, EPFL, 2024, doi:10.5075/epfl-thesis-10772: https://infoscience.epfl.ch/entities/publication/5a575d6b-4aa2-463f-a697-bcd0ffeda140
+47. Rezaie A., Achanta R., Godio M., Beyer K., Comparison of crack segmentation using digital image correlation measurements and deep learning, Construction and Building Materials 261, 2020 (code: https://github.com/amirrezaie1415/Concrete-Crack-Segmentation), as cited in [46]
+48. Pantoja-Rosero B. G., dos Santos K. R. M., Achanta R., Rezaie A., Beyer K., Determining crack kinematics from imaged crack patterns, Construction and Building Materials 343, 2022 (code: https://github.com/eesd-epfl/crack_kinematics), as cited in [46]
+49. Özgenel Ç. F., Concrete Crack Segmentation Dataset, Mendeley Data, 2019: https://data.mendeley.com/datasets/jwsn7tfbrp/1, as cited in [46] (not yet checked)
+50. Zaborac J., Athanasiou A., Salamone S., Bayrak O., Hrynyk T. D., Evaluation of Structural Cracking in Concrete, Center for Transportation Research, University of Texas at Austin, FHWA/TX-19/0-6919-1, 2019, as cited in [46]
+51. OFROU, Directive ASTRA 62016: Guide pour les inspecteurs d'ouvrages d'art, Office fédéral des routes, 2021, as cited in [46]
+52. DGC, Guía para la realización de inspecciones principales de obras de paso en la Red de Carreteras del Estado, Ministerio de Fomento, 2012, as cited in [46]
