@@ -1295,6 +1295,11 @@ def pipeline_flow():
     for oy in (71.0, 67.7):
         line([(112.3, oy), (117.8, oy)], head=False, dot=False)
     line([(117.8, 71.0), (117.8, 61.8), (6.2, 61.8), (6.2, 46.0), (7.0, 46.0)], lw=2.4, dot=False)
+    # the same visit also photographs every cracked element and every crack
+    lane_y = {code: y for y, code, *_ in FLOW_LANES}
+    ax.plot([6.2, 6.2], [46.0, lane_y["P"] + 0.9], color=FLOW_TEXT, lw=2.4, zorder=2)
+    line([(6.2, lane_y["O"]), (7.0, lane_y["O"])], lw=2.4, dot=False)
+    line([(6.2, lane_y["P"] + 0.9), (7.0, lane_y["P"] + 0.9)], lw=2.4, dot=False)
     label(62.0, 60.7, "V1 OR V2: A FIELD WORKER VISITS with a reliable phone and the scale card, and photographs "
           "the building once, every cracked element and every crack  (also 1 in 10 V3 reports, as an audit)",
           size=10.5, weight="bold")
@@ -1362,7 +1367,7 @@ def pipeline_flow():
           "a reviewed decision", size=10.5, weight="bold")
     # monitoring loop: the resident's recheck date brings the same crack back
     my = 7.9
-    line([(115.6, yP - 2.5), (115.6, my), (5.6, my), (5.6, yP), (7.0, yP)], ls="--", dot=False)
+    line([(115.6, yP - 2.5), (115.6, my), (4.4, my), (4.4, yP - 0.9), (7.0, yP - 0.9)], ls="--", dot=False)
     label(63.5, my - 1.8, "MONITORING LOOP: on the recheck date (Category 1: 6 months, Category 2: 1 month) the same crack ID "
           "and stickers are photographed again, with the last photo as an overlay\ngrowth larger than the measurement "
           "uncertainty raises the crack level, and through it the building risk score", size=10.5, weight="bold")
