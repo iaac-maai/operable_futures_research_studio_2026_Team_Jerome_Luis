@@ -44,6 +44,12 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 "Accepted" counts cracked and uncracked images together (up to 2,000 per group, last run on 25 Oct 2026); the split is in `docs/experiments/2026-10-25_quality_gate_first_test.md`. A low share means the gate struggles with that surface (smooth plaster and concrete, D12), not that the data is bad.
 
+### Every dataset we hold, side by side (27 Oct 2026)
+
+![Every dataset we hold, compared](../figures/10_dataset_comparison.png)
+
+One row per dataset (one per PHI-Net task), in order of fit: images on our disk, share accepted by the quality gate, the labels it gives, what it can train in our pipeline, and the licence. PHI-Net images were not put through the gate: they are 224 x 224 px crops, smaller than the gate's 512 px working size. Details of PHI-Net on our disk are in section 6.
+
 ## 0b. What we can train now, and what we cannot (25 Oct 2026)
 
 | Step | Enough data now? | What we have | What is missing | How we get it |
@@ -149,6 +155,30 @@ What is downloaded on Jerome's PC as of 25 Oct 2026. Anyone else downloads from 
 | `strathclyde-brickwork/` | Brickwork cracks [44] | 19 MB | 700 | MD5 matches Zenodo |
 | `crackseg9k/` | CrackSeg9k Vol1 [25] | 1.5 GB | not extracted | MD5 matches Dataverse |
 | `haiti2010/` | Haiti Earthquake Database [41] | 12 GB extracted (broken zip deleted) | 4,450 photos (1,041 linked to a building rating); spreadsheet of 183 buildings | Partial zip, every recovered file CRC-checked |
+| `phinet/` | PHI-Net, 8 tasks [53][54][55] | see below | see below | Zip sizes match the server |
 | `nepal2015/` | Nepal 2015 surveys [42] | - | not downloaded | Nepal folder to download in a browser |
 
 Run the real-data test on all of them: `py src/experiments/real_data_quality.py data/raw/crack-seg data/raw/darbhanga data/raw/metu data/raw/sdnet2018 data/raw/strathclyde-brickwork --per-group 2000`.
+
+### PHI-Net on our disk (27 Oct 2026)
+
+`data/raw/phinet/zips/` holds the ten task zips as downloaded from the PEER download page [55] (`task1` and `task2` come in two parts). `py -I src/experiments/phinet_prepare.py data/raw/phinet/zips data/raw/phinet` turns each into `data/raw/phinet/<task>/` with:
+- `X_train.npy`, `X_test.npy`: 224 x 224 RGB images as uint8. The zips store float32 BGR with the ImageNet mean subtracted (VGG preprocessing); the script undoes it, losslessly after rounding, which cuts the size by four.
+- `y_train.npy`, `y_test.npy`: class numbers (the zips store one-hot rows).
+- `README.txt` (label codes) and `license.txt` (CC BY-NC-SA 4.0, research use only, D6).
+- `data/raw/phinet/samples/<task>_<split>.png`: six random images per class, to look at before training. They stay in `data/`, never on GitHub.
+
+| Task | Classes (code: name) | Train | Test | Train per class | Use for us |
+|---|---|---|---|---|---|
+| 1 scene level (2 parts) | pixel / object / structural | downloading | | | Scene check (S, O, P) |
+| 2 damage state (2 parts) | damaged / undamaged | downloading | | | Crack or no crack |
+| 3 spalling | 0 non-spalling, 1 spalling | 6,898 | 837 | 4,294 / 2,604 | Pattern: spalling |
+| 4 material | 0 other materials, 1 steel | 8,312 | 979 | 6,506 / 1,806 | Not the material model: steel vs other, not concrete vs brick |
+| 5 collapse mode | non-collapse / partial / global | downloading | | | Building reading (S) |
+| 6 component | 0 beam, 1 column, 2 others, 3 wall | 4,755 | 579 | 511 / 1,618 / 358 / 2,268 | Element model; no slab class |
+| 7 damage level | 0 heavy, 1 minor, 2 moderate, 3 undamaged | 4,138 | 498 | 919 / 869 / 799 / 1,551 | Second opinion only |
+| 8 damage type | 0 combined, 1 flexural, 2 undamaged, 3 shear | 4,093 | 492 | 1,193 / 476 / 1,598 / 826 | Pattern model |
+
+Counts are from the npy files, not the paper.
+
+What we saw in the sample sheets: PHI-Net mixes real buildings, close-ups and laboratory test specimens, and its spalling and damage classes include brick walls, and its column class includes timber columns. Before training for our concrete-only scope (D17), we filter or relabel by hand; the size of that filtered set is not known yet.

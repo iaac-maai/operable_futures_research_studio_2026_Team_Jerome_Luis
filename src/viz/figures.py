@@ -665,6 +665,95 @@ def timeline():
     return fig
 
 
+# Every dataset on our disk (docs/data_map.md, sections 0 and 6), in order of fit to the concept (D14).
+# (name, fit, images on disk or None, quality-gate pass % or None, labels it gives, what it trains, licence).
+# Gate %: data/processed/real_data_quality.csv (25 Oct 2026). PHI-Net counts: train + test from the npy files [53][55].
+HELD = [
+    ("Haiti 2010 survey", "high", 4_450, 95, "engineer rating per building:\nlight / moderate / severe (183)",
+     "building risk score evidence,\nsanity check of levels", "not stated"),
+    ("PHI-Net t1 scene level", "medium", None, None, "pixel / object / structural", "scene check (S, O, P)",
+     "CC BY-NC-SA 4.0"),
+    ("PHI-Net t2 damage state", "medium", None, None, "damaged / undamaged", "crack or no crack", "CC BY-NC-SA 4.0"),
+    ("PHI-Net t3 spalling", "medium", 7_735, None, "spalling / none", "pattern: spalling", "CC BY-NC-SA 4.0"),
+    ("PHI-Net t4 material", "medium", 9_291, None, "steel / other\n(not concrete vs brick)", "not the material model",
+     "CC BY-NC-SA 4.0"),
+    ("PHI-Net t5 collapse mode", "medium", None, None, "none / partial / global collapse", "building reading (S)",
+     "CC BY-NC-SA 4.0"),
+    ("PHI-Net t6 component", "medium", 5_334, None, "beam / column / wall / other", "element model",
+     "CC BY-NC-SA 4.0"),
+    ("PHI-Net t7 damage level", "medium", 4_636, None, "undamaged / minor /\nmoderate / heavy",
+     "second opinion only", "CC BY-NC-SA 4.0"),
+    ("PHI-Net t8 damage type", "medium", 4_585, None, "undamaged / flexural /\nshear / combined",
+     "pattern model", "CC BY-NC-SA 4.0"),
+    ("Darbhanga brick masonry", "medium", 4_259, 76, "crack boxes on brick walls", "crack detector", "CC BY 4.0"),
+    ("Strathclyde brick facades", "medium", 700, 100, "crack / no crack", "crack or no crack, material",
+     "CC BY 4.0"),
+    ("METU building concrete", "low", 40_000, 20, "crack / no crack", "crack or no crack, material", "CC BY 4.0"),
+    ("SDNET2018 walls", "low", 18_138, 16, "crack / no crack", "crack or no crack", "CC BY 4.0"),
+    ("crack-seg (Ultralytics)", "low", 4_029, 97, "crack outlines (polygons)", "crack segmentation",
+     "Public Domain"),
+    ("CrackSeg9k Vol1", "low", None, None, "crack pixel masks", "crack segmentation", "CC0"),
+    ("SDNET2018 pavement", "off-concept", 24_334, 87, "crack / no crack", "nothing (roads)", "CC BY 4.0"),
+    ("SDNET2018 bridge decks", "off-concept", 13_620, 19, "crack / no crack", "nothing (bridges)", "CC BY 4.0"),
+]
+FIT_FILL = {"high": SEQ["covered"], "medium": SEQ["partial"], "low": SEQ["planned"], "off-concept": SURFACE}
+HELD_MISSING = {"PHI-Net": "downloading", "CrackSeg9k": "zip not extracted"}
+
+
+def dataset_comparison():
+    n = len(HELD)
+    fig, ax = plt.subplots(figsize=(19, 0.62 * n + 2.6))
+    # x layout: name | fit | images bar | gate bar | labels | trains | licence
+    x_fit, x_img, w_img, x_gate, w_gate, x_lab, x_use, x_lic, x_end = 3.3, 4.6, 3.0, 8.3, 1.6, 10.6, 13.6, 16.4, 18.2
+    top = 40_000
+    heads = [(0, "Dataset", "left"), (x_fit, "Fit", "left"), (x_img, "Images on our disk", "left"),
+             (x_gate, "Pass the quality gate", "left"), (x_lab, "Labels it gives", "left"),
+             (x_use, "What it can train for us", "left"), (x_lic, "Licence", "left")]
+    for x, h, ha in heads:
+        ax.text(x, -0.75, h, ha=ha, va="center", fontsize=10, weight="bold", color=INK)
+    for r, (name, fit, images, gate, labels, use, licence) in enumerate(HELD):
+        if r and HELD[r - 1][1] != fit:
+            ax.axhline(r - 0.5, color=INK_2, lw=0.9)
+        elif r:
+            ax.axhline(r - 0.5, color=GRID, lw=0.6)
+        ax.text(0, r, name, va="center", fontsize=10, color=INK)
+        ax.add_patch(FancyBboxPatch((x_fit, r - 0.2), 1.05, 0.4, boxstyle="round,pad=0,rounding_size=0.08",
+                                    facecolor=FIT_FILL[fit], edgecolor=GRID if fit == "off-concept" else "none"))
+        ax.text(x_fit + 0.525, r, fit, ha="center", va="center", fontsize=8.5,
+                color="white" if fit in ("high", "medium") else INK)
+        missing = next((v for k, v in HELD_MISSING.items() if name.startswith(k)), "not on disk")
+        if images is None:
+            ax.text(x_img, r, missing, va="center", fontsize=9, color=MUTED, style="italic")
+        else:
+            w = w_img * min(images, top) / top
+            ax.add_patch(FancyBboxPatch((x_img, r - 0.17), w, 0.34, boxstyle="round,pad=0,rounding_size=0.04",
+                                        facecolor=BLUE, edgecolor="none"))
+            ax.text(x_img + w + 0.08, r, f"{images:,}", va="center", fontsize=9.5, color=INK)
+        if gate is None:
+            ax.text(x_gate, r, "not run" if images is None or "PHI" not in name else "not run (224 px crops)",
+                    va="center", fontsize=9, color=MUTED, style="italic")
+        else:
+            ax.add_patch(FancyBboxPatch((x_gate, r - 0.17), w_gate, 0.34, boxstyle="round,pad=0,rounding_size=0.04",
+                                        facecolor=GRID, edgecolor="none"))
+            ax.add_patch(FancyBboxPatch((x_gate, r - 0.17), w_gate * gate / 100, 0.34,
+                                        boxstyle="round,pad=0,rounding_size=0.04", facecolor=BLUE, edgecolor="none"))
+            ax.text(x_gate + w_gate + 0.08, r, f"{gate}%", va="center", fontsize=9.5, color=INK)
+        ax.text(x_lab, r, labels, va="center", fontsize=8.8, color=INK_2, linespacing=1.05)
+        ax.text(x_use, r, use, va="center", fontsize=8.8, color=INK, linespacing=1.05)
+        ax.text(x_lic, r, licence, va="center", fontsize=8.8, color=INK_2)
+    ax.set_xlim(-0.1, x_end)
+    ax.set_ylim(n - 0.4, -1.2)
+    ax.set_axis_off()
+    fig.suptitle("Every dataset we hold, compared: fit to informal buildings, size, quality, labels, use",
+                 x=0.01, ha="left", fontsize=14, weight="bold")
+    fig.text(0.01, 1 - 0.95 / fig.get_figheight(),
+             "Ordered by fit to the concept (D14). Image bars capped at 40,000. Low gate rates on METU and SDNET "
+             "come from smooth concrete read as blur (open issue D12), not from bad photos. PHI-Net is post-earthquake "
+             "damage, research use only. Sources: docs/data_map.md, sections 0 and 6.", fontsize=9.5, color=INK_2)
+    fig.subplots_adjust(left=0.01, right=0.99, top=1 - 1.5 / fig.get_figheight(), bottom=0.02)
+    return fig
+
+
 FIGURES = {
     "01_pipeline.png": pipeline,
     "02_decision_flow.png": decision_flow,
@@ -674,6 +763,7 @@ FIGURES = {
     "06_dataset_sizes.png": dataset_sizes,
     "07_confusion_template.png": confusion_template,
     "09_timeline.png": timeline,
+    "10_dataset_comparison.png": dataset_comparison,
 }
 
 
