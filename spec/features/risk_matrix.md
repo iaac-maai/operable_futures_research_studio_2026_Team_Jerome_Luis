@@ -39,15 +39,15 @@ Lower bound inclusive: `under_0.3` [0, 0.3), `0.3_to_1` [0.3, 1), `1_to_3` [1, 3
 ## Base levels: pattern x width band (illustrative, unchanged from v2)
 | Pattern | under 0.3 mm | 0.3 to 1 mm | 1 to 3 mm | over 3 mm |
 |---|---|---|---|---|
-| surface map cracking | Low | Low | Medium | Medium |
-| flexural crack | Low | Medium | High | High |
-| diagonal shear crack | Medium | High | High | High |
-| crack along a bar | Medium | Medium | High | High |
-| horizontal crack in a column | Medium | High | High | High |
-| spalling with exposed bar | Medium | High | High | High |
-| beam-column joint crack | Medium | High | High | High |
+| surface map cracking | Category 1 | Category 1 | Category 2 | Category 2 |
+| flexural crack | Category 1 | Category 2 | Category 3 | Category 3 |
+| diagonal shear crack | Category 2 | Category 3 | Category 3 | Category 3 |
+| crack along a bar | Category 2 | Category 2 | Category 3 | Category 3 |
+| horizontal crack in a column | Category 2 | Category 3 | Category 3 | Category 3 |
+| spalling with exposed bar | Category 2 | Category 3 | Category 3 | Category 3 |
+| beam-column joint crack | Category 2 | Category 3 | Category 3 | Category 3 |
 
-## Raises (only raise, never lower; capped at High)
+## Raises (only raise, never lower; capped at Category 3)
 **Element:** column +1 (a column carries everything above it).
 
 **Location on the element (new):**
@@ -68,8 +68,8 @@ Lower bound inclusive: `under_0.3` [0, 0.3), `0.3_to_1` [0.3, 1), `1_to_3` [1, 3
 | `thin_cover` **(new)** | where the bar is exposed: cover under about one bar diameter (measured on the scale card), or no stirrups visible | +1 | [46] ch. 2.3.3 (cover of 1 bar diameter: brittle failure), ch. 3.2 (thin cover and no stirrups: brittle splitting) |
 | `crossing_bar_crack` **(new)** | the crack meets a crack running along a bar or stirrup | +1 | [46] ch. 4.4 (cracks along stirrups lower the bond) |
 | `damp` **(new)** | damp, water marks or moss at the crack | +1 | assumption: [46] ch. 6.2 lists these signs as not yet evaluated; code exposure classes (Eurocode 2) not yet read |
-| `offset` | one side of the crack displaced; measured: sliding larger than its uncertainty (±2 px at ≥ 3 px across [46] ch. 5.2) | straight to High | v2; [46] ch. 5.1 |
-| `sagging` | visible sagging of a beam or slab | straight to High | v2 |
+| `offset` | one side of the crack displaced; measured: sliding larger than its uncertainty (±2 px at ≥ 3 px across [46] ch. 5.2) | straight to Category 3 | v2; [46] ch. 5.1 |
+| `sagging` | visible sagging of a beam or slab | straight to Category 3 | v2 |
 
 An unknown warning sign or location is a programming error, not a guess. Each sign counts once.
 
@@ -83,16 +83,16 @@ An unknown warning sign or location is a programming error, not a guess. Each si
 2. Material not concrete, or unsure: Expert needed.
 3. Unknown element, unknown pattern, pattern not allowed on the element, pattern confidence below threshold, or width not measurable: Expert needed.
 4. Base level from pattern x band (upper end of the width).
-5. Element, then location, then warning signs raise it; cap at High.
+5. Element, then location, then warning signs raise it; cap at Category 3.
 
 ## Output
-Level, one-sentence reason (pattern, element, width with its upper end, band, and everything that raised the level), engineer-review flag (High and Expert needed), and a next step:
+Level, one-sentence reason (pattern, element, width with its upper end, band, and everything that raised the level), engineer-review flag (Category 3 and Expert needed), and a next step:
 
 | Level | Next step (illustrative intervals) |
 |---|---|
-| Low | Routine monitoring: photograph the same crack again in 6 months. |
-| Medium | Low-cost advice; photograph the same crack again in 1 month. If it has grown, it goes to an engineer. |
-| High | An engineer must confirm; the case is sent now. |
+| Category 1 | Routine monitoring: photograph the same crack again in 6 months. |
+| Category 2 | Low-cost advice; photograph the same crack again in 1 month. If it has grown, it goes to an engineer. |
+| Category 3 | An engineer must confirm; the case is sent now. |
 | Expert needed | An engineer decides; the case is sent now. |
 | Retake | Retake the photo following the protocol. |
 
@@ -102,17 +102,17 @@ Level, one-sentence reason (pattern, element, width with its upper end, band, an
 ## What we need from the engineer (in order of importance)
 **A. Values to set** (one card session, about 1 hour; see the calibration plan):
 1. **Width band edges** (0.3, 1, 3 mm): right for reinforced concrete homes? Different per pattern?
-2. **Base level of each pattern x band** (28 cells), and which patterns are **brittle**, so High even when narrow.
+2. **Base level of each pattern x band** (28 cells), and which patterns are **brittle**, so Category 3 even when narrow.
 3. **Element weights:** column +1 only? A load-bearing wall, a beam over an open ground floor?
 4. **End zone:** how long (one element depth? two?), which patterns it raises (along a bar, diagonal shear, horizontal crack in a column?).
-5. **Thin cover / no stirrups:** is "cover under one bar diameter" the right line? +1, or straight to High?
-6. **Warning signs:** is +1 right for each? Which go straight to High? Should damp be one at all?
+5. **Thin cover / no stirrups:** is "cover under one bar diameter" the right line? +1, or straight to Category 3?
+6. **Warning signs:** is +1 right for each? Which go straight to Category 3? Should damp be one at all?
 
 **B. Definitions to confirm**
 7. **Growth:** the smallest growth that counts, and over what interval (we use: larger than the combined uncertainty, D23).
 8. **Accuracy:** is ±1 pixel at 3 pixels across the crack (±30 %) enough for triage, or do we require 6 to 8 pixels [46]?
-9. **Confidence threshold** (0.8): how many referrals per week can an engineer take? (trade-off: fewer missed High vs more Expert needed)
-10. **Dispatch and recheck times:** V1 within 1 week, V2 within 1 month, V3 recheck in 1 month (D27); Low in 6 months, Medium in 1 month.
+9. **Confidence threshold** (0.8): how many referrals per week can an engineer take? (trade-off: fewer missed Category 3 vs more Expert needed)
+10. **Dispatch and recheck times:** V1 within 1 week, V2 within 1 month, V3 recheck in 1 month (D27); Category 1 in 6 months, Category 2 in 1 month.
 11. **Building risk score:** are age over 50 years, floors added, changes and an open ground floor the right flags, and is "two flags = one tier up" right (D22)?
 
 **C. Ground truth**
@@ -122,5 +122,5 @@ Level, one-sentence reason (pattern, element, width with its upper end, band, an
 1. **Literature anchors.** The reference thesis [46] gives the principles (pattern over width; brittle modes; anchorage, cover and confinement; measurement accuracy) but no width thresholds. Next, read Zaborac et al. 2019 [50], the Swiss and Spanish inspection guides [51][52], then FEMA 306, ACI 224R and Eurocode 2 (crack limits and exposure classes). No number from them enters the matrix before it is read in the source.
 2. **Sense check on Haiti.** The Haiti engineers' damage definitions [41] against our bands.
 3. **Engineer card session.** About 40 cards (element x location x pattern x width, with and without warning signs), each rated by each engineer on their own. Where they agree, the matrix takes their level; where they disagree, the more cautious one. Their agreement is reported as a result.
-4. **Test on engineer-rated photos.** Target: almost no missed High (`spec/features/evaluation.md`), while tracking the share sent to experts.
+4. **Test on engineer-rated photos.** Target: almost no missed Category 3 (`spec/features/evaluation.md`), while tracking the share sent to experts.
 5. **Version.** v3.1, v3.2, ... each recorded as a decision; never automatic.

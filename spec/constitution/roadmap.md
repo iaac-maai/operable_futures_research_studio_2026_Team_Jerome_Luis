@@ -2,7 +2,7 @@
 
 1. Calibrate: agree the risk matrix and thresholds per element (columns, beams, slabs, walls) with structural engineers. Fix the photo protocol (scale card, S, O and P shots, distance). Set consent and data rules.
 2. Build and test: collect and label phone photos, train the detector and segmenter, compare against buildings an engineer has already assessed.
-   Goal: flag every crack the engineer rated High, and send only a few cases to an expert.
+   Goal: flag every crack the engineer rated Category 3, and send only a few cases to an expert.
 3. Widen the scope, only if the Phase 2 goal is met: more materials, ground fissures, multi-storey frames, offline use.
 
 ## Engineering partners

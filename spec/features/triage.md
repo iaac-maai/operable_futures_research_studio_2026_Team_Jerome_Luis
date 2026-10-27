@@ -17,11 +17,11 @@ Status: implemented with risk matrix v3.0-illustrative (`spec/features/risk_matr
 |---|---|---|
 | Retake | Photo unusable; take it again following the protocol | No |
 | Expert needed | The system is unsure; a human decides | Yes |
-| Low | Routine monitoring | No |
-| Medium | Low-cost advice, recheck | No |
-| High | Engineer must confirm | Yes |
+| Category 1 | Routine monitoring | No |
+| Category 2 | Low-cost advice, recheck | No |
+| Category 3 | Engineer must confirm | Yes |
 
-Every result carries a one-sentence reason and a next step with a recheck interval, e.g. "diagonal shear crack in a beam, 1.5 mm wide, 1 to 3 mm band: High; raised because rust staining along the crack." / "An engineer must confirm; the case is sent now."
+Every result carries a one-sentence reason and a next step with a recheck interval, e.g. "diagonal shear crack in a beam, 1.5 mm wide, 1 to 3 mm band: Category 3; raised because rust staining along the crack." / "An engineer must confirm; the case is sent now."
 The tool never outputs "safe", a clearance or a permit.
 
 ## Decision order
@@ -33,17 +33,17 @@ The tool never outputs "safe", a clearance or a permit.
    - confidence missing, not a number, outside 0 to 1, or below the threshold (0.8, illustrative);
    - width or its uncertainty missing, not a number, negative or infinite (measurement failed).
 3. Base level from pattern x width band, using the upper end of the measured width.
-4. Element criticality, the location on the element (end zone: cracks along bars and diagonal shear cracks +1) and warning signs raise the level (never lower it); capped at High.
+4. Element criticality, the location on the element (end zone: cracks along bars and diagonal shear cracks +1) and warning signs raise the level (never lower it); capped at Category 3.
 
 The confidence thresholds are module constants, not function arguments, so they can only change in a reviewed commit. The matrix values live in `src/triage/risk_matrix_v3.json`.
 
 ## Tests (`tests/test_matrix.py`)
-- Bad photo -> Retake; low, NaN or out-of-range confidence -> Expert needed (never Low).
+- Bad photo -> Retake; low, NaN or out-of-range confidence -> Expert needed (never Category 1).
 - Bad width or uncertainty -> Expert needed; the upper end of the width is used.
 - Unknown element or pattern, or a pattern on the wrong element -> Expert needed.
-- Columns raise one level; every warning sign raises and never lowers; offset and sagging go straight to High; unknown warning signs are an error.
-- Low only when image usable, confidence over threshold, not a column, no warning sign and the matrix says Low (exhaustive check).
-- Every High and every Expert needed sets `engineer_review`; every result has a reason and a next step.
+- Columns raise one level; every warning sign raises and never lowers; offset and sagging go straight to Category 3; unknown warning signs are an error.
+- Category 1 only when image usable, confidence over threshold, not a column, no warning sign and the matrix says Category 1 (exhaustive check).
+- Every Category 3 and every Expert needed sets `engineer_review`; every result has a reason and a next step.
 - Band boundaries go to the wider band.
 
 ## Not yet covered

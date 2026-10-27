@@ -9,6 +9,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import matplotlib
+import numpy as np
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -25,8 +26,8 @@ SURFACE, INK, INK_2, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "
 BLUE, AQUA, VIOLET = "#2a78d6", "#1baf7a", "#6250d6"
 SEQ = {"covered": "#1c5cab", "partial": "#5598e7", "planned": "#b7d3f6", "none": SURFACE}
 # Status colours are reserved for triage levels, always with a text label.
-LEVEL = {"Low": "#0ca30c", "Medium": "#fab219", "High": "#d03b3b", "Expert needed": "#ec835a", "Retake": MUTED}
-ON_FILL = {"Medium": INK}  # dark text on the yellow fill, white elsewhere
+LEVEL = {"Category 1": "#0ca30c", "Category 2": "#fab219", "Category 3": "#d03b3b", "Expert needed": "#ec835a", "Retake": MUTED}
+ON_FILL = {"Category 2": INK}  # dark text on the yellow fill, white elsewhere
 
 plt.rcParams.update({
     "font.family": "sans-serif",
@@ -78,8 +79,8 @@ PIPE_BOXES = {
     (0, 0): ("human", "Building case (once)", "questionnaire: age, storeys, added floors,\ntypology + changes, open ground floor\n+ facade photo + map data (MCP)", "spec"),
     (0, 1): ("rule", "Completeness check", "every answer known or 'unknown'\nunknown counts as a risk flag\nand stays visible as unknown", "spec"),
     (0, 2): ("learned", "Building reading", "now: the questionnaire answers\nlater: model on the facade photo\n(storeys, typology; PHI-Net task 5)", "spec"),
-    (0, 3): ("rule", "Building risk score", "worst crack level → P1 · P2 · P3\n+1 tier if ≥ 2 risk flags\n+1 tier if Medium+ in ≥ 2 elements", "spec"),
-    (0, 4): ("human", "Engineer", "ranked list of buildings + dossier\nconfirms or corrects every High\nand every referral; rates on site", "spec"),
+    (0, 3): ("rule", "Building risk score", "worst crack level → P1 · P2 · P3\n+1 tier if ≥ 2 risk flags\n+1 tier if Category 2+ in ≥ 2 elements", "spec"),
+    (0, 4): ("human", "Engineer", "ranked list of buildings + dossier\nconfirms or corrects every Category 3\nand every referral; rates on site", "spec"),
     (1, 0): ("human", "Element photo", "the whole element\nwith the scale card\nno question to the resident", "spec"),
     (1, 1): ("rule", "Scale and angle", "scale card visible?\nphone parallel to the wall?\nno → retake", "spec"),
     (1, 2): ("learned", "Material + element", "material model: concrete or not\nelement model: column, beam, slab, wall\n(PHI-Net task 6) · each + confidence", "spec"),
@@ -177,7 +178,7 @@ def pipeline():
     ax.plot([x0[4] + w / 2, x0[4] + w / 2], [y0[2], my], color=BLUE, lw=1.8, ls="--")
     ax.plot([x0[4] + w / 2, x0[0] + w / 2], [my, my], color=BLUE, lw=1.8, ls="--")
     arrow((x0[0] + w / 2, my), (x0[0] + w / 2, y0[2]), colour=BLUE, ls="--", lw=1.8)
-    ax.text((x0[0] + x0[4]) / 2 + w / 2, my - 0.3, "MONITORING LOOP: on the recheck date (Low: 6 months, Medium: "
+    ax.text((x0[0] + x0[4]) / 2 + w / 2, my - 0.3, "MONITORING LOOP: on the recheck date (Category 1: 6 months, Category 2: "
             "1 month) the same crack ID and stickers are photographed again, with the last photo as an overlay",
             ha="center", fontsize=9.8, color=BLUE, weight="bold")
     ax.text((x0[0] + x0[4]) / 2 + w / 2, my - 0.58, "growth larger than the measurement uncertainty raises the "
@@ -217,8 +218,8 @@ HANDOFFS = [
     (45.4, "F", "M", "7  reliable photos: the building, every cracked element, every crack", False),
     (40.8, "M", "W", "8  material, element, width, pattern + confidence", False),
     (37.4, "F", "W", "9  pattern from drawings (model unsure)", False),
-    (28.6, "W", "R", "10  Low or Medium: level, reason, recheck date", False),
-    (25.2, "W", "E", "11  High, Expert needed (any doubt), buildings P1 · P2", False),
+    (28.6, "W", "R", "10  Category 1 or Category 2: level, reason, recheck date", False),
+    (25.2, "W", "E", "11  Category 3, Expert needed (any doubt), buildings P1 · P2", False),
     (16.4, "E", "R", "12  confirmed level, reason, next step · never 'safe'", False),
     (13.0, "E", "M", "13  corrections become labels → retraining", True),
     (8.4, "R", "M", "14  recheck photo, same crack ID → back to 8", True),
@@ -229,12 +230,12 @@ WHO_DECIDES = [
     ("photo", "RESIDENT", "Decides to report a crack and answers\nwhat they know (age, floors added,\nnew? growing? doors stick?).",
      "Never asked the material, the element\nor the pattern. Never told 'safe'."),
     ("model", "APP · MODELS", "Decides nothing. Measures the crack,\nwidth, material, element, pattern,\nand says how sure it is.",
-     "Unsure → the case goes up to\na person, never down to Low."),
+     "Unsure → the case goes up to\na person, never down to Category 1."),
     ("rule", "APP · WRITTEN RULES", "Decides: retake, visit priority\n(V1 to V3), the level, building\npriority (P1 to P3).",
      "Auditable and versioned; changed\nonly by a reviewed decision."),
     ("photo", "FIELD WORKER", "Decides nothing on risk. Takes the\nreliable photos, places stickers,\npicks the pattern when unsure.",
      "Visits only when the dispatch\nrule sends them (V1, V2, audit)."),
-    ("term", "ENGINEER", "Has the final word: confirms or\ncorrects every High and every\ndoubt; visits P1 and P2 buildings.",
+    ("term", "ENGINEER", "Has the final word: confirms or\ncorrects every Category 3 and every\ndoubt; visits P1 and P2 buildings.",
      "Every correction becomes a label\nthat retrains the models."),
 ]
 
@@ -309,7 +310,7 @@ def decisions_and_players():
               bbox=dict(facecolor="white", edgecolor="none", pad=1.5))
     # decisions: only on the written rules and the engineer
     diamond(X["W"], 64.4, 8.0, 3.0, "DISPATCH RULE\nV1 · V2 · V3 · RETAKE")
-    diamond(X["W"], 32.8, 11.0, 3.6, "TRIAGE RULES + BUILDING SCORE\nRetake · Expert needed · Low · Medium · High\n"
+    diamond(X["W"], 32.8, 11.0, 3.6, "TRIAGE RULES + BUILDING SCORE\nRetake · Expert needed · Category 1 · Category 2 · Category 3\n"
             "building priority P1 · P2 · P3")
     white_diamond(X["E"], 20.0, 8.0, 3.0, "CONFIRMS OR\nCORRECTS")
     label(X["E"] + 8.8, 20.0, "visits P1, P2\nbuildings", size=9.5, colour=FLOW_TEXT, ha="left")
@@ -341,61 +342,233 @@ def decisions_and_players():
     return fig
 
 
-NEW_IN_V3 = {"thin_cover", "crossing_bar_crack", "damp"}
+CAT_FILL = {"Category 1": ("white", FLOW_INK if "FLOW_INK" in globals() else "#111111", "#111111"),
+            "Category 2": ("#bdbdbd", "#bdbdbd", "#111111"), "Category 3": ("#111111", "#111111", "white")}
+
+
+def _icon(ax, key, cx, cy, s=9.0):
+    """Black, white and grey pictogram of a crack pattern, a raise or an action, in an s x s box centred on (cx, cy).
+    Symbol key in spec/features/figures.md."""
+    K, G, u = "#111111", "#9a9a9a", s / 10.0
+    x0, y0 = cx - s / 2, cy - s / 2
+
+    def P(x, y):
+        return x0 + x * u, y0 + y * u
+
+    def rect(x, y, w, h, fc="white", ec=K, lw=1.6, ls="-", z=3):
+        ax.add_patch(matplotlib.patches.Rectangle(P(x, y), w * u, h * u, facecolor=fc, edgecolor=ec, lw=lw, ls=ls,
+                                                  zorder=z))
+
+    def poly(pts, fc="white", ec=K, lw=1.6, z=3, closed=True):
+        ax.add_patch(matplotlib.patches.Polygon([P(*p) for p in pts], closed=closed, facecolor=fc, edgecolor=ec,
+                                                lw=lw, zorder=z))
+
+    def ln(pts, lw=1.8, c=K, ls="-", z=4):
+        xs, ys = zip(*[P(*p) for p in pts])
+        ax.plot(xs, ys, color=c, lw=lw, ls=ls, zorder=z, solid_capstyle="round", solid_joinstyle="round")
+
+    def circ(x, y, r, fc="white", ec=K, lw=1.6, z=4):
+        ax.add_patch(plt.Circle(P(x, y), r * u, facecolor=fc, edgecolor=ec, lw=lw, zorder=z))
+
+    def arrow(p0, p1, lw=1.8):
+        ax.annotate("", xy=P(*p1), xytext=P(*p0), zorder=5,
+                    arrowprops=dict(arrowstyle="-|>", color=K, lw=lw, shrinkA=0, shrinkB=0, mutation_scale=11))
+
+    if key == "surface_map":
+        rect(0.5, 0.5, 9, 9, fc="#f2f2f2", ec=G, lw=1.2)
+        for seg in ([(1, 3), (3, 4), (5, 2), (7, 4), (9, 3)], [(3, 4), (4, 7), (2, 9)], [(5, 2), (6, 6), (4, 7)],
+                    [(6, 6), (8, 8), (9, 6)], [(7, 4), (8, 8)], [(4, 7), (6, 9)]):
+            ln(seg, lw=1.3)
+    elif key in ("flexural", "diagonal_shear", "along_bar"):
+        rect(0, 3, 10, 4)
+        if key == "flexural":
+            for x in (3, 5, 7):
+                ln([(x, 3), (x + 0.3, 4), (x - 0.2, 4.8), (x + 0.1, 5.5)], lw=1.7)
+        elif key == "diagonal_shear":
+            poly([(0.5, 3), (1.5, 1.4), (-0.5, 1.4)], fc=G, ec="none")
+            ln([(1.6, 3.1), (2.3, 4.0), (2.6, 4.4), (3.4, 5.4), (3.7, 5.9), (4.4, 6.9)], lw=1.9)
+        else:
+            ln([(0.4, 4.3), (9.6, 4.3)], lw=2.6, c=G, ls=(0, (2.5, 1.5)), z=3)
+            ln([(1, 4.9), (2.5, 4.7), (4, 5.0), (5.5, 4.75), (7, 5.0), (8.8, 4.8)], lw=1.7)
+    elif key == "column_horizontal":
+        rect(3.3, 0, 3.4, 10)
+        for y in (4, 6.3):
+            ln([(3.3, y), (4.2, y + 0.3), (5.0, y - 0.1), (5.8, y + 0.3), (6.7, y)], lw=1.7)
+    elif key == "spalling_exposed_bar":
+        rect(0, 2, 10, 6)
+        poly([(2.5, 3.2), (6.5, 2.8), (7.8, 5.0), (6.4, 7.0), (3.2, 6.6), (2.2, 5.0)], fc="#d9d9d9", ec=K, lw=1.3)
+        ln([(1.5, 5), (8.5, 5)], lw=3.2, c=K, z=5)
+    elif key == "joint":
+        rect(4, 0, 2, 10, z=3)
+        rect(0, 4.5, 10, 2.5, z=2)
+        ln([(4.1, 4.6), (4.8, 5.4), (5.2, 6.1), (5.9, 6.9)], lw=1.8, z=5)
+        ln([(5.9, 4.6), (5.2, 5.3), (4.8, 6.2), (4.1, 6.9)], lw=1.8, z=5)
+    elif key == "column":
+        rect(4, 0, 2, 7.6)
+        arrow((5, 10), (5, 7.8))
+        ln([(2.5, 7.8), (7.5, 7.8)], lw=1.6)
+    elif key == "end_zone":
+        rect(0, 0, 2.2, 10)
+        rect(2.2, 5, 7.8, 3)
+        rect(2.2, 5, 2.6, 3, fc="#bdbdbd", ec=K, lw=1.2, z=4)
+        ln([(3.1, 6.1), (4.4, 6.2)], lw=1.6, z=5)
+    elif key == "growing":
+        ln([(5, 1), (4.6, 3), (5.3, 5), (4.7, 7), (5, 9)], lw=2.6)
+        arrow((4.1, 5), (1.3, 5))
+        arrow((5.9, 5), (8.7, 5))
+    elif key == "rust_stain":
+        rect(0.5, 0.5, 9, 9, fc="#f2f2f2", ec=G, lw=1.2)
+        ln([(5, 9), (4.6, 7), (5.3, 5), (4.8, 3.2)], lw=1.8)
+        for (x, y, w, h) in ((4.0, 2.4, 2.4, 1.2), (5.6, 1.4, 1.2, 1.3), (3.6, 1.0, 1.0, 1.1)):
+            ax.add_patch(matplotlib.patches.Ellipse(P(x + w / 2, y + h / 2), w * u, h * u, facecolor="#7a7a7a",
+                                                    edgecolor="none", zorder=4))
+    elif key == "sticking_openings":
+        rect(2, 0, 6, 10, fc="white", ec=K, lw=1.8)
+        poly([(2.7, 0.5), (7.3, 1.6), (7.3, 9.2), (2.7, 9.5)], fc="#d0d0d0", ec=K, lw=1.3, z=4)
+        circ(6.5, 5.2, 0.35, fc=K, z=5)
+    elif key == "recent_earthquake":
+        ln([(0, 5), (2.5, 5), (3.2, 8.5), (4.1, 1.5), (5.0, 9.5), (5.9, 0.5), (6.8, 7.5), (7.5, 5), (10, 5)], lw=1.7)
+    elif key == "added_floors":
+        rect(2, 0, 6, 3)
+        rect(2, 3, 6, 3)
+        rect(2, 6, 6, 3, fc="white", ec=K, lw=1.6, ls=(0, (2, 1.5)))
+        ln([(5, 6.8), (5, 8.2)], lw=1.8)
+        ln([(4.3, 7.5), (5.7, 7.5)], lw=1.8)
+    elif key == "thin_cover":
+        rect(0, 1, 10, 8, fc="#f2f2f2", ec=K, lw=1.6)
+        circ(5, 7.4, 0.9, fc=K)
+        ln([(8.2, 9), (8.2, 8.3)], lw=1.3)
+        ln([(7.6, 9), (8.8, 9)], lw=1.3)
+        ln([(7.6, 8.3), (8.8, 8.3)], lw=1.3)
+        ln([(0, 9), (10, 9)], lw=2.4)
+    elif key == "crossing_bar_crack":
+        rect(0, 1, 10, 8)
+        ln([(0.4, 4.5), (9.6, 4.5)], lw=2.6, c=G, ls=(0, (2.5, 1.5)), z=3)
+        ln([(0.8, 5.1), (3, 4.9), (5, 5.2), (7.2, 4.9), (9.2, 5.1)], lw=1.6)
+        ln([(5, 1.2), (5.4, 3), (4.8, 5), (5.3, 7), (5, 8.8)], lw=1.9)
+        circ(5, 5.05, 0.55, fc=K, z=5)
+    elif key == "damp":
+        for (x, y, r) in ((2.6, 5.5, 1.4), (6.6, 6.5, 1.7), (5.0, 2.2, 1.2)):
+            circ(x, y, r, fc="#9a9a9a", ec=K, lw=1.3)
+            poly([(x - r * 0.95, y + r * 0.3), (x, y + r * 2.2), (x + r * 0.95, y + r * 0.3)], fc="#9a9a9a", ec="none",
+                 z=4)
+            ln([(x - r * 0.97, y + r * 0.25), (x, y + r * 2.2), (x + r * 0.97, y + r * 0.25)], lw=1.3, z=5)
+    elif key == "offset":
+        ln([(0, 6.2), (5, 6.2), (5, 3.8), (10, 3.8)], lw=2.4)
+        ln([(5, 9.5), (4.7, 7.5), (5.2, 6.2)], lw=1.5)
+        ln([(5, 3.8), (5.3, 2.2), (4.9, 0.5)], lw=1.5)
+    elif key == "sagging":
+        poly([(1, 5), (1.9, 3.4), (0.1, 3.4)], fc=G, ec="none")
+        poly([(9, 5), (9.9, 3.4), (8.1, 3.4)], fc=G, ec="none")
+        theta = np.linspace(0, np.pi, 30)
+        ln(list(zip(1 + 8 * theta / np.pi, 5.2 - 2.6 * np.sin(theta))), lw=2.6)
+        ln(list(zip(1 + 8 * theta / np.pi, 7.4 - 2.6 * np.sin(theta))), lw=1.2, c=G, ls=(0, (2, 2)))
+    elif key == "monitor":  # an eye
+        theta = np.linspace(0, np.pi, 30)
+        ln(list(zip(5 + 4.5 * np.cos(theta), 5 + 2.6 * np.sin(theta))), lw=1.8)
+        ln(list(zip(5 + 4.5 * np.cos(theta), 5 - 2.6 * np.sin(theta))), lw=1.8)
+        circ(5, 5, 1.4, fc=K)
+    elif key == "repair":  # a wrench
+        ln([(2.2, 2.2), (6.6, 6.6)], lw=3.4)
+        circ(7.4, 7.4, 1.7, fc="white", lw=2.2)
+        poly([(7.2, 9.4), (9.4, 7.2), (8.6, 6.6), (6.6, 8.6)], fc="white", ec="white", lw=0.1, z=5)
+    elif key == "engineer":  # a hard hat
+        theta = np.linspace(0, np.pi, 30)
+        poly(list(zip(5 + 3.6 * np.cos(theta), 4 + 3.6 * np.sin(theta))), fc=K, ec=K)
+        rect(0.6, 3.2, 8.8, 1.0, fc=K, ec=K)
+        rect(4.5, 7.0, 1.0, 1.2, fc="white", ec="white", lw=0.5, z=4)
+    elif key == "doubt":
+        circ(5, 5, 4.2, fc="white", lw=1.8)
+        ax.text(*P(5, 4.9), "?", ha="center", va="center", fontsize=s * 2.6, weight="bold", color=K, zorder=6)
+    elif key == "retake":  # a camera
+        rect(1, 2, 8, 5.6, fc="white", ec=K, lw=1.8)
+        rect(3.2, 7.6, 2.6, 1.2, fc=K, ec=K)
+        circ(5, 4.8, 1.8, fc="white", lw=1.8)
+        circ(5, 4.8, 0.7, fc=K)
+    elif key == "again":  # a circular arrow: do it again
+        theta = np.linspace(0.35 * np.pi, 2.2 * np.pi, 40)
+        ln(list(zip(5 + 3.6 * np.cos(theta), 5 + 3.6 * np.sin(theta))), lw=2.0)
+        end_x, end_y = 5 + 3.6 * np.cos(theta[-1]), 5 + 3.6 * np.sin(theta[-1])
+        arrow((end_x - 0.9, end_y - 1.2), (end_x + 0.3, end_y + 0.4))
 
 
 def risk_matrix():
-    """Matrix v3: base level per pattern x width band, plus what can raise it (read from risk_matrix_v3.json)."""
-    fig = plt.figure(figsize=(16, 8.6))
-    ax = fig.add_axes([0.18, 0.1, 0.42, 0.66])
+    """Matrix v3 in black, white and grey with symbols: base category per pattern x width band, and what raises it.
+    Cells: 1 white, 2 grey, 3 black. Values read from src/triage/risk_matrix_v3.json."""
+    K = "#111111"
+    fig = plt.figure(figsize=(18, 10.4), facecolor="white")
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_xlim(0, 180)
+    ax.set_ylim(0, 104)
+    ax.set_axis_off()
+    ax.text(3, 98.5, "Risk matrix", fontsize=34, weight="bold", color=K, va="center")
+    ax.text(177, 98.5, "03", fontsize=34, weight="bold", color=K, va="center", ha="right")
+    ax.text(3, 92.6, f"v{VERSION} · values illustrative until calibrated with the engineering partners · "
+            "src/triage/risk_matrix_v3.json", fontsize=10.5, color="#555555", va="center")
+
+    def cat_cell(x, y, w, h, level, size=22):
+        fc, ec, ink = CAT_FILL[level]
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0,rounding_size=0.8", facecolor=fc,
+                                    edgecolor=ec, lw=1.6, zorder=3))
+        ax.text(x + w / 2, y + h / 2, level.split()[-1], ha="center", va="center", fontsize=size, weight="bold",
+                color=ink, zorder=4)
+
+    # column headers: crack width, thin to wide
+    cw, x_first, top = 19.0, 21.0, 84.0
+    for c, band in enumerate(BANDS):
+        cx = x_first + c * (cw + 1.2) + cw / 2
+        ax.plot([cx - 6, cx + 6], [top + 2.6, top + 2.6], color=K, lw=[1.0, 2.6, 5.0, 8.5][c], solid_capstyle="butt")
+        ax.text(cx, top - 0.4, BAND_NAMES[band].replace("under ", "< ").replace("over ", "> ").replace(" to ", "–"),
+                ha="center", va="center", fontsize=12, weight="bold", color=K)
+    # rows: pattern symbols, then category cells
+    rh = 10.2
     for r, pattern in enumerate(PATTERNS):
+        y = top - 4.2 - (r + 1) * rh
+        ax.add_patch(FancyBboxPatch((4.0, y + 0.3), 13.5, rh - 0.6, boxstyle="round,pad=0,rounding_size=0.8",
+                                    facecolor="white", edgecolor="#cfcfcf", lw=1.2, zorder=2))
+        _icon(ax, pattern, 10.75, y + rh / 2, s=8.2)
         for c, band in enumerate(BANDS):
-            lvl = MATRIX[band][r]
-            ax.add_patch(FancyBboxPatch((c + 0.04, r + 0.07), 0.92, 0.86, boxstyle="round,pad=0,rounding_size=0.06",
-                                        facecolor=LEVEL[lvl], edgecolor="none"))
-            ax.text(c + 0.5, r + 0.5, lvl, ha="center", va="center", weight="bold", fontsize=10.5,
-                    color=ON_FILL.get(lvl, "white"))
-    ax.set_xlim(0, len(BANDS))
-    ax.set_ylim(len(PATTERNS), 0)
-    ax.set_xticks([c + 0.5 for c in range(len(BANDS))], [BAND_NAMES[b] for b in BANDS], fontsize=10.5)
-    ax.set_yticks([r + 0.5 for r in range(len(PATTERNS))], [PATTERN_NAMES[p] for p in PATTERNS], fontsize=10.5)
-    ax.xaxis.tick_top()
-    ax.tick_params(length=0)
-    for s in ax.spines.values():
-        s.set_visible(False)
-    ax.text(len(BANDS) / 2, -0.75, "Crack width (upper end of the measurement)", ha="center", fontsize=10, color=INK_2)
+            cat_cell(x_first + c * (cw + 1.2), y + 0.3, cw, rh - 0.6, MATRIX[band][r])
 
-    side = fig.add_axes([0.63, 0.06, 0.36, 0.76])
-    side.set_axis_off()
-    side.set_xlim(0, 1)
-    side.set_ylim(0, 1)
-    side.text(0, 0.98, "What raises the level (never lowers it)", fontsize=11.5, weight="bold", va="top")
+    # what raises the category: one card per raise, symbol + effect
     end = _LOCATION_RULE["end_zone"]
-    lines = [(f"It is a {ELEMENTS[e]}", f"+{n}", "") for e, n in ELEMENT_RAISE.items() if n]
-    plural = {"along_bar": "cracks along bars", "diagonal_shear": "diagonal shear cracks"}
-    lines.append(("In an end zone (or location unknown):\n" + ", ".join(plural.get(p, PATTERN_NAMES[p])
-                                                                      for p in end["patterns"]),
-                  f"+{end['raise']}", "assumption" if "assumption" in BASIS["end_zone"] else ""))
-    lines += [(name[0].upper() + name[1:], "to High" if effect == "High" else effect,
-               "assumption" if BASIS[k].startswith("assumption") else ("new in v3" if k in NEW_IN_V3 else ""))
-              for k, name, effect in ((k, ESCALATORS[k], _ESCALATOR_EFFECT[k]) for k in ESCALATORS)]
-    for i, (text, effect, tag) in enumerate(lines):
-        y = 0.9 - i * 0.07
-        side.add_patch(FancyBboxPatch((0, y - 0.027), 0.17, 0.054, boxstyle="round,pad=0,rounding_size=0.02",
-                                      facecolor="#f0efec" if effect != "to High" else LEVEL["High"], edgecolor="none"))
-        side.text(0.085, y, effect, ha="center", va="center", fontsize=9.5, weight="bold",
-                  color=INK if effect != "to High" else "white")
-        side.text(0.2, y, text, va="center", fontsize=9.8, color=INK)
-        if tag:
-            side.text(0.99, y, tag, va="center", ha="right", fontsize=8.5, color=INK_2, style="italic")
-    side.text(0, 0.03, "Levels stop at High. Any doubt (photo, material,\nelement, pattern, width) goes to Expert needed.",
-              fontsize=9, color=INK_2, va="bottom")
+    raises = [("column", f"+{ELEMENT_RAISE['column']}", False), ("end_zone", f"+{end['raise']}", True)]
+    raises += [(k, "+1" if _ESCALATOR_EFFECT[k] == "+1" else "→3", "assumption" in BASIS[k]) for k in ESCALATORS]
+    ax.plot([104.5, 104.5], [10, 88], color="#cfcfcf", lw=1.2)
+    for i, (key, effect, assumed) in enumerate(raises):
+        col, row = i % 3, i // 3
+        x, y = 108.0 + col * 23.4, 72.0 - row * 16.2
+        ax.add_patch(FancyBboxPatch((x, y), 21.6, 14.4, boxstyle="round,pad=0,rounding_size=0.8", facecolor="white",
+                                    edgecolor="#cfcfcf", lw=1.2, zorder=2))
+        _icon(ax, key, x + 7.6, y + 7.2, s=10.0)
+        if effect == "→3":
+            ax.text(x + 15.4, y + 7.2, "→", fontsize=16, weight="bold", color=K, va="center", ha="center", zorder=4)
+            cat_cell(x + 16.9, y + 4.6, 3.6, 5.2, "Category 3", size=12)
+        else:
+            ax.add_patch(FancyBboxPatch((x + 14.6, y + 4.8), 5.6, 4.8, boxstyle="round,pad=0,rounding_size=0.6",
+                                        facecolor="#bdbdbd", edgecolor="none", zorder=3))
+            ax.text(x + 17.4, y + 7.2, effect, fontsize=14, weight="bold", color=K, va="center", ha="center", zorder=4)
+        if assumed:
+            ax.add_patch(plt.Circle((x + 20.0, y + 12.8), 1.1, facecolor="white", edgecolor=K, lw=1.2, zorder=4))
+            ax.text(x + 20.0, y + 12.75, "?", fontsize=9, weight="bold", color=K, ha="center", va="center", zorder=5)
 
-    fig.suptitle(f"Risk matrix for reinforced concrete, v{VERSION}", x=0.02, ha="left", fontsize=14, weight="bold")
-    fig.text(0.02, 0.905, "Base level from crack pattern × width; the element, the location on the element and warning "
-             "signs can only raise it. All values illustrative until calibrated with the engineering partners.\n"
-             "Source: src/triage/risk_matrix_v3.json, where every raise records its basis (thesis [46] chapter, "
-             "decision or assumption).", fontsize=10, color=INK_2, va="top", linespacing=1.5)
+    # symbol legend: what each category leads to; doubt and unusable photos
+    ly = 4.8
+    items = [("Category 1", "monitor", "6 mo"), ("Category 2", "repair", "1 mo"), ("Category 3", "engineer", "now")]
+    x = 4.0
+    for level, icon, when in items:
+        cat_cell(x, ly - 2.6, 5.2, 5.2, level, size=13)
+        _icon(ax, icon, x + 10.4, ly, s=6.4)
+        ax.text(x + 14.6, ly, when, fontsize=12, weight="bold", color=K, va="center")
+        x += 25.0
+    _icon(ax, "doubt", x + 2.6, ly, s=6.0)
+    ax.text(x + 7.0, ly, "→", fontsize=16, weight="bold", color=K, va="center", ha="center")
+    _icon(ax, "engineer", x + 11.4, ly, s=6.4)
+    x += 22.0
+    _icon(ax, "retake", x + 2.8, ly, s=6.4)
+    _icon(ax, "again", x + 9.0, ly, s=5.6)
+    ax.text(177, ly, "? = assumption, to confirm with the engineer", fontsize=10, color="#555555", va="center",
+            ha="right")
     return fig
 
 
@@ -646,27 +819,27 @@ def dataset_sizes():
 def confusion_template():
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(14, 5.4), gridspec_kw={"width_ratios": [1, 1.6]})
     cells = [  # (row, col, title, meaning, colour)
-        (0, 0, "TP", "danger caught,\nengineer visits", LEVEL["Low"]),
-        (0, 1, "FN", "missed danger:\nwrong all-clear. Stop condition", LEVEL["High"]),
-        (1, 0, "FP", "unneeded visit,\ncosts engineer time", LEVEL["Medium"]),
-        (1, 1, "TN", "correctly kept off\nthe engineer's list", LEVEL["Low"]),
+        (0, 0, "TP", "danger caught,\nengineer visits", LEVEL["Category 1"]),
+        (0, 1, "FN", "missed danger:\nwrong all-clear. Stop condition", LEVEL["Category 3"]),
+        (1, 0, "FP", "unneeded visit,\ncosts engineer time", LEVEL["Category 2"]),
+        (1, 1, "TN", "correctly kept off\nthe engineer's list", LEVEL["Category 1"]),
     ]
     for r, c, title, meaning, colour in cells:
         a1.add_patch(FancyBboxPatch((c + 0.04, r + 0.04), 0.92, 0.92, boxstyle="round,pad=0,rounding_size=0.05",
                                     facecolor=colour, edgecolor="none"))
-        ink = INK if colour == LEVEL["Medium"] else "white"
+        ink = INK if colour == LEVEL["Category 2"] else "white"
         a1.text(c + 0.5, r + 0.36, title, ha="center", va="center", fontsize=18, weight="bold", color=ink)
         a1.text(c + 0.5, r + 0.66, meaning, ha="center", va="center", fontsize=9, color=ink)
     a1.set_xlim(0, 2)
     a1.set_ylim(2, 0)
-    a1.set_xticks([0.5, 1.5], ["Tool flags\n(High or Expert needed)", "Tool does not flag\n(Low or Medium)"])
-    a1.set_yticks([0.5, 1.5], ["Engineer:\nHigh", "Engineer:\nLow or Medium"])
+    a1.set_xticks([0.5, 1.5], ["Tool flags\n(Category 3 or Expert needed)", "Tool does not flag\n(Category 1 or Category 2)"])
+    a1.set_yticks([0.5, 1.5], ["Engineer:\nHigh", "Engineer:\nLow or Category 2"])
     a1.xaxis.tick_top()
     a1.set_title("Table 1: the safety question", loc="left", weight="bold", pad=44)
 
     kinds = {"correct": ("#e3f5ee", INK), "over-cautious": ("#fdf0d0", INK), "false alarm": ("#fdf0d0", INK),
              "referral": ("#fbe3d9", INK), "retake": ("#f0efec", INK_2),
-             "false all-clear": (LEVEL["High"], "white"), "missed danger": (LEVEL["High"], "white"),
+             "false all-clear": (LEVEL["Category 3"], "white"), "missed danger": (LEVEL["Category 3"], "white"),
              "missed danger\n(worst)": ("#9e2424", "white")}
     grid = [["correct", "over-cautious", "false alarm", "referral", "retake"],
             ["false all-clear", "correct", "over-cautious", "referral", "retake"],
@@ -680,8 +853,8 @@ def confusion_template():
                     weight="bold" if "missed" in kind or "all-clear" in kind else "normal")
     a2.set_xlim(0, 5)
     a2.set_ylim(3, 0)
-    a2.set_xticks([c + 0.5 for c in range(5)], ["Low", "Medium", "High", "Expert\nneeded", "Retake"])
-    a2.set_yticks([0.5, 1.5, 2.5], ["Low", "Medium", "High"])
+    a2.set_xticks([c + 0.5 for c in range(5)], ["Category 1", "Category 2", "Category 3", "Expert\nneeded", "Retake"])
+    a2.set_yticks([0.5, 1.5, 2.5], ["Category 1", "Category 2", "Category 3"])
     a2.xaxis.tick_top()
     a2.set_xlabel("Tool output")
     a2.xaxis.set_label_position("top")
@@ -758,8 +931,8 @@ def timeline():
                                     facecolor=colour if not risk else "white", edgecolor=colour,
                                     hatch="///" if risk else None, lw=1.6))
     for k, (x, label, risk) in enumerate(MILESTONES):
-        ax.plot(x, -0.8, marker="D", ms=10, color=LEVEL["High"] if not risk else "white",
-                markeredgecolor=LEVEL["High"], mew=1.8, zorder=3)
+        ax.plot(x, -0.8, marker="D", ms=10, color=LEVEL["Category 3"] if not risk else "white",
+                markeredgecolor=LEVEL["Category 3"], mew=1.8, zorder=3)
         ax.text(x, -1.85 if k % 2 == 0 else -2.75, label, ha="center", va="center", fontsize=8.5, color=INK)
     ax.set_xlim(0, weeks)
     ax.set_ylim(n - 0.4, -3.3)
@@ -865,7 +1038,7 @@ def dataset_comparison():
     fig.suptitle("Every dataset we hold, compared: fit to informal buildings, size, quality, labels, use",
                  x=0.01, ha="left", fontsize=14, weight="bold")
     fig.text(0.01, 1 - 0.95 / fig.get_figheight(),
-             "Ordered by fit to the concept (D14). Image bars capped at 40,000. Low gate rates on METU and SDNET "
+             "Ordered by fit to the concept (D14). Image bars capped at 40,000. Category 1 gate rates on METU and SDNET "
              "come from smooth concrete read as blur (open issue D12), not from bad photos. PHI-Net is post-earthquake "
              "damage, research use only;\nits images are 224 px crops. Sources: docs/data_map.md, sections 0 and 6.",
              fontsize=9.5, color=INK_2, va="top")
@@ -1123,7 +1296,7 @@ def pipeline_flow():
     # monitoring loop: the resident's recheck date brings the same crack back
     my = 7.9
     line([(115.6, yP - 2.5), (115.6, my), (5.6, my), (5.6, yP), (7.8, yP)], ls="--", dot=False)
-    label(63.5, my - 1.8, "MONITORING LOOP: on the recheck date (Low: 6 months, Medium: 1 month) the same crack ID "
+    label(63.5, my - 1.8, "MONITORING LOOP: on the recheck date (Category 1: 6 months, Category 2: 1 month) the same crack ID "
           "and stickers are photographed again, with the last photo as an overlay\ngrowth larger than the measurement "
           "uncertainty raises the crack level, and through it the building risk score", size=10.5, weight="bold")
 

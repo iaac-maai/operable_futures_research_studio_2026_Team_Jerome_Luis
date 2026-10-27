@@ -8,7 +8,7 @@ Whether a crack is growing is what engineers look at above all (studio professor
 ## How
 1. **Crack ID.** Every crack gets an ID made of the building ID and a crack number (for example `B014-C03`), written on the scale card in every photo of that crack.
 2. **Marker stickers.** At the first visit, two round stickers are placed on either side of the crack, about 5 to 10 cm apart (assumption), and stay on the wall. This is a low-cost version of the marker technique in the reference thesis, which tracks markers fixed on both sides of a crack between inspections [46].
-3. **Recheck date** from the crack level (risk matrix next steps): Low in 6 months, Medium in 1 month. High and Expert needed go to an engineer at once.
+3. **Recheck date** from the crack level (risk matrix next steps): Category 1 in 6 months, Category 2 in 1 month. Category 3 and Expert needed go to an engineer at once.
 4. **Revisit.** The app shows the previous photo as a faint overlay so the same view is taken (same distance and angle), with the scale card; a burst of photos; at a similar time of day as the first visit, to limit the effect of temperature [46].
 5. **Measure** the crack width and the distance between the two stickers, each with its uncertainty: ±1 pixel at the measured pixel size [46].
 6. **Growth** counts only when the increase in width or in sticker distance is larger than the sum of the two visits' uncertainties. Only then the warning sign `growing` is set: +1 crack level (risk matrix), which also raises the building risk score through the worst crack (`spec/features/building_score.md`).
@@ -20,5 +20,5 @@ Phone photos only show clear growth of several pixels. Movements of micrometres,
 
 ## Tests (when coded)
 - Growth smaller than the combined uncertainty is not growth; growth larger than it sets `growing`.
-- The recheck date follows the level; High and Expert needed are never scheduled for a later recheck instead of an engineer.
+- The recheck date follows the level; Category 3 and Expert needed are never scheduled for a later recheck instead of an engineer.
 - A missing crack or missing stickers gives "growth unknown", keeps the previous level and flags the engineer.

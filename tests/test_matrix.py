@@ -28,11 +28,11 @@ def test_pattern_not_allowed_on_element_goes_to_expert(pattern, element):
 
 
 def test_diagonal_shear_crack_in_a_beam_over_0_3mm_is_high():
-    assert triage("diagonal_shear", "beam", 0.5, 0.9, image_ok=True) == "High"
+    assert triage("diagonal_shear", "beam", 0.5, 0.9, image_ok=True) == "Category 3"
 
 
 def test_fine_surface_map_cracking_is_low():
-    assert triage("surface_map", "infill_wall", 0.2, 0.9, image_ok=True) == "Low"
+    assert triage("surface_map", "infill_wall", 0.2, 0.9, image_ok=True) == "Category 1"
 
 
 @pytest.mark.parametrize("confidence", [math.nan, math.inf, -0.1, 1.5, None, "0.9", True])
@@ -63,14 +63,14 @@ def test_boundary_goes_to_wider_band(width, band):
 
 def test_upper_bound_of_width_is_used():
     """0.2 mm measured, +/- 0.2 mm: could be 0.4 mm, so the 0.3 to 1 band applies."""
-    assert triage("flexural", "beam", 0.2, 0.9, True) == "Low"
+    assert triage("flexural", "beam", 0.2, 0.9, True) == "Category 1"
     result = assess("flexural", "beam", 0.2, 0.9, True, width_uncertainty_mm=0.2)
-    assert result.level == "Medium" and "up to 0.4 mm" in result.reason
+    assert result.level == "Category 2" and "up to 0.4 mm" in result.reason
 
 
 def test_column_raises_one_level():
-    assert triage("flexural", "beam", 0.5, 0.9, True) == "Medium"
-    assert triage("flexural", "column", 0.5, 0.9, True) == "High"
+    assert triage("flexural", "beam", 0.5, 0.9, True) == "Category 2"
+    assert triage("flexural", "column", 0.5, 0.9, True) == "Category 3"
 
 
 @pytest.mark.parametrize("escalator", [e for e in ESCALATORS])
@@ -83,17 +83,17 @@ def test_every_escalator_raises_and_never_lowers(escalator):
 @pytest.mark.parametrize("escalator", ["offset", "sagging"])
 def test_offset_and_sagging_go_straight_to_high(escalator):
     result = assess("surface_map", "slab", 0.1, 0.9, True, escalators=(escalator,))
-    assert result.level == "High" and ESCALATORS[escalator] in result.reason
+    assert result.level == "Category 3" and ESCALATORS[escalator] in result.reason
 
 
 def test_escalators_stack_and_cap_at_high():
-    assert triage("surface_map", "slab", 0.1, 0.9, True, escalators=("growing",)) == "Medium"
-    assert triage("surface_map", "slab", 0.1, 0.9, True, escalators=("growing", "rust_stain")) == "High"
-    assert triage("surface_map", "slab", 0.1, 0.9, True, escalators=("growing", "rust_stain", "recent_earthquake")) == "High"
+    assert triage("surface_map", "slab", 0.1, 0.9, True, escalators=("growing",)) == "Category 2"
+    assert triage("surface_map", "slab", 0.1, 0.9, True, escalators=("growing", "rust_stain")) == "Category 3"
+    assert triage("surface_map", "slab", 0.1, 0.9, True, escalators=("growing", "rust_stain", "recent_earthquake")) == "Category 3"
 
 
 def test_repeated_escalator_counts_once():
-    assert triage("surface_map", "slab", 0.1, 0.9, True, escalators=("growing", "growing")) == "Medium"
+    assert triage("surface_map", "slab", 0.1, 0.9, True, escalators=("growing", "growing")) == "Category 2"
 
 
 def test_unknown_escalator_is_an_error_not_a_guess():
@@ -102,22 +102,22 @@ def test_unknown_escalator_is_an_error_not_a_guess():
 
 
 def test_low_is_earned():
-    """Low only when image usable, material concrete, confidence at or over threshold, no escalator,
-    not a column, and the matrix says Low for the upper bound of the width."""
+    """Category 1 only when image usable, material concrete, confidence at or over threshold, no escalator,
+    not a column, and the matrix says Category 1 for the upper bound of the width."""
     widths = [0, 0.1, 0.3, 0.5, 1, 2, 3, 10, -1, math.nan]
     confidences = [0, 0.5, CONFIDENCE_THRESHOLD - 0.01, CONFIDENCE_THRESHOLD, 0.95, 1, math.nan]
     for pattern, element, width, conf, ok in itertools.product(PATTERNS + ["unknown"], list(ELEMENTS) + ["roof"],
                                                                 widths, confidences, [True, False]):
-        if triage(pattern, element, width, conf, ok) == "Low":
+        if triage(pattern, element, width, conf, ok) == "Category 1":
             assert ok and conf >= CONFIDENCE_THRESHOLD and width >= 0 and element != "column"
-            assert MATRIX[width_band(width)][PATTERNS.index(pattern)] == "Low"
+            assert MATRIX[width_band(width)][PATTERNS.index(pattern)] == "Category 1"
 
 
 @pytest.mark.parametrize("args", [("flexural", "beam", 2, 0.9, True), ("unknown", "beam", 1, 0.9, True),
                                   ("flexural", "beam", 1, 0.1, True)])
 def test_high_and_referrals_need_engineer(args):
     result = assess(*args)
-    assert result.level in {"High", "Expert needed"}
+    assert result.level in {"Category 3", "Expert needed"}
     assert result.engineer_review
 
 
@@ -129,9 +129,9 @@ def test_low_medium_retake_do_not_flag_engineer(args):
 
 def test_every_result_has_a_reason_a_next_step_and_no_safe_claim():
     result = assess("diagonal_shear", "beam", 1.5, 0.9, True, escalators=("rust_stain",), location="middle")
-    assert result.reason == ("diagonal shear crack in a beam, 1.5 mm wide, 1 to 3 mm band: High; "
+    assert result.reason == ("diagonal shear crack in a beam, 1.5 mm wide, 1 to 3 mm band: Category 3; "
                              "raised because rust staining along the crack.")
-    assert result.next_step == NEXT_STEPS["High"]
+    assert result.next_step == NEXT_STEPS["Category 3"]
     for pattern, element, width in itertools.product(PATTERNS, ELEMENTS, [0.1, 0.5, 2, 5]):
         r = assess(pattern, element, width, 0.9, True)
         assert "safe" not in r.reason.lower() and r.next_step
@@ -155,7 +155,7 @@ def test_unsure_material_goes_to_expert(material_confidence):
 
 
 def test_confident_concrete_reaches_the_matrix():
-    assert triage("surface_map", "slab", 0.1, 0.99, True, material="concrete", material_confidence=0.9) == "Low"
+    assert triage("surface_map", "slab", 0.1, 0.99, True, material="concrete", material_confidence=0.9) == "Category 1"
 
 
 def test_bad_photo_is_retake_before_material_check():
@@ -164,20 +164,20 @@ def test_bad_photo_is_retake_before_material_check():
 
 # matrix v3: location on the element and the new warning signs (spec/features/risk_matrix.md, D28)
 def test_end_zone_raises_cracks_along_bars_and_diagonal_shear():
-    assert triage("along_bar", "beam", 0.2, 0.9, True, location="middle") == "Medium"
-    assert triage("along_bar", "beam", 0.2, 0.9, True, location="end_zone") == "High"
-    assert triage("diagonal_shear", "slab", 0.1, 0.9, True, location="end_zone") == "High"
+    assert triage("along_bar", "beam", 0.2, 0.9, True, location="middle") == "Category 2"
+    assert triage("along_bar", "beam", 0.2, 0.9, True, location="end_zone") == "Category 3"
+    assert triage("diagonal_shear", "slab", 0.1, 0.9, True, location="end_zone") == "Category 3"
 
 
 def test_end_zone_does_not_raise_other_patterns():
-    assert triage("flexural", "beam", 0.5, 0.9, True, location="end_zone") == "Medium"
-    assert triage("surface_map", "slab", 0.1, 0.9, True, location="end_zone") == "Low"
+    assert triage("flexural", "beam", 0.5, 0.9, True, location="end_zone") == "Category 2"
+    assert triage("surface_map", "slab", 0.1, 0.9, True, location="end_zone") == "Category 1"
 
 
 def test_unknown_location_counts_as_end_zone():
     result = assess("along_bar", "beam", 0.2, 0.9, True)
-    assert result.level == "High" and "location is unknown" in result.reason
-    assert triage("along_bar", "beam", 0.2, 0.9, True, location="unknown") == "High"
+    assert result.level == "Category 3" and "location is unknown" in result.reason
+    assert triage("along_bar", "beam", 0.2, 0.9, True, location="unknown") == "Category 3"
 
 
 def test_unknown_location_name_is_an_error_not_a_guess():
@@ -187,8 +187,8 @@ def test_unknown_location_name_is_an_error_not_a_guess():
 
 @pytest.mark.parametrize("sign", ["thin_cover", "crossing_bar_crack", "damp"])
 def test_new_v3_signs_raise_one_level(sign):
-    assert triage("flexural", "beam", 0.5, 0.9, True, escalators=(sign,)) == "High"
-    assert triage("surface_map", "slab", 0.1, 0.9, True, escalators=(sign,)) == "Medium"
+    assert triage("flexural", "beam", 0.5, 0.9, True, escalators=(sign,)) == "Category 3"
+    assert triage("surface_map", "slab", 0.1, 0.9, True, escalators=(sign,)) == "Category 2"
 
 
 def test_every_location_and_sign_has_a_basis():

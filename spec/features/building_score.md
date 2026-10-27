@@ -23,11 +23,11 @@ The age, added floors and typology changes come from the professor's list of bui
 **Crack results (P and O scales):** the level of every crack recorded in the building, after the element rule and the warning signs, including growth (risk matrix v3, `spec/features/monitoring.md`).
 
 ## Rules (illustrative)
-1. **Base tier from the worst crack:** any High: P1. Otherwise any Medium or Expert needed: P2. Otherwise (only Low, or no crack recorded yet): P3.
+1. **Base tier from the worst crack:** any Category 3: P1. Otherwise any Category 2 or Expert needed: P2. Otherwise (only Category 1, or no crack recorded yet): P3.
 2. **Building data:** two or more risk flags: one tier higher.
-3. **Damage spread:** Medium or worse in two or more different elements: one tier higher.
+3. **Damage spread:** Category 2 or worse in two or more different elements: one tier higher.
 4. Tiers stop at P1. The score never lowers a crack level and is never shown to residents as "safe".
-5. **Order within a tier:** number of High cracks, then number of growing cracks, then number of risk flags, then occupants.
+5. **Order within a tier:** number of Category 3 cracks, then number of growing cracks, then number of risk flags, then occupants.
 
 Output: the tier, the rules that raised it (one sentence each), and the list of unknown answers.
 
@@ -38,11 +38,11 @@ Output: the tier, the rules that raised it (one sentence each), and the list of 
 | P2 | An engineer visits within a month. |
 | P3 | Monitoring: the resident photographs the cracks again on their recheck dates. |
 
-Every High and every referral is also confirmed by an engineer on the review screen, whatever the tier (AGENTS.md rule 4).
+Every Category 3 and every referral is also confirmed by an engineer on the review screen, whatever the tier (AGENTS.md rule 4).
 
 ## Example
-A 60-year-old building (flag) with floors added (flag), one Medium crack in a beam and one Medium crack in a column: base P2 (worst crack Medium); two flags: P1. Reason shown: "Worst crack: Medium; raised because 2 building risk flags (older than 50 years, floors added)."
-Note: a crack in a column is already raised one level by the element rule, so a Medium in a column means its base pattern was Low.
+A 60-year-old building (flag) with floors added (flag), one Category 2 crack in a beam and one Category 2 crack in a column: base P2 (worst crack Category 2); two flags: P1. Reason shown: "Worst crack: Category 2; raised because 2 building risk flags (older than 50 years, floors added)."
+Note: a crack in a column is already raised one level by the element rule, so a Category 2 in a column means its base pattern was Category 1.
 
 ## Calibration
 1. Check rapid visual screening methods for buildings (candidates to verify: FEMA P-154 and the GEM building taxonomy) before any threshold changes.

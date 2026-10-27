@@ -10,9 +10,9 @@ from dataclasses import dataclass
 
 from triage.matrix import CONFIDENCE_THRESHOLD, ESCALATORS
 
-URGENT_SIGNS = {"offset", "sagging"}  # straight to High in the risk matrix
+URGENT_SIGNS = {"offset", "sagging"}  # straight to Category 3 in the risk matrix
 WATCH_SIGNS = {"growing", "rust_stain", "sticking_openings", "recent_earthquake"}  # residents can report these
-URGENT_WIDTH_MM = 1.0  # upper end of the width; from 1 mm the risk matrix can reach High
+URGENT_WIDTH_MM = 1.0  # upper end of the width; from 1 mm the risk matrix can reach Category 3
 VISIT_WIDTH_MM = 0.3  # first band edge of the risk matrix
 MAX_RETAKES = 2
 BUILDING_FLAGS_FOR_VISIT = 2  # as in the building risk score (D22)

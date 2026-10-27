@@ -194,7 +194,7 @@ def histogram(rows: list[dict], path: Path) -> None:
             if vals:
                 ax.hist(vals, bins=bins, histtype="step", lw=2, color=colour, label=label)
         ax.legend(frameon=False, fontsize=8.5, loc="upper right")
-        ax.axvline(MIN_SHARPNESS, color=LEVEL["High"], lw=1.2)
+        ax.axvline(MIN_SHARPNESS, color=LEVEL["Category 3"], lw=1.2)
         ax.set_xscale("log")
         members = [r for r in rows if r["group"] == group]
         accepted = sum(r["image_ok"] for r in members) / len(members)

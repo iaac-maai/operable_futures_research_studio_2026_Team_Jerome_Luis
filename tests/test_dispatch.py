@@ -47,7 +47,7 @@ def test_doubt_or_any_sign_means_a_visit_within_a_month(kwargs):
 def test_only_a_confident_hairline_with_nothing_else_can_wait():
     d = screen(**HAIRLINE, building_flags=1)
     assert d.tier == "V3"
-    assert "Low" not in d.next_step and "safe" not in d.next_step.lower()
+    assert "Category 1" not in d.next_step and "safe" not in d.next_step.lower()
 
 
 def test_every_result_has_a_reason_and_a_next_step():

@@ -1,14 +1,14 @@
 # AGENTS.md: system constitution
 
 ## Project
-Second Look is a human-in-the-loop triage system for cracks in reinforced concrete. It checks the photo and the material, finds and measures the crack in millimetres, classifies its pattern, and applies written, auditable risk rules, returning a level with its confidence. An engineer confirms every High and every referral, and their corrections retrain the models. It never issues a safety clearance. Context: buildings in informal neighbourhoods that nobody inspects.
+Second Look is a human-in-the-loop triage system for cracks in reinforced concrete. It checks the photo and the material, finds and measures the crack in millimetres, classifies its pattern, and applies written, auditable risk rules, returning a level with its confidence. An engineer confirms every Category 3 and every referral, and their corrections retrain the models. It never issues a safety clearance. Context: buildings in informal neighbourhoods that nobody inspects.
 Read `spec/constitution/mission.md`, `roadmap.md` and `tech_stack.md` before changing anything.
 
 ## Non-negotiable rules
 1. The tool never issues a permit, a clearance or a "safe" guarantee.
-2. Any doubt goes to an expert: unusable photo means retake, low model confidence means "Expert needed". Low confidence must never become Low risk.
-3. Low risk is earned: usable image, confident model, and the risk matrix says Low.
-4. An engineer confirms every High and every referral.
+2. Any doubt goes to an expert: unusable photo means retake, low model confidence means "Expert needed". A low confidence must never become Category 1.
+3. Category 1 is earned: usable image, confident model, and the risk matrix says Category 1.
+4. An engineer confirms every Category 3 and every referral.
 5. Triage levels come from written, auditable rules in `src/triage/`, not from a language model.
 6. Language models are probabilistic and do not understand loads or materials. Verify outputs against data and tests.
 7. Do not invent data, citations or numbers. Mark assumptions as "assumption" and thresholds as "illustrative until calibrated".
@@ -21,9 +21,9 @@ Read `spec/constitution/mission.md`, `roadmap.md` and `tech_stack.md` before cha
 |---|---|---|
 | Retake | Photo unusable | No |
 | Expert needed | The system is unsure | Yes |
-| Low | Routine monitoring | No |
-| Medium | Low-cost advice, recheck | No |
-| High | Engineer must confirm | Yes |
+| Category 1 | Routine monitoring | No |
+| Category 2 | Low-cost advice, recheck | No |
+| Category 3 | Engineer must confirm | Yes |
 Every output carries a one-sentence reason. Never output "safe", a clearance or a permit.
 
 ## Working method

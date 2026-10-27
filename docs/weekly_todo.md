@@ -32,7 +32,7 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 - [ ] Decide who presents what on Thursday (J + L)
 
 ### Engineering partners (send early, replies take time)
-- [ ] Send a dated request to Engineers Without Borders: rate about 150 to 200 crack photos Low / Medium / High, at least 30 High, by 20 Nov; put the scale card (or a coin) next to cracks in their own inspection photos (__)
+- [ ] Send a dated request to Engineers Without Borders: rate about 150 to 200 crack photos Category 1 / Category 2 / Category 3, at least 30 Category 3, by 20 Nov; put the scale card (or a coin) next to cracks in their own inspection photos (__)
 - [ ] Same request to the third-party structural engineer; confirm the agreement (__)
 
 ### Data

@@ -2,9 +2,9 @@
 
 from collections import Counter
 
-TRUTH = ["Low", "Medium", "High"]
-OUTPUTS = ["Low", "Medium", "High", "Expert needed", "Retake"]
-FLAGGED = {"High", "Expert needed"}
+TRUTH = ["Category 1", "Category 2", "Category 3"]
+OUTPUTS = ["Category 1", "Category 2", "Category 3", "Expert needed", "Retake"]
+FLAGGED = {"Category 3", "Expert needed"}
 
 
 def confusion(truth: list[str], predicted: list[str]) -> dict[str, dict[str, int]]:
@@ -19,18 +19,18 @@ def confusion(truth: list[str], predicted: list[str]) -> dict[str, dict[str, int
 
 
 def safety_table(truth: list[str], predicted: list[str]) -> dict[str, int]:
-    """Table 1: positive is engineer High, flagged is High or Expert needed. Retakes are counted apart."""
+    """Table 1: positive is engineer Category 3, flagged is Category 3 or Expert needed. Retakes are counted apart."""
     table = confusion(truth, predicted)
-    high = table["High"]
-    others = [table["Low"], table["Medium"]]
+    high = table["Category 3"]
+    others = [table["Category 1"], table["Category 2"]]
     return {
         "TP": sum(high[p] for p in FLAGGED),
-        "FN": high["Low"] + high["Medium"],
+        "FN": high["Category 1"] + high["Category 2"],
         "FP": sum(row[p] for row in others for p in FLAGGED),
-        "TN": sum(row["Low"] + row["Medium"] for row in others),
+        "TN": sum(row["Category 1"] + row["Category 2"] for row in others),
         "retake": sum(row["Retake"] for row in table.values()),
         "retake_high": high["Retake"],
-        "false_all_clear": table["Medium"]["Low"] + table["High"]["Low"],
+        "false_all_clear": table["Category 2"]["Category 1"] + table["Category 3"]["Category 1"],
     }
 
 

@@ -10,7 +10,7 @@ How reinforcing bars and concrete hold together (bond), how that governs crackin
 
 ### A. Cracks and safety (chapters 1, 4, 5)
 1. **A crack is not automatically a safety problem, and a small crack is not automatically safe.** "Cracks do not necessarily indicate an insufficient level of safety if they are expected and coherent with the structural behaviour"; "small crack openings might not be an indicator of sufficient resistance in cases governed by fragile failure modes" (ch. 4.1, citing Zaborac et al. 2019 and Monney et al. 2022).
-   → Supports our design: the level depends on the **pattern** (what the crack means), not on width alone; brittle patterns such as diagonal shear cracks start at Medium even below 0.3 mm (`spec/features/risk_matrix.md`).
+   → Supports our design: the level depends on the **pattern** (what the crack means), not on width alone; brittle patterns such as diagonal shear cracks start at Category 2 even below 0.3 mm (`spec/features/risk_matrix.md`).
 2. Cracks are one of the indicators used in visual inspections for structural assessment, with national inspection guides (Switzerland OFROU 2021, Spain DGC 2012) and a US report on evaluating structural cracking in concrete (Zaborac et al. 2019, FHWA/TX-19/0-6919-1) [50][51][52].
    → These are the **literature anchors** to check first for calibrating the matrix.
 3. Crack **kinematics** have two components: **opening** (perpendicular to the crack) and **sliding** (along it). Kinematics help estimate which shear-transfer mechanisms are active (ch. 5.1).
@@ -67,7 +67,7 @@ How reinforcing bars and concrete hold together (bond), how that governs crackin
 | 12 | Damp or wet exposure as a warning sign, after reading Eurocode 2 exposure classes | Risk matrix (later) | Finding 18 |
 
 ## Open questions for the expert (Enrique Corres Sojo)
-- Which crack patterns in reinforced concrete homes would you treat as brittle (High even when narrow)?
+- Which crack patterns in reinforced concrete homes would you treat as brittle (Category 3 even when narrow)?
 - Is ±1 pixel (±30 %) at 3 pixels per crack acceptable for triage, or should we require 6 to 8 pixels?
 - What would you accept as evidence that a crack is growing, from two phone photos months apart?
 - Would you rate our 30 to 40 calibration cards (element x pattern x width x warning signs)?

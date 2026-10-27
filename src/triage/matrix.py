@@ -12,7 +12,7 @@ from pathlib import Path
 _DATA = json.loads((Path(__file__).with_name("risk_matrix_v3.json")).read_text(encoding="utf-8"))
 
 VERSION = _DATA["version"]
-LEVELS = _DATA["levels"]  # Low < Medium < High
+LEVELS = _DATA["levels"]  # Category 1 < Category 2 < Category 3
 BANDS = [b["key"] for b in _DATA["width_bands"]]
 BAND_NAMES = {b["key"]: b["name"] for b in _DATA["width_bands"]}
 _BAND_UPPER = [b["upper_mm"] for b in _DATA["width_bands"]]
@@ -31,12 +31,12 @@ SUPPORTED_MATERIALS = {"concrete"}  # reinforced concrete only (decision D17)
 
 CONFIDENCE_THRESHOLD = 0.8  # illustrative; fixed here so callers cannot lower it
 MATERIAL_THRESHOLD = 0.8  # illustrative; below it the material counts as unsure
-NEEDS_ENGINEER = {"High", "Expert needed"}
+NEEDS_ENGINEER = {"Category 3", "Expert needed"}
 
 
 @dataclass(frozen=True)
 class Result:
-    level: str  # Low, Medium, High, Retake or Expert needed
+    level: str  # Category 1, Category 2, Category 3, Retake or Expert needed
     reason: str
     engineer_review: bool
     next_step: str
@@ -107,7 +107,7 @@ def assess(pattern: str, element: str, width_mm: float, confidence: float, image
         raised_by.append("its location is unknown, so it counts as an end zone" if location == "unknown"
                          else "it is in an end zone, where bars are anchored")
     for e in dict.fromkeys(escalators):  # each sign counts once
-        rank = len(LEVELS) - 1 if _ESCALATOR_EFFECT[e] == "High" else rank + 1
+        rank = len(LEVELS) - 1 if _ESCALATOR_EFFECT[e] == "Category 3" else rank + 1
         raised_by.append(ESCALATORS[e])
     level = LEVELS[min(rank, len(LEVELS) - 1)]
 
@@ -118,5 +118,5 @@ def assess(pattern: str, element: str, width_mm: float, confidence: float, image
 
 
 def triage(pattern: str, element: str, width_mm: float, confidence: float, image_ok: bool, **kwargs) -> str:
-    """Return Low, Medium, High, 'Retake' or 'Expert needed'."""
+    """Return Category 1, Category 2, Category 3, 'Retake' or 'Expert needed'."""
     return assess(pattern, element, width_mm, confidence, image_ok, **kwargs).level

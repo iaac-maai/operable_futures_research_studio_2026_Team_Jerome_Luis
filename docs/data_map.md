@@ -63,8 +63,8 @@ One row per dataset (one per PHI-Net task), in order of fit: images on our disk,
 | Crack or no crack | **Yes** | METU, Strathclyde, SDNET2018: over 90,000 images | Smooth plaster walls of homes | Our pilot photos |
 | Crack pattern (7 classes) | **No** | No dataset uses our seven patterns | Labels | Label a few hundred images by hand (number: assumption, to set when we start) |
 | Width in mm | **No** | Nothing public has a scale reference | Photos with the scale card and a known width | Pilot photos with the scale card |
-| Low / Medium / High | **No** | Haiti and Nepal rate whole buildings, after an earthquake | A rating per crack, by an engineer | Our photos rated by Engineers Without Borders and the structural engineer |
-| Proof that the tool works (3 Dec baseline) | **No** | Nothing | Held-out photos rated per crack, plus an engineer's photo-only rating | Same as above; at least 30 High cases (`spec/features/evaluation.md`) |
+| Category 1 / Category 2 / Category 3 | **No** | Haiti and Nepal rate whole buildings, after an earthquake | A rating per crack, by an engineer | Our photos rated by Engineers Without Borders and the structural engineer |
+| Proof that the tool works (3 Dec baseline) | **No** | Nothing | Held-out photos rated per crack, plus an engineer's photo-only rating | Same as above; at least 30 Category 3 cases (`spec/features/evaluation.md`) |
 
 **In one line:** we can train the "find the crack" step now (hackathon target); the "how dangerous is it" step, and the proof that it works, still depend on our own photos and the engineers (`spec/decisions.md` D15).
 
@@ -111,7 +111,7 @@ One row per dataset (one per PHI-Net task), in order of fit: images on our disk,
 | Data | Source | Availability | Access | Format | Size | Licence | Covers | Gaps |
 |---|---|---|---|---|---|---|---|---|
 | Pilot phone photos (no engineer) | Us, Barcelona, public facades (`spec/features/photo_protocol.md`) | To collect this week | Our own; no people, no addresses | S, O and P photos with the scale card; labels in a CSV | Target about 30 cracks, 3 shots each (assumption) | Ours | Photo protocol, quality gate, width measurement | No risk labels; Barcelona is not the target context |
-| Engineer-labelled phone photos | To collect (Phase 2) | Does not exist | Needs engineering partner and resident consent | Same protocol, plus element, material, pattern, width (mm), Low / Medium / High, on-site rating | Target size: assumption, to set with the partner | Ours; consent rules to write | The real target data | Everything: partner, consent, sites |
+| Engineer-labelled phone photos | To collect (Phase 2) | Does not exist | Needs engineering partner and resident consent | Same protocol, plus element, material, pattern, width (mm), Category 1 / Category 2 / Category 3, on-site rating | Target size: assumption, to set with the partner | Ours; consent rules to write | The real target data | Everything: partner, consent, sites |
 
 ### Building data and ground-truth candidates
 

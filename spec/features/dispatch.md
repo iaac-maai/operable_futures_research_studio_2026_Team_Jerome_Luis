@@ -19,13 +19,13 @@ A field worker cannot visit every crack a resident photographs. The professor's 
 
 | # | If | Then | Why |
 |---|---|---|---|
-| 1 | Offset or sagging reported | **V1: visit within 1 week**, engineer told today | These go straight to High in the risk matrix |
+| 1 | Offset or sagging reported | **V1: visit within 1 week**, engineer told today | These go straight to Category 3 in the risk matrix |
 | 2 | Photo not usable | **Retake**; after 2 failed retakes, **V2** | A resident who cannot take the photo is not left alone |
-| 3 | Width upper end ≥ 1 mm | **V1** | From 1 mm the matrix can reach High |
+| 3 | Width upper end ≥ 1 mm | **V1** | From 1 mm the matrix can reach Category 3 |
 | 4 | "Growing" plus any other warning sign | **V1** | Growth is what engineers look at first |
 | 5 | Any other warning sign (growing, rust staining, sticking doors or windows, recent earthquake, damp, or any sign of the risk matrix) | **V2: visit within 1 month** | Each raises the level in the risk matrix; no reported sign is ever ignored |
 | 6 | Crack not found with confidence | **V2** | Any doubt goes to a person (rule 2) |
-| 7 | No scale in the photo, so no width | **V2** | Without a width, Low cannot be earned |
+| 7 | No scale in the photo, so no width | **V2** | Without a width, Category 1 cannot be earned |
 | 8 | Width upper end ≥ 0.3 mm | **V2** | Above the first matrix band |
 | 9 | 2 or more building risk flags (unknown counts) | **V2** | Same flags as the building risk score (D22) |
 | 10 | Otherwise: hairline under 0.3 mm, crack found with confidence, no sign, fewer than 2 flags | **V3: no visit yet** | The only case that can wait |
@@ -38,7 +38,7 @@ Times (1 week, 1 month), widths (0.3 and 1 mm, the risk matrix band edges) and t
 - **V3:** "Not assessed yet: no field worker has seen this crack. Photograph it again in 1 month, and at once if it grows, if doors or windows stick, or after an earthquake."
 - **Retake:** "Retake the photo with the scale card, following the guide."
 
-V1, V2 and V3 are visit priorities, not triage levels. The five levels (Retake, Expert needed, Low, Medium, High) are only given after the field visit, from the field worker's photos. V3 is never Low and never "safe" (rules 1 and 3).
+V1, V2 and V3 are visit priorities, not triage levels. The five levels (Retake, Expert needed, Category 1, Category 2, Category 3) are only given after the field visit, from the field worker's photos. V3 is never Category 1 and never "safe" (rules 1 and 3).
 
 ## After the decision
 - **Visit (V1, V2):** the field worker does the first visit: the building (once), every cracked element, every crack (pipeline phases 1 to 5), with a reference phone and the scale card. Visits are grouped: one visit covers every open report in the same building.
@@ -56,5 +56,5 @@ V1, V2 and V3 are visit priorities, not triage levels. The five levels (Retake, 
 - A bad photo asks for a retake; after 2 failed retakes it becomes a visit.
 - A wide crack (≥ 1 mm) gives V1; growing plus another sign gives V1.
 - Any one warning sign, low confidence, no scale, 0.3 mm or more, or 2 building flags gives V2.
-- Only a confident hairline crack with no sign and fewer than 2 flags gives V3, and V3 never mentions Low or "safe".
+- Only a confident hairline crack with no sign and fewer than 2 flags gives V3, and V3 never mentions Category 1 or "safe".
 - Unknown sign names are rejected; the audit picks about 1 in 10 and always the same reports.

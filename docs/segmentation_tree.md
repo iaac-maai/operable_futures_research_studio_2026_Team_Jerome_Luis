@@ -49,7 +49,7 @@ These are the inputs of the building risk score (`spec/features/building_score.m
 | D2 | No crack is labelled by an engineer with a risk level and a scale | Measured: `docs/data_map.md` |
 
 ## Atomic problem (work on first)
-**Is this crack dangerous, and is it growing?** One crack in one reinforced concrete element, photographed with a scale and seen again later, gives a level (Low, Medium, High, Expert needed, Retake), its confidence, a one-sentence reason, and whether it grew.
+**Is this crack dangerous, and is it growing?** One crack in one reinforced concrete element, photographed with a scale and seen again later, gives a level (Category 1, Category 2, Category 3, Expert needed, Retake), its confidence, a one-sentence reason, and whether it grew.
 It comes from the crack path: B1 to B5 (bold above).
 
 ## Building risk score (what the atomic problem feeds)

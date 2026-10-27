@@ -1,6 +1,6 @@
 # Mission
 
-Second Look is a human-in-the-loop triage system for cracks in reinforced concrete. It checks the photo and the material, finds and measures the crack in millimetres, classifies its pattern, and applies written, auditable risk rules, returning a level with its confidence. An engineer confirms every High and every referral, and their corrections retrain the models. It never issues a safety clearance.
+Second Look is a human-in-the-loop triage system for cracks in reinforced concrete. It checks the photo and the material, finds and measures the crack in millimetres, classifies its pattern, and applies written, auditable risk rules, returning a level with its confidence. An engineer confirms every Category 3 and every referral, and their corrections retrain the models. It never issues a safety clearance.
 
 ## Problem
 In dense, ageing neighbourhoods, residents see cracks every day but cannot tell a harmless one from a sign of structural failure.
@@ -15,7 +15,7 @@ Cracks in reinforced concrete elements (walls, columns, beams, slabs). Other mat
 
 ## Users
 - Residents of old buildings, field workers and community leaders: take the photo and receive a level, a reason and a next step.
-- Structural engineers: review every High and every referral, confirm or correct it, and so improve the models (`spec/features/pipeline.md`). Engineers and municipalities also use the ranked list to decide where to inspect first.
+- Structural engineers: review every Category 3 and every referral, confirm or correct it, and so improve the models (`spec/features/pipeline.md`). Engineers and municipalities also use the ranked list to decide where to inspect first.
 
 ## Success (works, used, matters)
 - Works: beats the non-AI baseline (an engineer's visual check) on held-out, engineer-labelled photos.
@@ -23,7 +23,7 @@ Cracks in reinforced concrete elements (walls, columns, beams, slabs). Other mat
 - Matters: impact indicators move. Indicator, unit, baseline, target and evidence are still to be defined (see `roadmap.md`).
 
 ## Failure (stop condition)
-We stop or redesign if the tool misses High cases that engineers would flag.
+We stop or redesign if the tool misses Category 3 cases that engineers would flag.
 
 ## Out of scope
 Permits, legal clearances, foundation or rebar assessment, any claim a surface photo cannot support. Materials other than reinforced concrete are not assessed (they are referred).

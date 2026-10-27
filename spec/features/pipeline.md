@@ -32,7 +32,7 @@ Kinds: learned model (reports a confidence), written rule (auditable), people. S
 | S | 2 Check | Completeness check | rule | Each answer known or "unknown" | Unknown counts as a risk flag and is shown as unknown | specified |
 | S | 3 Perceive | Building reading | learned (later) | Now: the questionnaire answers. Later: a model on the facade photo (storeys, typology; PHI-Net task 5) | - | specified |
 | S | 4 Decide | Building risk score | rule | Priority P1, P2 or P3 with its reasons (`spec/features/building_score.md`) | - | specified |
-| S | 5 Act | Engineer | people | Ranked list of buildings and a dossier per building; confirms or corrects every High and every referral; rates on site | - | specified |
+| S | 5 Act | Engineer | people | Ranked list of buildings and a dossier per building; confirms or corrects every Category 3 and every referral; rates on site | - | specified |
 | O | 1 Capture | Element photo | people | The whole element with the scale card; the resident is not asked what it is | - | specified |
 | O | 2 Check | Scale and angle | rule | Scale card visible; phone parallel to the wall | Retake | specified |
 | O | 3 Perceive | Material + element | learned | Two models, each with a confidence: **material** (concrete or not concrete) and **element** (column, beam, slab, wall; pre-trained on PHI-Net task 6) | Either unsure: Expert needed. A confirmation by a field worker or an engineer is stored for that element and reused at follow-ups | specified |
@@ -48,7 +48,7 @@ Kinds: learned model (reports a confidence), written rule (auditable), people. S
 **Between the rows:** the element rules (O) pass the material and the element to the crack level (P); the crack levels, their growth and the spread of damage across elements pass up to the building risk score (S).
 
 ## Two loops
-- **Monitoring loop:** on the recheck date (Low: 6 months, Medium: 1 month, from the risk matrix) the same crack ID and marker stickers are photographed again, with the previous photo shown as an overlay. Growth larger than the measurement uncertainty raises the crack level and, through it, the building priority (`spec/features/monitoring.md`). Status: specified.
+- **Monitoring loop:** on the recheck date (Category 1: 6 months, Category 2: 1 month, from the risk matrix) the same crack ID and marker stickers are photographed again, with the previous photo shown as an overlay. Growth larger than the measurement uncertainty raises the crack level and, through it, the building priority (`spec/features/monitoring.md`). Status: specified.
 - **Learning loop:** engineer corrections and on-site ratings are stored as labels; the learned models (phase 3) are retrained in batches and each new version is checked on held-out engineer-rated photos before use. Written rules change only by a reviewed decision in `spec/decisions.md` (AGENTS.md rule 5). This semester: one manual retraining as a demonstration. This is human-in-the-loop learning, not reinforcement learning (D18). Status: specified.
 
 ## Who answers what (D25)

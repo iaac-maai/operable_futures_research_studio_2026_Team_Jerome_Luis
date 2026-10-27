@@ -2,9 +2,9 @@
  "version": "3.0-illustrative",
  "status": "Illustrative until calibrated with the engineering partners (spec/features/risk_matrix.md). Every value carries its basis: a source number from docs/sources.md, a decision, or 'assumption'.",
  "levels": [
-  "Low",
-  "Medium",
-  "High"
+  "Category 1",
+  "Category 2",
+  "Category 3"
  ],
  "width_bands": [
   {
@@ -32,50 +32,50 @@
   "surface_map": {
    "name": "surface map cracking",
    "levels": [
-    "Low",
-    "Low",
-    "Medium",
-    "Medium"
+    "Category 1",
+    "Category 1",
+    "Category 2",
+    "Category 2"
    ],
    "elements": "all"
   },
   "flexural": {
    "name": "flexural crack",
    "levels": [
-    "Low",
-    "Medium",
-    "High",
-    "High"
+    "Category 1",
+    "Category 2",
+    "Category 3",
+    "Category 3"
    ],
    "elements": "all"
   },
   "diagonal_shear": {
    "name": "diagonal shear crack",
    "levels": [
-    "Medium",
-    "High",
-    "High",
-    "High"
+    "Category 2",
+    "Category 3",
+    "Category 3",
+    "Category 3"
    ],
    "elements": "all"
   },
   "along_bar": {
    "name": "crack along a bar",
    "levels": [
-    "Medium",
-    "Medium",
-    "High",
-    "High"
+    "Category 2",
+    "Category 2",
+    "Category 3",
+    "Category 3"
    ],
    "elements": "all"
   },
   "column_horizontal": {
    "name": "horizontal crack in a column",
    "levels": [
-    "Medium",
-    "High",
-    "High",
-    "High"
+    "Category 2",
+    "Category 3",
+    "Category 3",
+    "Category 3"
    ],
    "elements": [
     "column"
@@ -84,20 +84,20 @@
   "spalling_exposed_bar": {
    "name": "spalling with exposed bar",
    "levels": [
-    "Medium",
-    "High",
-    "High",
-    "High"
+    "Category 2",
+    "Category 3",
+    "Category 3",
+    "Category 3"
    ],
    "elements": "all"
   },
   "joint": {
    "name": "beam-column joint crack",
    "levels": [
-    "Medium",
-    "High",
-    "High",
-    "High"
+    "Category 2",
+    "Category 3",
+    "Category 3",
+    "Category 3"
    ],
    "elements": [
     "column",
@@ -192,19 +192,19 @@
   },
   "offset": {
    "name": "one side of the crack is displaced",
-   "effect": "High",
+   "effect": "Category 3",
    "basis": "v2 (D20); measured as sliding larger than its uncertainty, about 2 px [46] ch. 5.1, 5.2"
   },
   "sagging": {
    "name": "visible sagging of a beam or slab",
-   "effect": "High",
+   "effect": "Category 3",
    "basis": "v2 (D20)"
   }
  },
  "next_steps": {
-  "Low": "Routine monitoring: photograph the same crack again in 6 months.",
-  "Medium": "Low-cost advice; photograph the same crack again in 1 month. If it has grown, it goes to an engineer.",
-  "High": "An engineer must confirm; the case is sent now.",
+  "Category 1": "Routine monitoring: photograph the same crack again in 6 months.",
+  "Category 2": "Low-cost advice; photograph the same crack again in 1 month. If it has grown, it goes to an engineer.",
+  "Category 3": "An engineer must confirm; the case is sent now.",
   "Expert needed": "An engineer decides; the case is sent now.",
   "Retake": "Retake the photo following the protocol."
  }
