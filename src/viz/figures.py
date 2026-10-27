@@ -9,7 +9,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import matplotlib
-import numpy as np
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -342,12 +341,15 @@ def decisions_and_players():
     return fig
 
 
-CAT_FILL = {"Category 1": ("white", FLOW_INK if "FLOW_INK" in globals() else "#111111", "#111111"),
+NEW_IN_V3 = {"thin_cover", "crossing_bar_crack", "damp"}
+PATTERN_WORD = {"surface_map": "Map", "flexural": "Bending", "diagonal_shear": "Shear", "along_bar": "Bar",
+                "column_horizontal": "Column", "spalling_exposed_bar": "Spalling", "joint": "Joint"}
+CAT_FILL = {"Category 1": ("white", "#111111", "#111111"),
             "Category 2": ("#bdbdbd", "#bdbdbd", "#111111"), "Category 3": ("#111111", "#111111", "white")}
 
 
 def _icon(ax, key, cx, cy, s=9.0):
-    """Black, white and grey pictogram of a crack pattern, a raise or an action, in an s x s box centred on (cx, cy).
+    """Black, white and grey pictogram of a crack pattern, in an s x s box centred on (cx, cy).
     Symbol key in spec/features/figures.md."""
     K, G, u = "#111111", "#9a9a9a", s / 10.0
     x0, y0 = cx - s / 2, cy - s / 2
@@ -403,99 +405,12 @@ def _icon(ax, key, cx, cy, s=9.0):
         rect(0, 4.5, 10, 2.5, z=2)
         ln([(4.1, 4.6), (4.8, 5.4), (5.2, 6.1), (5.9, 6.9)], lw=1.8, z=5)
         ln([(5.9, 4.6), (5.2, 5.3), (4.8, 6.2), (4.1, 6.9)], lw=1.8, z=5)
-    elif key == "column":
-        rect(4, 0, 2, 7.6)
-        arrow((5, 10), (5, 7.8))
-        ln([(2.5, 7.8), (7.5, 7.8)], lw=1.6)
-    elif key == "end_zone":
-        rect(0, 0, 2.2, 10)
-        rect(2.2, 5, 7.8, 3)
-        rect(2.2, 5, 2.6, 3, fc="#bdbdbd", ec=K, lw=1.2, z=4)
-        ln([(3.1, 6.1), (4.4, 6.2)], lw=1.6, z=5)
-    elif key == "growing":
-        ln([(5, 1), (4.6, 3), (5.3, 5), (4.7, 7), (5, 9)], lw=2.6)
-        arrow((4.1, 5), (1.3, 5))
-        arrow((5.9, 5), (8.7, 5))
-    elif key == "rust_stain":
-        rect(0.5, 0.5, 9, 9, fc="#f2f2f2", ec=G, lw=1.2)
-        ln([(5, 9), (4.6, 7), (5.3, 5), (4.8, 3.2)], lw=1.8)
-        for (x, y, w, h) in ((4.0, 2.4, 2.4, 1.2), (5.6, 1.4, 1.2, 1.3), (3.6, 1.0, 1.0, 1.1)):
-            ax.add_patch(matplotlib.patches.Ellipse(P(x + w / 2, y + h / 2), w * u, h * u, facecolor="#7a7a7a",
-                                                    edgecolor="none", zorder=4))
-    elif key == "sticking_openings":
-        rect(2, 0, 6, 10, fc="white", ec=K, lw=1.8)
-        poly([(2.7, 0.5), (7.3, 1.6), (7.3, 9.2), (2.7, 9.5)], fc="#d0d0d0", ec=K, lw=1.3, z=4)
-        circ(6.5, 5.2, 0.35, fc=K, z=5)
-    elif key == "recent_earthquake":
-        ln([(0, 5), (2.5, 5), (3.2, 8.5), (4.1, 1.5), (5.0, 9.5), (5.9, 0.5), (6.8, 7.5), (7.5, 5), (10, 5)], lw=1.7)
-    elif key == "added_floors":
-        rect(2, 0, 6, 3)
-        rect(2, 3, 6, 3)
-        rect(2, 6, 6, 3, fc="white", ec=K, lw=1.6, ls=(0, (2, 1.5)))
-        ln([(5, 6.8), (5, 8.2)], lw=1.8)
-        ln([(4.3, 7.5), (5.7, 7.5)], lw=1.8)
-    elif key == "thin_cover":
-        rect(0, 1, 10, 8, fc="#f2f2f2", ec=K, lw=1.6)
-        circ(5, 7.4, 0.9, fc=K)
-        ln([(8.2, 9), (8.2, 8.3)], lw=1.3)
-        ln([(7.6, 9), (8.8, 9)], lw=1.3)
-        ln([(7.6, 8.3), (8.8, 8.3)], lw=1.3)
-        ln([(0, 9), (10, 9)], lw=2.4)
-    elif key == "crossing_bar_crack":
-        rect(0, 1, 10, 8)
-        ln([(0.4, 4.5), (9.6, 4.5)], lw=2.6, c=G, ls=(0, (2.5, 1.5)), z=3)
-        ln([(0.8, 5.1), (3, 4.9), (5, 5.2), (7.2, 4.9), (9.2, 5.1)], lw=1.6)
-        ln([(5, 1.2), (5.4, 3), (4.8, 5), (5.3, 7), (5, 8.8)], lw=1.9)
-        circ(5, 5.05, 0.55, fc=K, z=5)
-    elif key == "damp":
-        for (x, y, r) in ((2.6, 5.5, 1.4), (6.6, 6.5, 1.7), (5.0, 2.2, 1.2)):
-            circ(x, y, r, fc="#9a9a9a", ec=K, lw=1.3)
-            poly([(x - r * 0.95, y + r * 0.3), (x, y + r * 2.2), (x + r * 0.95, y + r * 0.3)], fc="#9a9a9a", ec="none",
-                 z=4)
-            ln([(x - r * 0.97, y + r * 0.25), (x, y + r * 2.2), (x + r * 0.97, y + r * 0.25)], lw=1.3, z=5)
-    elif key == "offset":
-        ln([(0, 6.2), (5, 6.2), (5, 3.8), (10, 3.8)], lw=2.4)
-        ln([(5, 9.5), (4.7, 7.5), (5.2, 6.2)], lw=1.5)
-        ln([(5, 3.8), (5.3, 2.2), (4.9, 0.5)], lw=1.5)
-    elif key == "sagging":
-        poly([(1, 5), (1.9, 3.4), (0.1, 3.4)], fc=G, ec="none")
-        poly([(9, 5), (9.9, 3.4), (8.1, 3.4)], fc=G, ec="none")
-        theta = np.linspace(0, np.pi, 30)
-        ln(list(zip(1 + 8 * theta / np.pi, 5.2 - 2.6 * np.sin(theta))), lw=2.6)
-        ln(list(zip(1 + 8 * theta / np.pi, 7.4 - 2.6 * np.sin(theta))), lw=1.2, c=G, ls=(0, (2, 2)))
-    elif key == "monitor":  # an eye
-        theta = np.linspace(0, np.pi, 30)
-        ln(list(zip(5 + 4.5 * np.cos(theta), 5 + 2.6 * np.sin(theta))), lw=1.8)
-        ln(list(zip(5 + 4.5 * np.cos(theta), 5 - 2.6 * np.sin(theta))), lw=1.8)
-        circ(5, 5, 1.4, fc=K)
-    elif key == "repair":  # a wrench
-        ln([(2.2, 2.2), (6.6, 6.6)], lw=3.4)
-        circ(7.4, 7.4, 1.7, fc="white", lw=2.2)
-        poly([(7.2, 9.4), (9.4, 7.2), (8.6, 6.6), (6.6, 8.6)], fc="white", ec="white", lw=0.1, z=5)
-    elif key == "engineer":  # a hard hat
-        theta = np.linspace(0, np.pi, 30)
-        poly(list(zip(5 + 3.6 * np.cos(theta), 4 + 3.6 * np.sin(theta))), fc=K, ec=K)
-        rect(0.6, 3.2, 8.8, 1.0, fc=K, ec=K)
-        rect(4.5, 7.0, 1.0, 1.2, fc="white", ec="white", lw=0.5, z=4)
-    elif key == "doubt":
-        circ(5, 5, 4.2, fc="white", lw=1.8)
-        ax.text(*P(5, 4.9), "?", ha="center", va="center", fontsize=s * 2.6, weight="bold", color=K, zorder=6)
-    elif key == "retake":  # a camera
-        rect(1, 2, 8, 5.6, fc="white", ec=K, lw=1.8)
-        rect(3.2, 7.6, 2.6, 1.2, fc=K, ec=K)
-        circ(5, 4.8, 1.8, fc="white", lw=1.8)
-        circ(5, 4.8, 0.7, fc=K)
-    elif key == "again":  # a circular arrow: do it again
-        theta = np.linspace(0.35 * np.pi, 2.2 * np.pi, 40)
-        ln(list(zip(5 + 3.6 * np.cos(theta), 5 + 3.6 * np.sin(theta))), lw=2.0)
-        end_x, end_y = 5 + 3.6 * np.cos(theta[-1]), 5 + 3.6 * np.sin(theta[-1])
-        arrow((end_x - 0.9, end_y - 1.2), (end_x + 0.3, end_y + 0.4))
 
 
 def risk_matrix():
-    """Matrix v3 in black, white and grey with symbols: base category per pattern x width band, and what raises it.
-    Cells: 1 white, 2 grey, 3 black. Values read from src/triage/risk_matrix_v3.json."""
-    K = "#111111"
+    """Matrix v3 in black, white and grey: base category per pattern (drawn symbol) x width band, and what raises it.
+    Values read from src/triage/risk_matrix_v3.json; pattern symbol key in spec/features/figures.md."""
+    K, GREY_TXT = "#111111", "#555555"
     fig = plt.figure(figsize=(18, 10.4), facecolor="white")
     ax = fig.add_axes([0, 0, 1, 1])
     ax.set_xlim(0, 180)
@@ -503,72 +418,70 @@ def risk_matrix():
     ax.set_axis_off()
     ax.text(3, 98.5, "Risk matrix", fontsize=34, weight="bold", color=K, va="center")
     ax.text(177, 98.5, "03", fontsize=34, weight="bold", color=K, va="center", ha="right")
-    ax.text(3, 92.6, f"v{VERSION} · values illustrative until calibrated with the engineering partners · "
-            "src/triage/risk_matrix_v3.json", fontsize=10.5, color="#555555", va="center")
+    ax.text(3, 92.6, f"Reinforced concrete, v{VERSION}. Base category from the crack pattern × width; the element, the "
+            "location on the element and warning signs can only raise it. Values illustrative until calibrated with "
+            "the engineering partners.", fontsize=11, color=GREY_TXT, va="center")
 
-    def cat_cell(x, y, w, h, level, size=22):
+    def cat_cell(x, y, w, h, level, size=13):
         fc, ec, ink = CAT_FILL[level]
         ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0,rounding_size=0.8", facecolor=fc,
                                     edgecolor=ec, lw=1.6, zorder=3))
-        ax.text(x + w / 2, y + h / 2, level.split()[-1], ha="center", va="center", fontsize=size, weight="bold",
-                color=ink, zorder=4)
+        ax.text(x + w / 2, y + h / 2, level, ha="center", va="center", fontsize=size, weight="bold", color=ink,
+                zorder=4)
 
     # column headers: crack width, thin to wide
     cw, x_first, top = 19.0, 21.0, 84.0
     for c, band in enumerate(BANDS):
         cx = x_first + c * (cw + 1.2) + cw / 2
         ax.plot([cx - 6, cx + 6], [top + 2.6, top + 2.6], color=K, lw=[1.0, 2.6, 5.0, 8.5][c], solid_capstyle="butt")
-        ax.text(cx, top - 0.4, BAND_NAMES[band].replace("under ", "< ").replace("over ", "> ").replace(" to ", "–"),
-                ha="center", va="center", fontsize=12, weight="bold", color=K)
-    # rows: pattern symbols, then category cells
+        ax.text(cx, top - 0.4, BAND_NAMES[band], ha="center", va="center", fontsize=12, weight="bold", color=K)
+    ax.text(x_first + 2 * (cw + 1.2), top + 5.2, "Crack width (upper end of the measurement)", ha="center",
+            fontsize=11, color=GREY_TXT)
+    # rows: one drawn symbol per pattern (key in spec/features/figures.md), then the category cells
     rh = 10.2
     for r, pattern in enumerate(PATTERNS):
         y = top - 4.2 - (r + 1) * rh
         ax.add_patch(FancyBboxPatch((4.0, y + 0.3), 13.5, rh - 0.6, boxstyle="round,pad=0,rounding_size=0.8",
                                     facecolor="white", edgecolor="#cfcfcf", lw=1.2, zorder=2))
-        _icon(ax, pattern, 10.75, y + rh / 2, s=8.2)
+        _icon(ax, pattern, 10.75, y + rh / 2 + 1.1, s=6.4)
+        ax.text(10.75, y + 1.7, PATTERN_WORD[pattern], ha="center", va="center", fontsize=10.5, weight="bold",
+                color=K)
         for c, band in enumerate(BANDS):
             cat_cell(x_first + c * (cw + 1.2), y + 0.3, cw, rh - 0.6, MATRIX[band][r])
 
-    # what raises the category: one card per raise, symbol + effect
-    end = _LOCATION_RULE["end_zone"]
-    raises = [("column", f"+{ELEMENT_RAISE['column']}", False), ("end_zone", f"+{end['raise']}", True)]
-    raises += [(k, "+1" if _ESCALATOR_EFFECT[k] == "+1" else "→3", "assumption" in BASIS[k]) for k in ESCALATORS]
+    # what raises the category, in words
     ax.plot([104.5, 104.5], [10, 88], color="#cfcfcf", lw=1.2)
-    for i, (key, effect, assumed) in enumerate(raises):
-        col, row = i % 3, i // 3
-        x, y = 108.0 + col * 23.4, 72.0 - row * 16.2
-        ax.add_patch(FancyBboxPatch((x, y), 21.6, 14.4, boxstyle="round,pad=0,rounding_size=0.8", facecolor="white",
-                                    edgecolor="#cfcfcf", lw=1.2, zorder=2))
-        _icon(ax, key, x + 7.6, y + 7.2, s=10.0)
-        if effect == "→3":
-            ax.text(x + 15.4, y + 7.2, "→", fontsize=16, weight="bold", color=K, va="center", ha="center", zorder=4)
-            cat_cell(x + 16.9, y + 4.6, 3.6, 5.2, "Category 3", size=12)
-        else:
-            ax.add_patch(FancyBboxPatch((x + 14.6, y + 4.8), 5.6, 4.8, boxstyle="round,pad=0,rounding_size=0.6",
-                                        facecolor="#bdbdbd", edgecolor="none", zorder=3))
-            ax.text(x + 17.4, y + 7.2, effect, fontsize=14, weight="bold", color=K, va="center", ha="center", zorder=4)
-        if assumed:
-            ax.add_patch(plt.Circle((x + 20.0, y + 12.8), 1.1, facecolor="white", edgecolor=K, lw=1.2, zorder=4))
-            ax.text(x + 20.0, y + 12.75, "?", fontsize=9, weight="bold", color=K, ha="center", va="center", zorder=5)
+    ax.text(108, 86.5, "What raises the category (never lowers it)", fontsize=14, weight="bold", color=K,
+            va="center")
+    end = _LOCATION_RULE["end_zone"]
+    plural = {"along_bar": "cracks along bars", "diagonal_shear": "diagonal shear cracks"}
+    lines = [(f"It is a {ELEMENTS[e]}", f"+{n}", "") for e, n in ELEMENT_RAISE.items() if n]
+    lines.append(("In an end zone (or location unknown):\n" + ", ".join(plural.get(p, PATTERN_NAMES[p])
+                                                                       for p in end["patterns"]),
+                  f"+{end['raise']}", "assumption" if "assumption" in BASIS["end_zone"] else ""))
+    lines += [(ESCALATORS[k][0].upper() + ESCALATORS[k][1:], "+1" if _ESCALATOR_EFFECT[k] == "+1" else "to 3",
+               "assumption" if BASIS[k].startswith("assumption") else ("new in v3" if k in NEW_IN_V3 else ""))
+              for k in ESCALATORS]
+    for i, (text_, effect, tag) in enumerate(lines):
+        y = 80.2 - i * 5.75
+        fill, ink = ("#bdbdbd", K) if effect != "to 3" else (K, "white")
+        ax.add_patch(FancyBboxPatch((108, y - 2.0), 8.0, 4.0, boxstyle="round,pad=0,rounding_size=0.6",
+                                    facecolor=fill, edgecolor="none", zorder=3))
+        ax.text(112, y, effect, ha="center", va="center", fontsize=11.5, weight="bold", color=ink, zorder=4)
+        ax.text(118, y, text_, va="center", fontsize=11.5, color=K)
+        if tag:
+            ax.text(177, y, tag, va="center", ha="right", fontsize=10, color=GREY_TXT, style="italic")
+    ax.text(108, 8.6, "Categories stop at 3. Any doubt (photo, material, element, pattern, width) goes to Expert "
+            "needed.", fontsize=10.5, color=GREY_TXT, va="center")
 
-    # symbol legend: what each category leads to; doubt and unusable photos
-    ly = 4.8
-    items = [("Category 1", "monitor", "6 mo"), ("Category 2", "repair", "1 mo"), ("Category 3", "engineer", "now")]
-    x = 4.0
-    for level, icon, when in items:
-        cat_cell(x, ly - 2.6, 5.2, 5.2, level, size=13)
-        _icon(ax, icon, x + 10.4, ly, s=6.4)
-        ax.text(x + 14.6, ly, when, fontsize=12, weight="bold", color=K, va="center")
-        x += 25.0
-    _icon(ax, "doubt", x + 2.6, ly, s=6.0)
-    ax.text(x + 7.0, ly, "→", fontsize=16, weight="bold", color=K, va="center", ha="center")
-    _icon(ax, "engineer", x + 11.4, ly, s=6.4)
-    x += 22.0
-    _icon(ax, "retake", x + 2.8, ly, s=6.4)
-    _icon(ax, "again", x + 9.0, ly, s=5.6)
-    ax.text(177, ly, "? = assumption, to confirm with the engineer", fontsize=10, color="#555555", va="center",
-            ha="right")
+    # legend: what each category means
+    ly, x = 3.2, 4.0
+    for level, meaning in (("Category 1", "routine monitoring, recheck in 6 months"),
+                           ("Category 2", "low-cost advice, recheck in 1 month"),
+                           ("Category 3", "an engineer must confirm now")):
+        cat_cell(x, ly - 2.0, 15.0, 4.0, level, size=11)
+        ax.text(x + 16.5, ly, meaning, fontsize=11, color=K, va="center")
+        x += 59.0
     return fig
 
 
