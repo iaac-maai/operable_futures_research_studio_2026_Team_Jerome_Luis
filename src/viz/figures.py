@@ -834,7 +834,7 @@ def data_coverage():
 DATASETS = [
     ("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0", True, True, False, "crack / no crack; quality gate"),
     ("METU", 40_000, "40,000  ·  CC BY 4.0", True, True, False, "crack / no crack; material: concrete"),
-    ("PHI-Net", 36_413, "36,413  ·  CC BY-NC-SA 4.0", True, True, False, "element, pattern, scene; own test splits"),
+    ("PHI-Net", 36_413, "36,413  ·  CC BY-NC-SA 4.0", True, True, False, "element, pattern, scene"),
     ("CrackSeg9k", 9_255, "9,255  ·  CC0", True, True, False, "crack pixels (U-Net)"),
     ("crack-seg (Ultralytics)", 4_029, "4,029  ·  Public Domain", True, True, False, "crack pixels (U-Net)"),
     ("Haiti 2010 survey", 6_526, "6,526 photos  ·  licence not stated", False, True, False,
@@ -854,15 +854,13 @@ def dataset_sizes():
     names = [d[0] for d in DATASETS]
     ys = range(len(DATASETS))
     ax.barh(ys, [d[1] for d in DATASETS], height=0.5, color=K)
-    for y, (_, n, count, *_flags, what) in zip(ys, DATASETS):
-        ax.text(n + 1200, y, f"{count}  ·  {what}", va="center", fontsize=11.5, color=K)
     ax.set_yticks(list(ys), names)
     for tick in ax.get_yticklabels():
         tick.set_fontsize(15)
         tick.set_fontweight("bold")
         tick.set_color(K)
     ax.invert_yaxis()
-    ax.set_xlim(0, 150_000)
+    ax.set_xlim(0, 168_000)
     ax.set_xticks([0, 20_000, 40_000, 60_000])
     ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v / 1000:.0f}K" if v else "0"))
     ax.tick_params(axis="x", colors=K, labelsize=11.5, length=0)
@@ -874,11 +872,18 @@ def dataset_sizes():
     ax.spines["bottom"].set_bounds(0, 60_000)
     ax.spines["bottom"].set_color(K)
     ax.text(30_000, len(DATASETS) + 0.15, "Images", ha="center", va="top", fontsize=12, color=K)
+    fig.subplots_adjust(left=0.22, right=0.985, top=0.8, bottom=0.08)
+    # two aligned columns after the bars: count and licence, then what the set is for (bold)
+    for y, (_, n, count, *_flags, what) in zip(ys, DATASETS):
+        ax.text(62_000, y, count, va="center", fontsize=11.5, color=K)
+        ax.text(96_000, y, what, va="center", fontsize=12, color=K, weight="bold")
+    ax.text(62_000, -0.95, "IMAGES · LICENCE", va="center", fontsize=11, color="#444444")
+    ax.text(96_000, -0.95, "WHAT IT IS FOR", va="center", fontsize=11, color="#444444")
 
     # what each set can be used for: a filled dot means yes
     trans = ax.get_yaxis_transform()
     for k, head in enumerate(("TRAIN", "TEST", "MEASURE")):
-        x = 0.80 + k * 0.085
+        x = 0.835 + k * 0.073
         ax.text(x, -0.95, head, transform=trans, ha="center", va="center", fontsize=13, weight="bold", color=K)
         for y, row in zip(ys, DATASETS):
             used = row[3 + k]
@@ -890,7 +895,6 @@ def dataset_sizes():
              "Measure: the photos carry a scale, so crack widths in mm can be checked.\nCounts and licences from each "
              "dataset's page; uses from docs/data_map.md. Only our own photos have a scale.", fontsize=11.5,
              color="#444444", va="top", linespacing=1.5)
-    fig.subplots_adjust(left=0.22, right=0.985, top=0.8, bottom=0.08)
     return fig
 
 
