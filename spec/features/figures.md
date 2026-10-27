@@ -7,7 +7,7 @@ Every figure is drawn from the repo's own rules and data map, so it changes when
 | File | Shows | Drawn from |
 |---|---|---|
 | `01_pipeline.png` | Pipeline v3: three scales (S, O, P as in PHI-Net task 1) x five phases, scene check, monitoring and learning loops, status of each box | `spec/features/pipeline.md` |
-| `01b_pipeline_infographic.png` | The same pipeline v3 as a one-page explainer: core flow (element, crack, building), simplified overview, key components, decision rules, loops and building score, in short | `spec/features/pipeline.md` |
+| `01b_pipeline_flow.png` | The same pipeline v3 drawn as a task flow: phases as numbered columns, scales as lanes; diamonds for written checks with stop (Retake, Expert needed) and continue marks, stacked boxes for learned models, both loops | `spec/features/pipeline.md` |
 | `02_decision_flow.png` | Order of checks: photo usable, reinforced concrete, model sure; then matrix, engineer review, correction logged | `triage.matrix.assess()` |
 | `03_risk_matrix.png` | Matrix v2: base level per pattern x width band, and what raises it (element, warning signs) | `src/triage/risk_matrix_v2.json` (read at run time) |
 | `04_segmentation_tree.png` | Tree v3: crack path (yellow) into the atomic problem, building path (navy) into the building risk score, context (grey); scale badge and evidence under each node | `docs/segmentation_tree.md` |

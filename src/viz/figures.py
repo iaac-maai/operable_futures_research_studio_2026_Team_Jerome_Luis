@@ -755,261 +755,233 @@ def dataset_comparison():
     return fig
 
 
-# Pipeline v3 as a one-page explainer (same content as 01_pipeline.png; spec/features/pipeline.md).
-# Core flow panels follow the flow of information: element (O) -> crack (P) -> building (S).
-# Each box: (phase, kind, title, body, status); None leaves the row empty.
-INFO_PANELS = [
-    ("1", "ELEMENT", "O", "mid-range: one element", [
-        ("1 CAPTURE", "human", "Element photo", "whole element + scale card\nthe resident is never asked", "spec"),
-        ("2 CHECK", "rule", "Scale and angle", "card visible, phone parallel\nno → Retake", "spec"),
-        ("3 PERCEIVE", "learned", "Material + element", "concrete or not · column, beam,\nslab, wall (PHI-Net t6) + confidence", "spec"),
-        ("4 DECIDE", "rule", "Element rules", "not concrete or unsure → Expert\ncolumn → +1 level", "code"),
-        None]),
-    ("2", "CRACK", "P", "close-up: the crack", [
-        ("1 CAPTURE", "human", "Crack close-up", "scale card + 2 marker stickers\nburst, flash on and off", "spec"),
-        ("2 CHECK", "rule", "Photo checks", "sharp, lit, ≥ 3 px across the crack\nno → Retake", "partly"),
-        ("3 PERCEIVE", "learned", "Crack reading", "width in mm ± 1 px, pattern\n(PHI-Net t3, t8) + confidence", "spec"),
-        ("4 DECIDE", "rule", "Crack level + growth", "matrix v2: level, reason,\nnext step; growth > uncertainty", "partly"),
-        ("5 ACT", "human", "Resident", "level, reason, recheck date\nnever 'safe', never a clearance", "partly")]),
-    ("3", "BUILDING", "S", "from far: the building", [
-        ("1 CAPTURE", "human", "Building case", "questionnaire + facade photo\nage, floors added, changes", "spec"),
-        ("2 CHECK", "rule", "Completeness", "every answer known or 'unknown'\nunknown counts as a risk flag", "spec"),
-        ("3 PERCEIVE", "learned", "Building reading", "now: the answers\nlater: facade model (PHI-Net t5)", "spec"),
-        ("4 DECIDE", "rule", "Building risk score", "priority P1 · P2 · P3\nwith its reasons", "spec"),
-        ("5 ACT", "human", "Engineer", "ranked list + dossier; confirms\nevery High and every referral", "spec")]),
+# Pipeline v3 as a task flow (same content as 01_pipeline.png; spec/features/pipeline.md).
+# Shapes: pill = start, rectangle = people input, diamond = written check, stacked = learned model,
+# parallelogram = result shown to a person, striped block = the person who acts.
+FLOW_TEAL, FLOW_DARK, FLOW_LINE, FLOW_BG = "#2e7d64", "#173d33", "#9db8ad", "#f5f8f6"
+FLOW_LANES = [  # (lane y, code, name, what, start pill)
+    (46, "S", "STRUCTURAL", "the building", "NEW\nBUILDING"),
+    (32, "O", "OBJECT", "one element", "EACH\nELEMENT"),
+    (18, "P", "PIXEL", "the crack", "EACH\nCRACK"),
 ]
-INFO_OVERVIEW = [("human", "Photos + answers", "people capture"), ("rule", "Written checks", "fail → Retake"),
-                 ("learned", "Learned models", "each with a confidence"), ("rule", "Written rules", "level + reason"),
-                 ("human", "People act", "resident, engineer")]
-INFO_COMPONENTS = [
-    ("card", "Scale card", "A printed card with mm marks in every close-up. It turns pixels\ninto millimetres; a coin is "
-     "only the backup."),
-    ("gate", "Quality gate", "Written checks: sharp, lit, card visible, at least 3 px across\nthe crack [46]. A failed "
-     "check means Retake, never a guess."),
-    ("bars", "Learned models with a confidence", "Material, element, crack pixels, pattern. Each reports how\nsure it "
-     "is; unsure means Expert needed."),
-    ("grid", "Risk matrix v2 (written rules)", "7 concrete patterns x 4 width bands; a column adds a level;\nwarning "
-     "signs raise it. Illustrative until calibrated."),
-    ("person", "Engineer in the loop", "Confirms every High and every referral; corrections become\nlabels that "
-     "retrain the models."),
-]
-INFO_CARDS = [
-    (BLUE, "Monitoring loop", "On the recheck date (Low: 6 months,\nMedium: 1 month) the same crack and\nstickers are "
-     "photographed again,\nwith the last photo as an overlay.\nGrowth beyond the uncertainty\nraises the level."),
-    (VIOLET, "Learning loop", "Engineer corrections and on-site\nratings become labels. Models are\nretrained in "
-     "batches and checked on\nheld-out photos before use. Rules\nchange only by a reviewed decision.\n"
-     "Human in the loop, not RL."),
-    (TREE_NAVY, "Building risk score", "Worst crack: High → P1,\nMedium or Expert → P2, else P3.\n+1 tier with ≥ 2 "
-     "risk flags (older\nthan 50 years, floors added, changes,\nopen ground floor; unknown counts).\n+1 tier if Medium+ "
-     "in ≥ 2 elements."),
-    (AQUA, "Built today (27 Oct)", "In code: element rules, matrix v2,\nthe five outputs.\nPartly: photo checks "
-     "(sharpness,\nbrightness), crack level (no growth\ncheck yet).\nThe rest: specified, not coded."),
-]
+FLOW_COLUMNS = [(11.5, None, "START"), (26.5, "1", "CAPTURE\nPHOTOS AND ANSWERS"), (43.5, "2", "CHECK\nWRITTEN RULES"),
+                (66, "3", "PERCEIVE\nMODELS + CONFIDENCE"), (88.5, "4", "DECIDE\nWRITTEN RULES, AUDITABLE"),
+                (109.5, "5", "ACT\nPEOPLE")]
+FLOW_SEPARATORS = [17.5, 35.5, 51.5, 79.5, 98.5]
+# Check diamonds per lane: (question, failure label or None)
+FLOW_CHECKS = {"S": ("ALL\nANSWERED?", None), "O": ("CARD +\nANGLE OK?", "RETAKE"),
+               "P": ("SHARP, LIT,\n≥ 3 PX?", "RETAKE")}
 
 
-def _icon(ax, kind, x, y, colour):
-    """Small drawn icon in a 5 x 5 tile whose top-left corner is (x, y) (axis y grows upwards)."""
-    ax.add_patch(FancyBboxPatch((x, y - 5), 5, 5, boxstyle="round,pad=0,rounding_size=0.8", facecolor=colour,
-                                edgecolor="none", alpha=0.14))
-    cx, cy = x + 2.5, y - 2.5
-    if kind == "card":
-        ax.add_patch(FancyBboxPatch((cx - 1.8, cy - 1.0), 3.6, 2.0, boxstyle="round,pad=0,rounding_size=0.2",
-                                    facecolor="white", edgecolor=colour, lw=1.6))
-        for i in range(7):
-            ax.plot([cx - 1.5 + i * 0.5] * 2, [cy + 1.0, cy + (0.3 if i % 2 else 0.0)], color=colour, lw=1.1)
-    elif kind == "gate":
-        ax.plot([cx - 1.4, cx - 0.4, cx + 1.6], [cy, cy - 1.1, cy + 1.3], color=colour, lw=3, solid_capstyle="round")
-    elif kind == "bars":
-        for i, hgt in enumerate((1.2, 2.6, 1.8)):
-            ax.add_patch(FancyBboxPatch((cx - 1.6 + i * 1.2, cy - 1.4), 0.8, hgt, boxstyle="round,pad=0,rounding_size=0.15",
-                                        facecolor=colour, edgecolor="none"))
-    elif kind == "grid":
-        for i in range(3):
-            for j in range(3):
-                ax.add_patch(FancyBboxPatch((cx - 1.6 + i * 1.1, cy - 1.6 + j * 1.1), 0.9, 0.9,
-                                            boxstyle="round,pad=0,rounding_size=0.1", facecolor=colour,
-                                            edgecolor="none", alpha=0.35 + 0.2 * (i + j) / 2))
-    elif kind == "person":
-        ax.add_patch(plt.Circle((cx, cy + 0.8), 0.75, color=colour))
-        ax.add_patch(matplotlib.patches.Wedge((cx, cy - 1.5), 1.7, 0, 180, color=colour))
-
-
-def pipeline_infographic():
-    """Pipeline v3 as a one-page explainer: core flow, key components, decision rules, loops, in short."""
-    H = 152
-    fig = plt.figure(figsize=(15, 22.8))
+def pipeline_flow():
+    """Pipeline v3 drawn as a task flow: phases as columns, scales as lanes, checks as diamonds."""
+    fig = plt.figure(figsize=(24, 14.4), facecolor=FLOW_BG)
     ax = fig.add_axes([0, 0, 1, 1])
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, H)
+    ax.set_xlim(0, 120)
+    ax.set_ylim(0, 72)
     ax.set_axis_off()
-    kinds = {"learned": (VIOLET, "#ecebfb"), "rule": (AQUA, "#e3f5ee"), "human": (MUTED, "#f0efec")}
+    ax.set_facecolor(FLOW_BG)
+    boxes = {code: {(c, ): PIPE_BOXES.get((r, c)) for c in range(5)} for r, (_, code, *_rest) in enumerate(FLOW_LANES)}
 
-    def box(x, top, w, h, fill, edge="none", lw=1.4, ls="-", r=1.0, z=1):
-        ax.add_patch(FancyBboxPatch((x, H - top - h), w, h, boxstyle=f"round,pad=0,rounding_size={r}",
-                                    facecolor=fill, edgecolor=edge, lw=lw, ls=ls, zorder=z))
+    def label(x, y, s, size=10, colour=FLOW_DARK, weight="normal", **kw):
+        ax.text(x, y, s, ha=kw.pop("ha", "center"), va=kw.pop("va", "center"), fontsize=size, color=colour,
+                weight=weight, linespacing=1.25, zorder=kw.pop("zorder", 6), **kw)
 
-    def text(x, top, s, **kw):
-        kw.setdefault("color", INK)
-        kw.setdefault("va", "center")
-        ax.text(x, H - top, s, **kw)
+    def rect(cx, cy, w, h, title, stacked=False):
+        if stacked:
+            for k in (2, 1):
+                ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2 - 0.55 * k), w, h, zorder=3 - k * 0.1,
+                                            boxstyle="round,pad=0,rounding_size=0.5", facecolor="white",
+                                            edgecolor=FLOW_LINE, lw=1.3))
+        ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2), w, h, boxstyle="round,pad=0,rounding_size=0.5",
+                                    facecolor="white", edgecolor=FLOW_LINE, lw=1.4, zorder=4))
+        label(cx, cy, title, weight="bold")
 
-    def arrow(x0, t0, x1, t1, colour=INK_2, ls="-", lw=1.6, z=3):
-        ax.annotate("", xy=(x1, H - t1), xytext=(x0, H - t0), zorder=z,
-                    arrowprops=dict(arrowstyle="-|>", color=colour, lw=lw, ls=ls, shrinkA=0, shrinkB=0,
-                                    mutation_scale=16))
+    def diamond(cx, cy, hw, hh, text):
+        ax.add_patch(matplotlib.patches.Polygon([(cx - hw, cy), (cx, cy + hh), (cx + hw, cy), (cx, cy - hh)],
+                                                closed=True, facecolor=FLOW_TEAL, edgecolor="none", zorder=4))
+        label(cx, cy, text, size=9, colour="white", weight="bold")
 
-    def banner(xc, top, label, w):
-        box(xc - w / 2, top - 1.6, w, 3.2, TREE_NAVY, r=1.6, z=4)
-        text(xc, top, label, ha="center", color="white", fontsize=14, weight="bold", zorder=5)
+    def para(cx, cy, w, h, text):
+        k = 0.8
+        ax.add_patch(matplotlib.patches.Polygon([(cx - w / 2 - k, cy - h / 2), (cx + w / 2 - k, cy - h / 2),
+                                                 (cx + w / 2 + k, cy + h / 2), (cx - w / 2 + k, cy + h / 2)],
+                                                closed=True, facecolor="white", edgecolor=FLOW_LINE, lw=1.4,
+                                                zorder=4))
+        label(cx, cy, text, weight="bold")
 
-    # title
-    text(50, 4.2, "Second Look: from a phone photo to a decision", ha="center", fontsize=33, weight="bold",
-         color=TREE_NAVY)
-    text(50, 8.6, "Step-by-step pipeline for cracks in reinforced concrete", ha="center", fontsize=22,
-         weight="bold", color=VIOLET)
-    text(50, 12.6, "How a crack in a building nobody inspects becomes a level, a reason and a next step.\nModels read "
-         "the photos and say how sure they are; written rules decide; any doubt goes to an engineer.",
-         ha="center", fontsize=12.5, color=INK_2, linespacing=1.5)
+    def pill(cx, cy, w, h, text):
+        ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2), w, h, boxstyle=f"round,pad=0,rounding_size={h / 2}",
+                                    facecolor=FLOW_TEAL, edgecolor="none", zorder=4))
+        label(cx, cy, text, size=9.4, colour="white", weight="bold")
 
-    # 1. core flow
-    box(1.5, 17, 97, 64.5, SURFACE, edge=GRID, lw=1.2)
-    banner(50, 17, "CORE FLOW: ONE BUILDING, THREE SCALES", 44)
-    px, pw, bx_off, bw = [2.8, 27.8, 52.8], 23.4, 1.7, 20
-    rows = [29.0, 37.6, 49.4, 58.0, 66.6]  # box tops; the scene check sits between rows 2 and 3
-    bh = 7.0
-    for (num, name, code, sub, boxes), x in zip(INFO_PANELS, px):
-        box(x, 20.2, pw, 54.6, "#f4f6fa", edge="#c9d3e6", lw=1.3)
-        ax.add_patch(plt.Circle((x + 3.2, H - 23.4), 1.8, color=TREE_NAVY, zorder=3))
-        text(x + 3.2, 23.4, num, ha="center", color=TREE_YELLOW, fontsize=17, weight="bold", zorder=4)
-        text(x + 5.8, 22.7, f"{name}  ({code})", fontsize=15, weight="bold", color=TREE_NAVY)
-        text(x + 5.8, 25.2, sub, fontsize=10.5, color=INK_2)
-        bx = x + bx_off
-        for k, (b, top) in enumerate(zip(boxes, rows)):
-            if b is None:
-                box(bx, top, bw, bh, "none", edge=GRID, lw=1.2, ls="--")
-                text(bx + bw / 2, top + bh / 2, "5 ACT: through the crack result\n(material and element hand over)",
-                     ha="center", fontsize=9, color=MUTED, linespacing=1.3)
-                continue
-            phase, kind, title, body, status = b
-            edge, fill = kinds[kind]
-            box(bx, top, bw, bh, fill, edge=edge, lw=1.5, z=2)
-            text(bx + 0.9, top + 1.25, phase, fontsize=7.8, color=edge, weight="bold", zorder=3)
-            text(bx + bw / 2, top + 3.0, title, ha="center", fontsize=11.5, weight="bold", zorder=3)
-            text(bx + bw / 2, top + 5.3, body, ha="center", fontsize=8.9, color=INK_2, linespacing=1.25, zorder=3)
-            label, chip_fill, chip_edge, chip_ink = PIPE_STATUS[status]
-            cw = 0.36 * len(label) + 1.4
-            box(bx + bw - cw - 0.6, top + 0.45, cw, 1.6, chip_fill, edge=chip_edge, lw=1, r=0.8, z=3)
-            text(bx + bw - cw / 2 - 0.6, top + 1.25, label, ha="center", fontsize=7.4, color=chip_ink,
-                 weight="bold", zorder=4)
-            if k < 4 and boxes[k + 1] is not None:
-                arrow(bx + bw / 2, top + bh, bx + bw / 2, rows[k + 1])
-    # scene check band across the three panels
-    box(px[0] + 0.8, 45.4, px[2] + pw - px[0] - 1.6, 3.1, kinds["learned"][1], edge=VIOLET, lw=1.4, r=1.5, z=4)
-    text(50 - 11.3, 46.95, "SCENE CHECK (PHI-Net task 1): is this photo O, P or S?   now the guided capture sets "
-         "it · later a scene model", ha="center", fontsize=10, weight="bold", color=INK, zorder=5)
-    # between panels at the Decide row
-    mid = rows[3] + bh / 2
-    for i, label in enumerate(("material\n+ element", "levels\n+ growth")):
-        x_from, x_to = px[i] + bx_off + bw, px[i + 1] + bx_off
-        arrow(x_from, mid, x_to, mid, colour=TREE_NAVY, lw=2.2, z=5)
-        text((x_from + x_to) / 2, mid - 2.6, label, ha="center", fontsize=7.8, color=TREE_NAVY, weight="bold",
-             linespacing=1.15, zorder=5)
-    # monitoring loop inside the crack panel: resident -> crack close-up on the recheck date
-    lx = px[1] + bx_off + bw + 0.75
-    ax.plot([px[1] + bx_off + bw, lx, lx], [H - rows[4] - bh / 2, H - rows[4] - bh / 2, H - rows[0] - bh / 2],
-            color=BLUE, lw=1.8, ls="--", zorder=4)
-    arrow(lx, rows[0] + bh / 2, px[1] + bx_off + bw, rows[0] + bh / 2, colour=BLUE, ls="--", lw=1.8, z=4)
-    text(lx + 0.3, rows[1] + 3.5, "recheck date", rotation=90, fontsize=7.8, color=BLUE, weight="bold", ha="left",
-         va="center")
-    # simplified overview
-    ox, ow = 78.6, 18.6
-    box(ox, 20.2, ow, 54.6, "white", edge=MUTED, lw=1.3, ls="--")
-    text(ox + ow / 2, 23.9, "SIMPLIFIED\nOVERVIEW", ha="center", fontsize=13, weight="bold", color=TREE_NAVY,
-         linespacing=1.15)
-    for k, ((kind, title, body), top) in enumerate(zip(INFO_OVERVIEW, rows)):
-        edge, fill = kinds[kind]
-        box(ox + 1.6, top, ow - 3.2, bh, fill, edge=edge, lw=1.5)
-        text(ox + ow / 2, top + 2.6, title, ha="center", fontsize=11.5, weight="bold")
-        text(ox + ow / 2, top + 4.8, body, ha="center", fontsize=9.3, color=INK_2)
-        if k < 4:
-            arrow(ox + ow / 2, top + bh, ox + ow / 2, rows[k + 1])
-    for x, kind, label in ((4.0, "human", "People and their inputs"), (23.5, "rule", "Written rule, auditable"),
-                           (42.5, "learned", "Learned model (reports a confidence)")):
-        box(x, 76.9, 1.6, 1.4, kinds[kind][1], edge=kinds[kind][0], lw=1.3, r=0.3)
-        text(x + 2.2, 77.6, label, fontsize=9.5, color=INK_2)
-    text(97, 77.6, "Chips: in code · partly in code · specified (designed, not coded yet)", fontsize=9.5,
-         color=INK_2, ha="right")
+    def terminal(cx, cy, w, h, text):
+        ax.add_patch(matplotlib.patches.Rectangle((cx - w / 2, cy - h / 2), w, h, facecolor=FLOW_TEAL,
+                                                  edgecolor="none", zorder=4))
+        for dx in (-w / 2 + 0.55, w / 2 - 0.55):
+            ax.plot([cx + dx] * 2, [cy - h / 2, cy + h / 2], color="white", lw=1.6, zorder=5)
+        label(cx, cy, text, size=9.4, colour="white", weight="bold")
 
-    # 2. key components and the decision rules
-    box(1.5, 84, 47.5, 44.5, SURFACE, edge=GRID, lw=1.2)
-    banner(19, 84, "KEY COMPONENTS EXPLAINED", 31)
-    colours = [TREE_NAVY, AQUA, VIOLET, BLUE, TREE_NAVY]
-    for k, ((icon, title, body), colour) in enumerate(zip(INFO_COMPONENTS, colours)):
-        top = 88.5 + k * 7.9
-        _icon(ax, icon, 3.5, H - top, colour)
-        text(10.2, top + 1.0, title, fontsize=12, weight="bold", color=colour)
-        text(10.2, top + 3.6, body, fontsize=9.4, color=INK_2, linespacing=1.3)
-        if k < 4:
-            ax.plot([3.5, 47.5], [H - top - 6.6] * 2, color=GRID, lw=0.8)
+    def mark(cx, cy, ok, r=0.95):
+        ax.add_patch(plt.Circle((cx, cy), r, facecolor="white", edgecolor=FLOW_TEAL, lw=1.6, zorder=5))
+        k = r * 0.45
+        if ok:
+            ax.plot([cx - k, cx - k * 0.2, cx + k], [cy, cy - k * 0.7, cy + k * 0.8], color=FLOW_DARK, lw=1.9,
+                    zorder=7, solid_capstyle="round")
+        else:
+            for sgn in (1, -1):
+                ax.plot([cx - k, cx + k], [cy - sgn * k, cy + sgn * k], color=FLOW_DARK, lw=1.9, zorder=7,
+                        solid_capstyle="round")
 
-    box(51, 84, 47.5, 44.5, SURFACE, edge=GRID, lw=1.2)
-    banner(74.75, 84, "DECISION RULES (INSIDE VIEW)", 33)
-    text(74.75, 88.0, "Checked in this order; the first 'no' stops the photo there.", ha="center", fontsize=9.8,
-         color=INK_2)
-    steps = [("Is the photo usable?", "sharp, lit, card visible, ≥ 3 px", "Retake"),
-             ("Reinforced concrete, model sure?", "material + element confidence", "Expert needed"),
-             ("Crack and pattern read with confidence?", "segmentation + pattern", "Expert needed")]
-    for k, (q, sub, out) in enumerate(steps):
-        top = 90.3 + k * 6.6
-        box(53, top, 30, 5.0, "white", edge=AQUA, lw=1.5)
-        text(68, top + 1.8, q, ha="center", fontsize=10.3, weight="bold")
-        text(68, top + 3.6, sub, ha="center", fontsize=8.8, color=INK_2)
-        arrow(83, top + 2.5, 87.2, top + 2.5)
-        text(85.1, top + 1.5, "no", ha="center", fontsize=8.5, color=INK_2)
-        box(87.4, top + 0.9, 9.6, 3.2, LEVEL[out], r=1.0)
-        text(92.2, top + 2.5, out, ha="center", fontsize=9.2, weight="bold", color=ON_FILL.get(out, "white"))
-        arrow(68, top + 5.0, 68, top + 6.6)
-        text(68.6, top + 5.8, "yes", fontsize=8.5, color=INK_2)
-    top = 110.1
-    box(53, top, 30, 6.4, "white", edge=AQUA, lw=1.5)
-    text(68, top + 1.7, "Risk matrix v2 (written rules)", ha="center", fontsize=10.3, weight="bold")
-    text(68, top + 4.2, "pattern x width band (upper end of width ± uncertainty)\na column +1 level · warning signs "
-         "raise it", ha="center", fontsize=8.6, color=INK_2, linespacing=1.25)
-    for k, out in enumerate(("Low", "Medium", "High")):
-        t = top - 0.3 + k * 2.4
-        arrow(83, top + 3.2, 87.2, t + 1.1, lw=1.1)
-        box(87.4, t, 9.6, 2.2, LEVEL[out], r=0.9)
-        text(92.2, t + 1.1, out, ha="center", fontsize=9.2, weight="bold", color=ON_FILL.get(out, "white"))
-    box(53, 118.6, 44, 8.4, "#f4f6fa", edge="#c9d3e6", lw=1.2)
-    text(75, 120.6, "Engineer confirms every High and every Expert needed", ha="center", fontsize=10.5,
-         weight="bold", color=TREE_NAVY)
-    text(75, 124.0, "Every result carries a one-sentence reason and a next step\n(Low: recheck in 6 months · Medium: "
-         "advice, recheck in 1 month). Never 'safe'.", ha="center", fontsize=9.2, color=INK_2, linespacing=1.3)
+    def line(points, colour=FLOW_TEAL, ls="-", lw=1.7, head=True, dot=True):
+        xs, ys = zip(*points)
+        ax.plot(xs[:-1] + (xs[-1],) if not head else xs[:-1], ys[:-1] if head else ys, color=colour, lw=lw, ls=ls,
+                zorder=2, solid_capstyle="round")
+        if head:
+            ax.annotate("", xy=points[-1], xytext=points[-2], zorder=2,
+                        arrowprops=dict(arrowstyle="-|>", color=colour, lw=lw, ls=ls, shrinkA=0, shrinkB=0,
+                                        mutation_scale=13))
+        if dot:
+            ax.plot(*points[0], "o", color=colour, ms=4.5, zorder=3)
 
-    # 3. loops and the building score
-    banner(50, 131.5, "TWO LOOPS, ONE BUILDING SCORE, AND WHAT IS BUILT", 56)
-    for k, (colour, title, body) in enumerate(INFO_CARDS):
-        x = 1.5 + k * 24.4
-        box(x, 133.6, 23.2, 12.2, "white", edge=colour, lw=1.6)
-        box(x, 133.6, 23.2, 2.6, colour, r=1.0)
-        text(x + 11.6, 134.9, title, ha="center", fontsize=11.5, weight="bold", color="white")
-        text(x + 1.2, 140.6, body, fontsize=8.9, color=INK_2, linespacing=1.3)
+    def status(cx, top, key):
+        text_, fill, edge, ink = {"code": ("IN CODE", FLOW_TEAL, FLOW_TEAL, "white"),
+                                  "partly": ("PARTLY IN CODE", "white", FLOW_TEAL, FLOW_TEAL),
+                                  "spec": ("SPECIFIED", "none", "none", MUTED)}[key]
+        w = 0.5 * len(text_) + 1.2
+        ax.add_patch(FancyBboxPatch((cx - w / 2, top + 0.35), w, 1.4, boxstyle="round,pad=0,rounding_size=0.6",
+                                    facecolor=fill, edgecolor=edge, lw=1.0, zorder=4))
+        label(cx, top + 1.05, text_, size=7.6, colour=ink, weight="bold")
 
-    # in short
-    box(1.5, 146.6, 97, 4.0, "#f4f6fa", edge="#c9d3e6", lw=1.2)
-    box(1.5, 146.6, 14, 4.0, TREE_NAVY, r=1.0)
-    text(8.5, 148.6, "IN SHORT", ha="center", fontsize=13.5, weight="bold", color="white")
-    text(17.5, 148.6, "Phone photos are checked, read by models that say how sure they are, and judged by written "
-         "rules.\nAny doubt goes to an engineer; growth is tracked over time; Second Look never says 'safe'.",
-         fontsize=11, color=INK, linespacing=1.4)
-    text(98.5, 151.5, "Source: spec/features/pipeline.md (v3, 27 Oct 2026). Thresholds illustrative until calibrated.",
-         ha="right", fontsize=8, color=MUTED)
+    def detail(cx, y_top, text):
+        label(cx, y_top, text, size=9.3, colour=INK_2, va="top")
+
+    # title, section heading, columns
+    label(1.5, 68.6, "Pipeline", size=40, weight="bold", ha="left")
+    label(118.5, 68.6, "01", size=40, weight="bold", ha="right")
+    label(1.5, 63.2, "From a phone photo to a decision", size=22, colour=FLOW_TEAL, weight="bold", ha="left")
+    label(118.5, 63.2, "Second Look · pipeline v3 · three scales as in PHI-Net task 1 [53][55]", size=11,
+          colour=INK_2, ha="right")
+    for x in FLOW_SEPARATORS:
+        ax.plot([x, x], [3.6, 60], color="#d3dcd8", lw=1.2, ls=(0, (5, 4)), zorder=0)
+    for cx, num, head in FLOW_COLUMNS:
+        if num:
+            ax.add_patch(plt.Circle((cx - 7.2, 57.2), 1.45, color=FLOW_DARK, zorder=4))
+            label(cx - 7.2, 57.2, num, size=13, colour="white", weight="bold")
+            label(cx - 5.2, 57.2, head, size=11, ha="left")
+        else:
+            label(cx, 57.2, head, size=11)
+
+    for r, (y, code, name, what, start) in enumerate(FLOW_LANES):
+        label(2.6, y, f"{name} ({code})\n{what}", size=11.5, rotation=90)
+        pill(11.5, y, 7.4, 3.6, start)
+        cap = PIPE_BOXES[(r, 0)]
+        rect(26.5, y, 13, 5, cap[1].upper())
+        status(26.5, y + 2.5, cap[3])
+        detail(26.5, y - 3.1, cap[2])
+        line([(15.2, y), (20.0, y)])
+        # check diamond and its failure branch
+        question, fail = FLOW_CHECKS[code]
+        diamond(43.5, y, 4.4, 3.4, question)
+        status(43.5, y + 3.4, PIPE_BOXES[(r, 1)][3])
+        line([(33.0, y), (39.1, y)])
+        if fail:
+            line([(43.5, y - 3.4), (43.5, y - 5.6)], head=False, dot=False)
+            mark(43.5, y - 6.5, False)
+            label(45.0, y - 6.5, fail, size=9.6, weight="bold", ha="left")
+        else:
+            detail(43.5, y - 3.9, "unknown is allowed:\nit counts as a risk flag")
+        line([(47.9, y), (55.5, y)], dot=False)
+        mark(50.2, y, True, r=0.8)
+        # perceive: learned model, then 'sure?' for the models that exist this semester
+        per = PIPE_BOXES[(r, 2)]
+        rect(62.5, y, 13, 5, per[1].upper(), stacked=True)
+        status(62.5, y + 2.5, per[3])
+        detail(62.5, y - 4.3, per[2])
+        dec = PIPE_BOXES[(r, 3)]
+        if code == "S":
+            line([(69.0, y), (82.0, y)])
+        else:
+            diamond(73.6, y, 2.9, 2.6, "SURE?")
+            line([(69.0, y), (70.7, y)], dot=False)
+            line([(73.6, y - 2.6), (73.6, y - 4.6)], head=False, dot=False)
+            mark(73.6, y - 5.5, False)
+            label(75.0, y - 5.5, "EXPERT\nNEEDED", size=9.6, weight="bold", ha="left")
+            line([(76.5, y), (82.0, y)], dot=False)
+            mark(78.4, y, True, r=0.8)
+        rect(88.5, y, 13, 5, dec[1].upper())
+        status(88.5, y + 2.5, dec[3])
+        detail(88.5, y - 3.1, dec[2])
+        if (r, 4) in PIPE_BOXES:
+            act = PIPE_BOXES[(r, 4)]
+            out = "PRIORITY LIST\n+ DOSSIER" if code == "S" else "LEVEL, REASON,\nNEXT STEP"
+            para(105.0, y, 9.4, 5, out)
+            status(105.0, y + 2.5, act[3])
+            detail(105.0, y - 3.1, act[2])
+            terminal(115.6, y, 5.6, 5, act[1].upper())
+            line([(95.0, y), (99.5, y)])
+            line([(110.5, y), (112.8, y)], dot=False)
+        else:
+            detail(108.5, y + 1.2, "no action at this scale:\nmaterial and element go\nto the crack level", )
+
+    yS, yO, yP = (lane[0] for lane in FLOW_LANES)
+    # scene check band between Check and Perceive, all scales
+    ax.add_patch(FancyBboxPatch((52.4, yP - 6.8), 2.6, yS - yP + 10.6, boxstyle="round,pad=0,rounding_size=0.8",
+                                facecolor="white", edgecolor=FLOW_TEAL, lw=1.4, ls=(0, (4, 3)), zorder=3))
+    label(53.7, (yS + yP) / 2 - 1.2, "SCENE CHECK (PHI-Net task 1): is this photo S, O or P?   now the guided "
+          "capture sets it · later a scene model", size=8.6, weight="bold", rotation=90)
+    # between the lanes: material + element down to the crack level; crack results up to the building score
+    line([(82.0, yO - 1.6), (81.0, yO - 1.6), (81.0, yP + 1.6), (82.0, yP + 1.6)], colour=FLOW_DARK)
+    label(80.5, yO - 8.6, "material,\nelement", size=9.3, colour=FLOW_DARK, weight="bold", ha="right")
+    line([(95.0, yP + 1.4), (96.8, yP + 1.4), (96.8, yS - 1.4), (95.0, yS - 1.4)], colour=FLOW_DARK)
+    label(97.3, yO + 0.2, "crack levels,\ngrowth, damage\nspread across\nelements", size=9.3, colour=FLOW_DARK,
+          weight="bold", ha="left")
+    # learning loop: engineer -> the learned models of phase 3
+    ly = 51.6
+    line([(115.6, yS + 2.5), (115.6, ly), (62.5, ly), (62.5, yS + 4.3)], colour=VIOLET, ls="--", dot=False)
+    label(89.0, ly + 1.5, "LEARNING LOOP: engineer corrections and on-site ratings become labels and retrain the "
+          "models (phase 3)\neach new version is checked on held-out photos before use; written rules change only by "
+          "a reviewed decision", size=9.8, colour=VIOLET, weight="bold")
+    # monitoring loop: the resident's recheck date brings the same crack back
+    my = 7.9
+    line([(115.6, yP - 2.5), (115.6, my), (11.5, my), (11.5, yP - 1.8)], colour=BLUE, ls="--", dot=False)
+    label(63.5, my - 1.8, "MONITORING LOOP: on the recheck date (Low: 6 months, Medium: 1 month) the same crack ID "
+          "and stickers are photographed again, with the last photo as an overlay\ngrowth larger than the measurement "
+          "uncertainty raises the crack level, and through it the building risk score", size=9.8, colour=BLUE,
+          weight="bold")
+
+    # legend of shapes
+    ly0, x = 1.9, 1.5
+    items = [("pill", "START"), ("rect", "PEOPLE INPUT"), ("diamond", "WRITTEN CHECK"),
+             ("stack", "LEARNED MODEL (REPORTS A CONFIDENCE)"), ("para", "RESULT SHOWN TO A PERSON"),
+             ("term", "PERSON WHO ACTS"), ("ok", "CONTINUE"), ("no", "STOP HERE")]
+    for kind, text_ in items:
+        if kind == "pill":
+            pill(x + 1.3, ly0, 2.6, 1.3, "")
+        elif kind == "rect":
+            rect(x + 1.3, ly0, 2.6, 1.5, "")
+        elif kind == "diamond":
+            diamond(x + 1.3, ly0, 1.3, 0.95, "")
+        elif kind == "stack":
+            rect(x + 1.3, ly0 + 0.2, 2.6, 1.3, "", stacked=False)
+            ax.add_patch(FancyBboxPatch((x, ly0 - 0.75), 2.6, 1.3, boxstyle="round,pad=0,rounding_size=0.3",
+                                        facecolor="white", edgecolor=FLOW_LINE, lw=1.2, zorder=3))
+        elif kind == "para":
+            para(x + 1.3, ly0, 1.8, 1.5, "")
+        elif kind == "term":
+            terminal(x + 1.3, ly0, 2.6, 1.5, "")
+        else:
+            mark(x + 1.3, ly0, kind == "ok", r=0.7)
+        label(x + 3.2, ly0, text_, size=9.2, ha="left")
+        x += 3.9 + 0.47 * len(text_)
+    label(118.5, ly0, "Source: spec/features/pipeline.md, 27 Oct 2026 · thresholds illustrative until calibrated",
+          size=8.6, colour=MUTED, ha="right")
     return fig
 
 
 FIGURES = {
     "01_pipeline.png": pipeline,
-    "01b_pipeline_infographic.png": pipeline_infographic,
+    "01b_pipeline_flow.png": pipeline_flow,
     "02_decision_flow.png": decision_flow,
     "03_risk_matrix.png": risk_matrix,
     "04_segmentation_tree.png": segmentation_tree,
