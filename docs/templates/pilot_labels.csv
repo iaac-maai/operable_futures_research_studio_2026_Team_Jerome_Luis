@@ -1,4 +1,4 @@
-photo_id,crack_id,shot,element,material,pattern_guess,width_mm_card,length_cm_estimate,coin_visible,deliberately_bad,notes
-P0001,P01,A,load_bearing_wall,concrete,diagonal_shear,,,no,no,example row: context shot
-P0002,P01,B,load_bearing_wall,concrete,diagonal_shear,,80,yes,no,example row
-P0003,P01,C,load_bearing_wall,concrete,diagonal_shear,0.5,,yes,no,example row: width read from the card
+photo_id,building_id,crack_id,scale,element,material,pattern_guess,width_band_card,width_mm_card,flash,card_visible,deliberately_bad,notes
+P0001,B001,,S,,concrete,,,,off,no,no,example row: building facade
+P0002,B001,B001-C01,O,load_bearing_wall,concrete,diagonal_shear,,,off,yes,no,example row: whole element with tag
+P0003,B001,B001-C01,P,load_bearing_wall,concrete,diagonal_shear,0.3_to_1,0.5,on,yes,no,example row: crack close-up with scale card

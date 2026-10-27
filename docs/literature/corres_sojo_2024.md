@@ -24,7 +24,7 @@ How reinforcing bars and concrete hold together (bond), how that governs crackin
 7. **Accuracy rule:** with **at least 3 pixels across the crack**, the error is about **±1 pixel for the opening (±30 %)** and ±2 pixels for the sliding. **6 to 8 pixels across the crack are recommended for about ±15 %.** Below 3 pixels, errors grow quickly (low contrast, too few features on the crack lips).
    → A measured rule for our quality gate and for the width uncertainty in the matrix.
 8. Recommendations for photos: camera **perpendicular** to the surface; for large surfaces, **several scale references** because pixel size is not uniform across the image; take images **with and without flash** depending on surface roughness.
-   → Updates our photo protocol (coin, distance, flash).
+   → Updates our photo protocol (scale reference, distance, flash); done in photo protocol v2 (D24).
 9. **On a real bridge** (Chillon Viaducts, crack about 50 years old), photo-based widths matched crack-microscope and crack-ruler measurements within ±1 pixel at most points, with one larger error (0.73 mm measured by hand, 1.18 mm by the algorithm). Reason: **dust and eroded crack lips** make old cracks less sharp than in the lab.
    → Expect lower accuracy on old cracks in informal housing; clean the surface before the photo; keep the width uncertainty honest.
 10. The authors list open issues for real conditions: **corrosion traces, water, sediment marks and moss** around cracks were not evaluated (ch. 6.2).
@@ -41,7 +41,7 @@ How reinforcing bars and concrete hold together (bond), how that governs crackin
 | # | Feature | Where | Based on |
 |---|---|---|---|
 | 1 | Width uncertainty = ±1 pixel (opening) from the measured pixel size; below 3 pixels across the crack, the width is not trusted: Retake closer, or Expert needed | Measurement, quality gate, matrix input `width_uncertainty_mm` | Finding 7 |
-| 2 | Photo protocol: camera perpendicular, close shot giving 6 to 8 pixels across the crack, a coin near the crack (and a second one on large surfaces), photos with and without flash, clean the surface first | `spec/features/photo_protocol.md` | Findings 8, 9 |
+| 2 | Photo protocol: camera perpendicular, close shot giving 6 to 8 pixels across the crack, the scale card near the crack (and a second reference on large surfaces), photos with and without flash, clean the surface first | `spec/features/photo_protocol.md` | Findings 8, 9 |
 | 3 | Measure opening and sliding, not only width; sliding counts as a measured "offset" | Measurement, matrix escalator `offset` | Findings 3, 5 |
 | 4 | Start the segmenter from the open-source EPFL tools and the Özgenel segmentation dataset (concrete of buildings) | Models, data map | Finding 5 |
 | 5 | "Growing" only when growth exceeds the measurement uncertainty; repeat photos in similar light and time of day; burst of photos averaged | Matrix escalator `growing`, follow-up flow | Findings 12, 13 |

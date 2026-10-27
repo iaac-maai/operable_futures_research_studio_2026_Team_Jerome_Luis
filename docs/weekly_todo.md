@@ -16,7 +16,9 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 ### Professor's feedback (26 Oct): answer before contacting the expert
 - [x] Pipeline v2 specified: material check, confidence on every result, engineer review, human-in-the-loop learning (C, 26 Oct)
 - [x] Figures updated: pipeline, decision flow, matrix, tree, data coverage, timeline (C, 26 Oct)
-- [ ] Material check: concrete vs not concrete, first training test (C, Tue 27 Oct)
+- [x] Professor's update (27 Oct) answered in the specs: pipeline v3 with three scales S, O, P (PHI-Net), building risk score, monitoring, scale card, models identify material and element (C, 27 Oct)
+- [x] Pipeline and segmentation tree figures redrawn to match (C, 27 Oct)
+- [ ] Material model: concrete vs not concrete, first training test (C)
 - [x] Reference thesis read; notes and proposed features in `docs/literature/corres_sojo_2024.md` (C, 26 Oct)
 - [ ] State-of-the-art review based on the reference thesis (C drafts Wed 28 Oct, J + L correct)
 - [ ] Engineer review screen mock-up and one-page pitch (C, Fri 30 Oct to Sun 1 Nov)
@@ -30,7 +32,7 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 - [ ] Decide who presents what on Thursday (J + L)
 
 ### Engineering partners (send early, replies take time)
-- [ ] Send a dated request to Engineers Without Borders: rate about 150 to 200 crack photos Low / Medium / High, at least 30 High, by 20 Nov; put a coin next to cracks in their own inspection photos (__)
+- [ ] Send a dated request to Engineers Without Borders: rate about 150 to 200 crack photos Low / Medium / High, at least 30 High, by 20 Nov; put the scale card (or a coin) next to cracks in their own inspection photos (__)
 - [ ] Same request to the third-party structural engineer; confirm the agreement (__)
 
 ### Data
@@ -63,5 +65,5 @@ Owner: J = Jerome, L = Luis, C = coding agent (Claude). Fill in the blanks.
 
 ## Coming up (from the roadmap)
 - **Week 2, 2 to 8 Nov:** midterm (5/6 Nov); pilot photos labelled; quality gate retuned on phone photos; label mapping to the patterns.
-- **Week 3, 9 to 15 Nov:** first feature with tests against the baseline (coin + width); first MCP connection attempt (12 Nov).
+- **Week 3, 9 to 15 Nov:** first feature with tests against the baseline (scale card + width with its uncertainty); first MCP: OpenStreetMap building data (12 Nov).
 - **Week 4, 16 to 20 Nov:** hackathon, beta version end to end on pilot photos.

@@ -3,7 +3,7 @@ pytest
 matplotlib==3.11.2  # figures (src/viz/figures.py)
 
 # Planned (add pinned versions when each is first used)
-# ultralytics   (YOLO detector)
+# ultralytics   (YOLO, only if element boxes are needed later; AGPL-3.0, decision D9)
 # torch         (U-Net segmentation)
 # opencv-python (measurement)
 # streamlit     (prototype interface)

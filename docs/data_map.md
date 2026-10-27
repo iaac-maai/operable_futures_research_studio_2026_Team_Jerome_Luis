@@ -9,7 +9,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 | Fit | Data | Why |
 |---|---|---|
-| **Target** | Engineer-labelled phone photos from informal neighbourhoods (to collect with the partners) | The exact case: homes, phone photos, coin, engineer rating |
+| **Target** | Engineer-labelled phone photos from informal neighbourhoods (to collect with the partners) | The exact case: homes, phone photos, scale card, engineer rating |
 | **High (closest public)** | Haiti 2010 Earthquake Database [41] | Engineers' photos of 183 real buildings in Port-au-Prince and Léogâne, reinforced concrete and concrete-block masonry, each rated light / moderate / severe with crack-based definitions; ratings are per building, after an earthquake, no scale |
 | **High (closest public)** | 2015 Nepal Earthquake Building Performance Database [42] | 146 low-rise RC buildings with masonry infill in Kathmandu, photos, rated light / moderate / severe / collapse; per building, no scale |
 | Medium | Building Surveys after Earthquakes (Nepal, Ecuador, Taiwan, Korea) [43] | Same kind of per-building engineer surveys with photos; non-commercial |
@@ -17,7 +17,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | Medium | PHI-Net [26] | Real damaged buildings after earthquakes, with component and damage labels; not pre-failure cracks; non-commercial |
 | Medium | Darbhanga brick masonry [30] | Brick walls, the material of many informal homes; one heritage fort, not homes |
 | Medium | Dais et al. masonry masks [31] | Masonry walls with pixel masks; small |
-| Medium | Pilot photos, Barcelona old facades | Real buildings and phone photos with a coin; not informal settlements, no engineer |
+| Medium | Pilot photos, Barcelona old facades | Real buildings and phone photos with the scale card; not informal settlements, no engineer |
 | Low | METU concrete cracks [36] | Concrete walls of campus buildings; formal buildings, tiles only |
 | Low | SDNET2018 walls subset [22] | Concrete walls, but of bridge-related structures; tiles only |
 | Low | crack-seg [33], CrackSeg9k [25] | Mostly roads and pavement; generic pre-training for crack pixels only |
@@ -52,7 +52,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | Detect cracks (YOLO) | **Yes, for cracks** | Darbhanga crack boxes on brick walls, crack-seg polygons | Boxes for the element (column, beam, slab, wall) | Draw element boxes on our own photos |
 | Crack or no crack | **Yes** | METU, Strathclyde, SDNET2018: over 90,000 images | Smooth plaster walls of homes | Our pilot photos |
 | Crack pattern (7 classes) | **No** | No dataset uses our seven patterns | Labels | Label a few hundred images by hand (number: assumption, to set when we start) |
-| Width in mm | **No** | Nothing public has a coin or any scale | Photos with a coin and a known width | Pilot photos with the crack-width card |
+| Width in mm | **No** | Nothing public has a scale reference | Photos with the scale card and a known width | Pilot photos with the scale card |
 | Low / Medium / High | **No** | Haiti and Nepal rate whole buildings, after an earthquake | A rating per crack, by an engineer | Our photos rated by Engineers Without Borders and the structural engineer |
 | Proof that the tool works (3 Dec baseline) | **No** | Nothing | Held-out photos rated per crack, plus an engineer's photo-only rating | Same as above; at least 30 High cases (`spec/features/evaluation.md`) |
 
@@ -64,12 +64,13 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 | Stage | Needs | Covered by | Gap |
 |---|---|---|---|
-| Quality gate | Phone photos labelled usable / unusable (blur, light, coin visible) | Pilot photos (section 4), planned. First code test on five public sets done (`docs/experiments/2026-10-25_quality_gate_first_test.md`) | Public sets are not phone photos; they test the code only |
-| Material check | Images labelled concrete / not concrete (`spec/decisions.md` D17) | Concrete: METU, SDNET2018, CODEBRIM; not concrete: Darbhanga and Strathclyde brick, Dais masonry; PHI-Net has a material task [26] | Plaster hides the material; our phone photos needed |
-| YOLO detector | Bounding boxes for element (column, beam, slab, brick wall) and crack | Cracks only: crack-seg polygons [33], Darbhanga crack boxes [30], CODEBRIM defect boxes [28]; PHI-Net has component type as a class only [26] | No public set has element boxes; draw them on our own photos |
-| U-Net segmenter | Pixel masks of cracks | CrackSeg9k [25]; crack-seg polygons converted to masks [33]; Dais et al. masonry masks [31] | Few columns and beams |
-| Measurement | Crack width in mm with a coin for scale | Pilot photos with a crack-width card, planned | Nothing public has a scale reference |
-| Pattern model | Labels for the 7 reinforced-concrete patterns (`spec/features/risk_matrix.md`) | Partly: SDNET2018 crack / no crack [22]; PHI-Net damage type [26]; CODEBRIM spalling, exposed bars, corrosion stains for `spalling_exposed_bar` [28]; Darbhanga brick masonry cracks [30] | Nobody uses our labels; needs a mapping, then our own labels |
+| Quality gate | Phone photos labelled usable / unusable (blur, light, scale card visible) | Pilot photos (section 4), planned. First code test on five public sets done (`docs/experiments/2026-10-25_quality_gate_first_test.md`) | Public sets are not phone photos; they test the code only |
+| Material model (O scale) | Images labelled concrete / not concrete; residents cannot tell (D25) | Concrete: METU, SDNET2018, CODEBRIM; not concrete: Darbhanga and Strathclyde brick, Dais masonry. PHI-Net's material task is steel vs other materials, so it does not separate concrete from brick [55] | Plaster and paint hide the material; our phone photos needed |
+| Element model (O scale) | Photos of whole elements labelled column, beam, slab, wall; residents cannot tell (D25) | PHI-Net task 6, component type: beam, column, wall, others (research licence) [55] | Slab is not a separate PHI-Net class; our photos needed |
+| Crack segmentation (P scale) | Pixel masks of cracks | CrackSeg9k [25]; crack-seg polygons converted to masks [33]; Dais et al. masonry masks [31] | Few columns and beams |
+| Measurement (P scale) | Crack width in mm with a scale reference | Pilot photos with the printed scale card, planned (`spec/features/photo_protocol.md`) | Nothing public has a scale reference |
+| Pattern model (P scale) | Labels for the 7 reinforced-concrete patterns (`spec/features/risk_matrix.md`) | Partly: PHI-Net task 8, damage type (flexural, shear, combined) and task 3, spalling [55]; CODEBRIM spalling, exposed bars, corrosion stains for `spalling_exposed_bar` [28] | Surface map, along-bar, column-horizontal and joint cracks need our own labels |
+| Building risk score (S scale) | Age, floors added, structure or use changed, open ground floor (`spec/features/building_score.md`) | Resident and field-worker questionnaire; candidates for map data in section 2 | No public record of added floors or changes in informal areas |
 | Agent (building data) | Construction type, age, footprint | Candidates in section 2 | Source not chosen; access not agreed |
 | Triage rules | Signed-off matrix and thresholds | Illustrative matrix (`spec/features/triage.md`) | Engineer sign-off (Phase 1) |
 | Evaluation | On-site engineer rating per crack (ground truth) and an engineer's photo-only rating (baseline) | Nothing yet | Engineering partner (`spec/features/evaluation.md`) |
@@ -99,7 +100,7 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 | Data | Source | Availability | Access | Format | Size | Licence | Covers | Gaps |
 |---|---|---|---|---|---|---|---|---|
-| Pilot phone photos (no engineer) | Us, Barcelona, public facades (`spec/features/photo_protocol.md`) | To collect this week | Our own; no people, no addresses | Photo + coin + element tag + crack-width card; labels in a CSV | Target about 30 cracks, 3 shots each (assumption) | Ours | Photo protocol, quality gate, width measurement | No risk labels; Barcelona is not the target context |
+| Pilot phone photos (no engineer) | Us, Barcelona, public facades (`spec/features/photo_protocol.md`) | To collect this week | Our own; no people, no addresses | S, O and P photos with the scale card; labels in a CSV | Target about 30 cracks, 3 shots each (assumption) | Ours | Photo protocol, quality gate, width measurement | No risk labels; Barcelona is not the target context |
 | Engineer-labelled phone photos | To collect (Phase 2) | Does not exist | Needs engineering partner and resident consent | Same protocol, plus element, material, pattern, width (mm), Low / Medium / High, on-site rating | Target size: assumption, to set with the partner | Ours; consent rules to write | The real target data | Everything: partner, consent, sites |
 
 ### Building data and ground-truth candidates

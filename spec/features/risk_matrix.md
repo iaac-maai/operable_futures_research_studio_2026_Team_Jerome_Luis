@@ -8,7 +8,7 @@ v1 ignored the structural element, mixed surface finishes with structural patter
 ## Inputs
 | Input | From pipeline stage | Values |
 |---|---|---|
-| Element | 4 (detector) or element tag | column, beam, slab, load-bearing wall, infill wall |
+| Element | element model (pipeline v3, scale O), confirmed by a field worker or engineer when unsure | column, beam, slab, load-bearing wall, infill wall |
 | Pattern | 6 (pattern model) | the seven patterns below |
 | Width (mm) and its uncertainty (mm) | 5 (measurement) | the matrix uses the **upper bound** = width + uncertainty |
 | Pattern confidence | 6 | 0 to 1, threshold 0.8 (illustrative) |

@@ -12,9 +12,14 @@ Tripoli, February 2026: two blocks collapsed on 8 February (14 to 15 dead, per A
 Rana Plaza, Dhaka, 2013: cracks were visible the day before the collapse.
 
 ## What it does
-Phone photo (with a coin for scale) -> quality check -> **material check (reinforced concrete only)** -> find the crack (YOLO, U-Net) -> measure (width in mm with uncertainty, length, orientation)
--> pattern model and AI agent (building data over MCP) -> written triage rules -> Low, Medium, High, "Expert needed" or "Retake", each with its confidence and a one-sentence reason
--> **engineer review screen** (confirms or corrects every High and referral) -> corrections retrain the models (human-in-the-loop learning). Full pipeline: `spec/features/pipeline.md`.
+The unit is the **building**, photographed at three scales as in PHI-Net: **S** the building, **O** the element, **P** the crack.
+- **S:** a short building questionnaire (age, storeys, floors added, typology and its changes) and a facade photo give a **building risk score** that ranks buildings for engineers (P1, P2, P3).
+- **O:** models identify the **material** (concrete or not) and the **element** (column, beam, slab, wall); residents are never asked.
+- **P:** the crack close-up with a printed scale card is checked (sharp, at least 3 pixels across the crack), segmented and measured (width in mm with its uncertainty); the written risk matrix gives Low, Medium, High, "Expert needed" or "Retake", each with its confidence and a one-sentence reason.
+- **Monitoring:** the same crack is photographed again on its recheck date; growth larger than the measurement uncertainty raises its level.
+- **Engineers** review every High and every referral; their corrections retrain the models (human-in-the-loop learning).
+
+Full pipeline: `spec/features/pipeline.md` and `figures/01_pipeline.png`.
 It never gives a permit or a clearance. Any doubt goes to an expert, and an engineer confirms every High.
 
 ## Data
@@ -22,7 +27,7 @@ The concept is cracks in buildings in slum-like, informal neighbourhoods. See `d
 - Closest public data: engineer surveys of damaged buildings after the Haiti 2010 and Nepal 2015 earthquakes, rated light / moderate / severe (one rating per building, no scale).
 - Building and masonry crack images: METU, Darbhanga, Strathclyde (crack / no crack, no scale).
 - Generic crack pixels for pre-training: CrackSeg9k, crack-seg. Bridge and pavement sets are off-concept.
-- Still to collect: our own phone photos with a coin, rated by our engineering partners (Engineers Without Borders and a third-party structural engineer).
+- Still to collect: our own phone photos with the printed scale card, rated by our engineering partners (Engineers Without Borders and a third-party structural engineer).
 
 **Can we train with it?** Partly. There is enough public data to train the step that finds cracks (segmentation and detection). There is not enough to train or prove the step that rates danger: no public dataset has our seven crack patterns, a scale for width in mm, or an engineer's rating per crack. Those come only from our own photos and the engineering partners (`docs/data_map.md`, section 0b).
 

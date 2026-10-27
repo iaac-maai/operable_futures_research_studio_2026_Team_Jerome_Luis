@@ -100,7 +100,7 @@ def run(roots: list[Path], per_group: int, seed: int = 0) -> list[dict]:
             for path in rng.sample(sorted(paths), min(per_group, len(paths))):
                 row = {"file": str(path.relative_to(root)), "group": group, "label": label}
                 try:
-                    r = check(to_grey(path), coin_visible=True)  # coin check not implemented; these sets have no coin
+                    r = check(to_grey(path), scale_visible=True)  # scale check not implemented; these sets have no scale card
                 except (OSError, ValueError):  # a broken file is a retake, not a crash
                     rows.append({**row, "sharpness": 0.0, "brightness": 0.0, "image_ok": False,
                                  "failed": "unreadable file"})

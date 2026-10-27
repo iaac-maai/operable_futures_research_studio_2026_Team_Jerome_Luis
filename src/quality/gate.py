@@ -44,8 +44,8 @@ def to_work_size(grey: np.ndarray) -> np.ndarray:
     return np.asarray(img, dtype=np.float64)
 
 
-def check(grey: np.ndarray, coin_visible: bool | None = None) -> GateResult:
-    """Every check must pass; a missing coin result counts as a fail."""
+def check(grey: np.ndarray, scale_visible: bool | None = None) -> GateResult:
+    """Every check must pass; a missing scale-card result counts as a fail (D24)."""
     work = to_work_size(grey)
     s, b = sharpness(work), float(work.mean())
     failed = []
@@ -55,6 +55,6 @@ def check(grey: np.ndarray, coin_visible: bool | None = None) -> GateResult:
         failed.append("too dark")
     if b > MAX_BRIGHTNESS:
         failed.append("too bright")
-    if coin_visible is not True:
-        failed.append("coin not confirmed")
+    if scale_visible is not True:
+        failed.append("scale card not confirmed")
     return GateResult(not failed, s, b, failed)

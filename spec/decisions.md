@@ -92,3 +92,18 @@ Each stage reports its output with a confidence: material, crack found, width in
 The matrix now has three parts: a base level from seven reinforced-concrete patterns x four width bands; element criticality (a column raises one level); and seven warning signs that can only raise the level (growing, rust staining, sticking openings, recent earthquake, added floors: +1; offset and sagging: straight to High). The width used is the upper end of the measurement. Every result adds a next step with a recheck interval. The values live in `src/triage/risk_matrix_v2.json` (version 2.0-illustrative), readable and editable by an engineer; each change is a new version recorded here.
 Supersedes D1 (five patterns): surface map cracking replaces plaster crazing; vertical wall crack and column-or-beam are replaced by the element axis and by flexural, horizontal-column, along-bar and joint patterns.
 Calibration plan in `spec/features/risk_matrix.md`: literature anchors (to verify in the sources), a sense check on the Haiti definitions, an engineer card session, a test on engineer-rated photos, and versioning. All values stay illustrative until then.
+
+## D21 (2026-10-27): the building is the unit, seen at three scales (pipeline v3)
+Following the professor's feedback (27 Oct: engineers read the pattern across the building and whether cracks grow; building data; cheap phones and scale; PHI-Net), the unit of analysis is the building and cracks are evidence inside it. Every photo is at one of three scales defined as in PHI-Net task 1: S (structural, the building), O (object, the element), P (pixel, the crack) [53][55]. Pipeline v3: three scales x five phases (capture, check, perceive, decide, act), a scene check, a monitoring loop and a learning loop (`spec/features/pipeline.md`, `figures/01_pipeline.png`). Supersedes the single-crack pipeline v2 (D17 to D19 still hold).
+
+## D22 (2026-10-27): building risk score and priority P1 to P3
+A written rule ranks buildings for engineers: base tier from the worst crack; one tier higher with two or more building risk flags (older than 50 years, floors added, structure or use changed, open ground floor; unknown counts as a flag); one tier higher when Medium or worse appears in two or more elements; never lowers a crack level (`spec/features/building_score.md`). Illustrative until calibrated.
+
+## D23 (2026-10-27): crack monitoring with IDs, stickers and repeat photos
+Every crack gets an ID and two marker stickers; it is photographed again on its recheck date with the previous photo as an overlay; growth counts only when it is larger than the measurement uncertainty, and then raises the crack level (`spec/features/monitoring.md`).
+
+## D24 (2026-10-27): printed scale card, pixel rule and device roles
+A printed scale card replaces the coin (the coin stays as a backup). A photo must show at least 3 pixels across the crack (6 to 8 recommended) [46]; otherwise retake closer, or read the width band on the card. Field workers make the first visit with a reference phone; residents do the follow-ups (`spec/features/photo_protocol.md`).
+
+## D25 (2026-10-27): residents are never asked the material, the element or the pattern
+Residents cannot tell concrete from other materials, or a column from a wall (team, 27 Oct). Models identify the material, the element and the crack pattern from the photos, each with a confidence; when unsure, the case goes to an engineer. Residents answer only what they can know (building history, sticking doors, whether the crack is new). Confirmations by field workers and engineers become labels. Three models this semester: material, element (pre-trained on PHI-Net task 6) and crack segmentation.

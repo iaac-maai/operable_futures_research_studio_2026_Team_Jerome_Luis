@@ -69,7 +69,7 @@ def assess(pattern: str, element: str, width_mm: float, confidence: float, image
     if unknown:
         raise ValueError(f"unknown escalators: {unknown}")
     if image_ok is not True:
-        return _result("Retake", "Photo not usable (blur, light or coin missing): retake it.")
+        return _result("Retake", "Photo not usable (blur, light or scale card missing): retake it.")
     if not _valid(material_confidence) or not MATERIAL_THRESHOLD <= material_confidence <= 1:
         return _result("Expert needed", "Material unclear from the photo: an engineer decides.")
     if material not in SUPPORTED_MATERIALS:

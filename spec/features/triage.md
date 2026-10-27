@@ -4,10 +4,10 @@ Status: implemented with risk matrix v2.0-illustrative (`spec/features/risk_matr
 
 ## Inputs
 - `pattern`: one of the seven reinforced-concrete patterns in `spec/features/risk_matrix.md`, from the pattern model.
-- `element`: column, beam, slab, load-bearing wall or infill wall, from the detector or the element tag.
-- `width_mm` and `width_uncertainty_mm`: crack width and its uncertainty in millimetres, from the measurement step (coin scale).
+- `element`: column, beam, slab, load-bearing wall or infill wall, from the element model; never asked to the resident (D25).
+- `width_mm` and `width_uncertainty_mm`: crack width and its uncertainty in millimetres, from the measurement step (printed scale card; D24).
 - `confidence`: pattern-model confidence, 0 to 1.
-- `image_ok`: result of the quality gate (blur, light, coin visible).
+- `image_ok`: result of the quality gate (blur, light, scale card visible).
 - `material` and `material_confidence`: result of the material check (decision D17).
 - `escalators`: warning signs (growing, rust staining, sticking openings, recent earthquake, added floors, offset, sagging).
 

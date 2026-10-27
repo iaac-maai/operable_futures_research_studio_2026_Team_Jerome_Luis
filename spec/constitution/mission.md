@@ -11,7 +11,7 @@ and 114 buildings were ordered evacuated. Rana Plaza, Dhaka, 2013: cracks were v
 Give residents and field workers a fast, cheap early-warning triage from a phone photo, and give scarce engineers a ranked list of which buildings to visit first.
 
 ## Scope
-Cracks in reinforced concrete elements (walls, columns, beams, slabs). Other materials go to an engineer (`spec/decisions.md` D17).
+Cracks in reinforced concrete elements (walls, columns, beams, slabs). Other materials go to an engineer (`spec/decisions.md` D17). The unit of analysis is the building, seen at three scales (S, O, P) and over time (D21).
 
 ## Users
 - Residents of old buildings, field workers and community leaders: take the photo and receive a level, a reason and a next step.

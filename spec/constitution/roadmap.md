@@ -1,6 +1,6 @@
 # Roadmap
 
-1. Calibrate: agree the risk matrix and thresholds per element (columns, beams, slabs, brick walls) with structural engineers. Fix the photo protocol (coin, element tag, distance). Set consent and data rules.
+1. Calibrate: agree the risk matrix and thresholds per element (columns, beams, slabs, walls) with structural engineers. Fix the photo protocol (scale card, S, O and P shots, distance). Set consent and data rules.
 2. Build and test: collect and label phone photos, train the detector and segmenter, compare against buildings an engineer has already assessed.
    Goal: flag every crack the engineer rated High, and send only a few cases to an expert.
 3. Widen the scope, only if the Phase 2 goal is met: more materials, ground fissures, multi-storey frames, offline use.
@@ -44,21 +44,23 @@ Weeks start on Monday. "At risk" means the task depends on the engineering partn
 | Deliverables | 10-slide pitch deck, final presentation | 7 to 8 | |
 | Deliverables | Blog post (by 24 Dec) | 8 to 9 | |
 | Data | Quality gate on public sets (done) | 1 | |
-| Data | Material check: concrete vs not concrete, first training test | 1 | |
+| Data | Material model: concrete vs not concrete, first training test | 1 | |
 | Data | Map public labels to the 7 patterns | 2 to 3 | |
-| Pilot | Collect pilot photos (about 30 cracks, `spec/features/photo_protocol.md`) | 2 | |
+| Pilot | Collect pilot photos at the S, O and P scales (about 30 cracks, `spec/features/photo_protocol.md`) | 2 | |
 | Pilot | Prepare, label, tune the quality gate | 2 to 3 | |
-| Pilot | Coin detection and width measurement: first feature against the baseline (12 Nov) | 3 to 4 | |
+| Pilot | Scale card and width with its uncertainty: first feature against the baseline (12 Nov) | 3 to 4 | |
 | Models | U-Net on CrackSeg9k and crack-seg | 3 to 4 | |
-| Models | Pattern model, pre-trained on public sets | 4 to 5 | |
-| Models | YOLO crack and element detector | 4 to 6 | |
-| Agent and MCP | First MCP connection attempt (12 Nov) | 3 | |
+| Models | Pattern model, pre-trained on PHI-Net tasks 3 and 8 | 4 to 5 | |
+| Models | Element model, pre-trained on PHI-Net task 6 | 3 to 4 | |
+| Agent and MCP | First MCP: OpenStreetMap building data into the building case (12 Nov) | 3 | |
 | Agent and MCP | Plan/build harness, MCP connectors to all mapped sources (26 Nov) | 4 to 5 | |
 | Engineering partners | Agree scope with Engineers Without Borders and the structural engineer | 1 to 2 | |
 | Engineering partners | Calibration: matrix, thresholds, protocol | 3 to 5 | yes |
 | Engineering partners | Engineer-labelled photos and baseline ratings | 4 to 6 | yes |
 | Integration | Engineer review screen (mock-up) | 1 to 2 | |
+| Integration | Building questionnaire and building risk score in code (`spec/features/building_score.md`) | 2 to 3 | |
 | Integration | Beta: end-to-end pipeline on pilot photos (hackathon) | 4 | |
+| Integration | Monitoring: crack IDs, stickers, revisit flow (`spec/features/monitoring.md`) | 5 | |
 | Integration | Corrections logged and retraining loop (human-in-the-loop learning) | 5 to 6 | yes |
 | Integration | Comparison against the non-AI baseline (3 Dec) | 6 | yes |
 | Integration | Proof of concept, limits and ethics check (10 Dec) | 7 | |

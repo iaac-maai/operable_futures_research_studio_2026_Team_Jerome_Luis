@@ -66,57 +66,135 @@ def _canvas(w, h, title, subtitle=None):
     return fig, ax
 
 
+# Pipeline v3 (spec/features/pipeline.md). Boxes: (row, column) -> (kind, title, body, status).
+# Rows follow PHI-Net task 1 scene levels: 0 = S structural, 1 = O object, 2 = P pixel [55].
+PIPE_LANES = [("S", "STRUCTURAL", "from far:\nthe building"), ("O", "OBJECT", "mid-range:\none element"),
+              ("P", "PIXEL", "close-up:\nthe crack")]
+PIPE_PHASES = [("1  Capture", "photos and answers"), ("2  Check", "written rules"),
+               ("3  Perceive", "learned models, each with a confidence"), ("4  Decide", "written rules, auditable"),
+               ("5  Act", "people")]
+PIPE_BOXES = {
+    (0, 0): ("human", "Building case (once)", "questionnaire: age, storeys, added floors,\ntypology + changes, open ground floor\n+ facade photo + map data (MCP)", "spec"),
+    (0, 1): ("rule", "Completeness check", "every answer known or 'unknown'\nunknown counts as a risk flag\nand stays visible as unknown", "spec"),
+    (0, 2): ("learned", "Building reading", "now: the questionnaire answers\nlater: model on the facade photo\n(storeys, typology; PHI-Net task 5)", "spec"),
+    (0, 3): ("rule", "Building risk score", "worst crack level → P1 · P2 · P3\n+1 tier if ≥ 2 risk flags\n+1 tier if Medium+ in ≥ 2 elements", "spec"),
+    (0, 4): ("human", "Engineer", "ranked list of buildings + dossier\nconfirms or corrects every High\nand every referral; rates on site", "spec"),
+    (1, 0): ("human", "Element photo", "the whole element\nwith the scale card\nno question to the resident", "spec"),
+    (1, 1): ("rule", "Scale and angle", "scale card visible?\nphone parallel to the wall?\nno → retake", "spec"),
+    (1, 2): ("learned", "Material + element", "material model: concrete or not\nelement model: column, beam, slab, wall\n(PHI-Net task 6) · each + confidence", "spec"),
+    (1, 3): ("rule", "Element rules", "not concrete or unsure → Expert\npattern does not fit element → Expert\ncolumn → +1 level", "code"),
+    (2, 0): ("human", "Crack close-up", "scale card + 2 marker stickers\nburst of photos, flash on and off\nresident or field worker", "spec"),
+    (2, 1): ("rule", "Photo checks", "sharp and lit? ≥ 3 px across the crack?\nno → retake closer; still no →\nwidth band read on the card", "partly"),
+    (2, 2): ("learned", "Crack reading", "crack pixels → width mm ± 1 px\npattern model (PHI-Net tasks 3, 8)\nfield worker until confident", "spec"),
+    (2, 3): ("rule", "Crack level + growth", "matrix v2 → level, reason, next step\ngrowth counts only if larger\nthan the measurement uncertainty", "partly"),
+    (2, 4): ("human", "Resident", "level, reason, next step,\nrecheck date\nnever 'safe', never a clearance", "partly"),
+}
+PIPE_STATUS = {"code": ("in code", "#2F4B7C", "#2F4B7C", "white"),
+               "partly": ("partly in code", "#dfe6f2", "#2F4B7C", "#2F4B7C"),
+               "spec": ("specified", "#FFFFFF", MUTED, INK_2)}
+
+
 def pipeline():
-    """Pipeline v2 (spec/features/pipeline.md): ten stages, two users, and the human-in-the-loop learning loop."""
-    fig, ax = _canvas(15, 7.4, "Second Look pipeline: from photo to engineer review and retraining",
-                      "Every stage reports its result with a confidence. Learned models suggest, written rules decide, "
-                      "an engineer confirms every High and every referral, and the corrections retrain the models")
-    learned, rules, human, data = (VIOLET, "#ecebfb"), (AQUA, "#e3f5ee"), (MUTED, "#f0efec"), (BLUE, "#e4eefb")
-    steps = [
-        ("1  Capture (resident)", "photo + coin + element tag", human),
-        ("2  Quality check", "usable? if not: Retake", rules),
-        ("3  Material check", "concrete? confidence\nif not or unsure: Expert", learned),
-        ("4  Find the crack", "crack pixels + element\nconfidence", learned),
-        ("5  Measure", "width mm ± uncertainty\nlength, orientation", rules),
-        ("6  Pattern", "crack type\nprobability", learned),
-        ("7  Triage rules", "level + reason\noverall confidence", rules),
-        ("8  Engineer review", "confirms or corrects\nevery High and referral", human),
-        ("9  Corrections logged", "labelled examples\n(with consent)", data),
-        ("10  Retraining", "new model version\nchecked before use", learned),
-    ]
-    w, h, gap = 2.55, 1.35, 0.5
-    xs = [i * (w + gap) for i in range(5)]
-    pos = [(x, 3.3) for x in xs] + [(x, 0.6) for x in reversed(xs)]
-    for (title, sub, (edge, fill)), (x, y) in zip(steps, pos):
-        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0,rounding_size=0.08",
-                                    facecolor=fill, edgecolor=edge, linewidth=1.4))
-        ax.text(x + w / 2, y + h - 0.3, title, ha="center", va="center", fontsize=10, weight="bold", color=INK)
-        ax.text(x + w / 2, y + 0.48, sub, ha="center", va="center", fontsize=8.6, color=INK_2, linespacing=1.15)
-    for i in range(4):
-        _arrow(ax, (pos[i][0] + w, 3.3 + h / 2), (pos[i + 1][0], 3.3 + h / 2))
-    _arrow(ax, (pos[4][0] + w / 2, 3.3), (pos[5][0] + w / 2, 0.6 + h))
-    for i in range(5, 9):
-        _arrow(ax, (pos[i][0], 0.6 + h / 2), (pos[i + 1][0] + w, 0.6 + h / 2))
-    # learning loop: retraining feeds the learned models (stages 3, 4, 6)
-    loop_x = pos[9][0] - 0.35
-    ax.plot([pos[9][0] + w / 2, pos[9][0] + w / 2, loop_x], [0.6, 0.25, 0.25], color=VIOLET, lw=1.6, ls="--")
-    ax.plot([loop_x, loop_x], [0.25, 5.0], color=VIOLET, lw=1.6, ls="--")
-    for target in (2, 3):
-        tx = pos[target][0] + w / 2
-        ax.plot([loop_x, tx], [5.0, 5.0], color=VIOLET, lw=1.6, ls="--")
-        _arrow(ax, (tx, 5.0), (tx, 3.3 + h))
-    ax.plot([loop_x, pos[5][0] + w / 2], [0.25, 0.25], color=VIOLET, lw=1.6, ls="--")
-    _arrow(ax, (pos[5][0] + w / 2, 0.25), (pos[5][0] + w / 2, 0.6))
-    ax.text(loop_x + 0.1, 5.12, "human-in-the-loop learning: retrains stages 3, 4 and 6", fontsize=9, color=VIOLET,
-            va="bottom")
-    ax.text(pos[6][0] + w / 2, 0.08, "the risk matrix never changes automatically", fontsize=8.5, color=INK_2,
-            ha="center", va="top")
-    ax.set_xlim(-0.7, xs[-1] + w + 0.2)
-    ax.set_ylim(-0.6, 5.7)
-    ax.legend(handles=[Patch(facecolor=f, edgecolor=e, label=l) for l, (e, f) in
-                       [("Learned model", learned), ("Written rule, auditable", rules), ("Human (resident, engineer)",
-                                                                                         human), ("Data", data)]],
-              loc="lower center", bbox_to_anchor=(0.5, -0.1), ncol=4, frameon=False)
+    """Pipeline v3: three scales (S, O, P) x five phases, scene check, monitoring and learning loops, status."""
+    kinds = {"learned": (VIOLET, "#ecebfb"), "rule": (AQUA, "#e3f5ee"), "human": (MUTED, "#f0efec")}
+    x0, w, y0, h = [0, 4.1, 9.35, 13.45, 17.55], 3.5, [7.0, 4.25, 1.5], 2.05
+    rx, rw = 8.0, 0.95  # scene check
+    fig, ax = plt.subplots(figsize=(21, 12.6))
+    ax.set_axis_off()
+    fig.suptitle("Second Look pipeline v3: three scales, a building risk score and monitoring", x=0.02, ha="left",
+                 fontsize=17, weight="bold")
+    fig.text(0.02, 0.905, "Scales as in PHI-Net task 1: S structural (the building), O object (the element), P pixel "
+             "(the crack) [53][55]. Learned models report a confidence; written rules decide; any doubt goes to an "
+             "engineer.\nResidents are never asked the material, the element or the crack pattern: models identify "
+             "them. Status on 27 Oct 2026. Source: spec/features/pipeline.md", fontsize=11, color=INK_2,
+             linespacing=1.5)
+
+    def arrow(p0, p1, colour=INK_2, ls="-", lw=1.5):
+        ax.annotate("", xy=p1, xytext=p0, arrowprops=dict(arrowstyle="-|>", color=colour, lw=lw, ls=ls,
+                                                          shrinkA=0, shrinkB=0, mutation_scale=15))
+
+    for c, (head, sub) in enumerate(PIPE_PHASES):
+        ax.text(x0[c] + w / 2, 9.85, head, ha="center", fontsize=13, weight="bold", color=INK)
+        ax.text(x0[c] + w / 2, 9.5, sub, ha="center", fontsize=9.5, color=INK_2)
+    for r, (code, name, what) in enumerate(PIPE_LANES):
+        y = y0[r]
+        ax.add_patch(FancyBboxPatch((-2.25, y), 1.75, h, boxstyle="round,pad=0,rounding_size=0.1",
+                                    facecolor=TREE_NAVY, edgecolor="none"))
+        ax.text(-1.375, y + h - 0.5, code, ha="center", va="center", color=TREE_YELLOW, fontsize=26, weight="bold")
+        ax.text(-1.375, y + h / 2 - 0.15, name, ha="center", va="center", color="white", fontsize=10, weight="bold")
+        ax.text(-1.375, y + 0.42, what, ha="center", va="center", color="#dfe6f2", fontsize=9, linespacing=1.2)
+    for (r, c), (kind, title, body, status) in PIPE_BOXES.items():
+        edge, fill = kinds[kind]
+        x, y = x0[c], y0[r]
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0,rounding_size=0.1", facecolor=fill,
+                                    edgecolor=edge, lw=1.6))
+        ax.text(x + w / 2, y + h - 0.42, title, ha="center", va="center", fontsize=11.3, weight="bold", color=INK)
+        ax.text(x + w / 2, y + 0.8, body, ha="center", va="center", fontsize=9.3, color=INK_2, linespacing=1.25)
+        label, chip_fill, chip_edge, chip_ink = PIPE_STATUS[status]
+        cw = 0.2 + 0.085 * len(label)
+        ax.add_patch(FancyBboxPatch((x + w - 0.15 - cw, y + h - 0.15), cw, 0.3,
+                                    boxstyle="round,pad=0,rounding_size=0.15", facecolor=chip_fill,
+                                    edgecolor=chip_edge, lw=1.1, zorder=4))
+        ax.text(x + w - 0.15 - cw / 2, y + h, label, ha="center", va="center", fontsize=8, color=chip_ink,
+                weight="bold", zorder=5)
+        if c == 1:  # Check -> scene check -> Perceive
+            arrow((x + w, y + h / 2), (rx, y + h / 2))
+            arrow((rx + rw, y + h / 2), (x0[2], y + h / 2))
+        elif c < 3 and (r, c + 1) in PIPE_BOXES:
+            arrow((x + w, y + h / 2), (x0[c + 1], y + h / 2))
+
+    # scene check: PHI-Net task 1
+    ax.add_patch(FancyBboxPatch((rx, y0[2]), rw, y0[0] + h - y0[2], boxstyle="round,pad=0,rounding_size=0.1",
+                                facecolor=kinds["learned"][1], edgecolor=kinds["learned"][0], lw=1.6))
+    ax.text(rx + rw / 2, (y0[2] + y0[0] + h) / 2, "SCENE CHECK (PHI-Net task 1):  is this photo S, O or P?\n"
+            "now: the app's guided capture sets it  ·  later: a scene model", rotation=90, ha="center",
+            va="center", fontsize=9.3, weight="bold", color=INK, linespacing=1.6)
+
+    # between the rows: material and element down to the crack level; crack results up to the building score
+    arrow((x0[3] + w / 2, y0[1]), (x0[3] + w / 2, y0[2] + h))
+    ax.text(x0[3] + w / 2 + 0.12, y0[2] + h + 0.35, "material, element", fontsize=9.3, color=INK_2, va="center")
+    gx = x0[3] + w + 0.3
+    ax.plot([x0[3] + w, gx, gx], [y0[2] + 0.55, y0[2] + 0.55, y0[0] + 0.55], color=INK_2, lw=1.5)
+    arrow((gx, y0[0] + 0.55), (x0[3] + w, y0[0] + 0.55))
+    ax.text(gx + 0.08, y0[1] + 0.3, "crack levels,\ngrowth, damage\nspread across\nelements", fontsize=9.3,
+            color=INK_2, va="center", linespacing=1.2)
+    arrow((x0[3] + w, y0[0] + 1.45), (x0[4], y0[0] + 1.45))
+    arrow((x0[3] + w, y0[2] + 1.45), (x0[4], y0[2] + 1.45))
+
+    # learning loop: engineer corrections retrain the learned models of phase 3
+    ly, lx = 10.6, x0[4] + 0.45
+    ax.plot([lx, lx], [y0[0] + h + 0.15, ly], color=VIOLET, lw=1.8, ls="--")
+    ax.plot([lx, x0[2] + w / 2], [ly, ly], color=VIOLET, lw=1.8, ls="--")
+    arrow((x0[2] + w / 2, ly), (x0[2] + w / 2, 10.2), colour=VIOLET, ls="--", lw=1.8)
+    ax.text((x0[2] + w / 2 + lx) / 2, ly + 0.42, "LEARNING LOOP: engineer corrections and on-site ratings become "
+            "labels and retrain the learned models (phase 3)", ha="center", fontsize=9.8, color=VIOLET, weight="bold")
+    ax.text((x0[2] + w / 2 + lx) / 2, ly + 0.14, "each new version is checked on held-out photos before use; "
+            "written rules change only by a reviewed decision", ha="center", fontsize=9.3, color=VIOLET)
+
+    # monitoring loop: the same crack again on its recheck date
+    my = 0.85
+    ax.plot([x0[4] + w / 2, x0[4] + w / 2], [y0[2], my], color=BLUE, lw=1.8, ls="--")
+    ax.plot([x0[4] + w / 2, x0[0] + w / 2], [my, my], color=BLUE, lw=1.8, ls="--")
+    arrow((x0[0] + w / 2, my), (x0[0] + w / 2, y0[2]), colour=BLUE, ls="--", lw=1.8)
+    ax.text((x0[0] + x0[4]) / 2 + w / 2, my - 0.3, "MONITORING LOOP: on the recheck date (Low: 6 months, Medium: "
+            "1 month) the same crack ID and stickers are photographed again, with the last photo as an overlay",
+            ha="center", fontsize=9.8, color=BLUE, weight="bold")
+    ax.text((x0[0] + x0[4]) / 2 + w / 2, my - 0.58, "growth larger than the measurement uncertainty raises the "
+            "crack level, and through it the building risk score", ha="center", fontsize=9.3, color=BLUE)
+
+    handles = []
+    for (klabel, kkey), skey in zip([("Learned model (reports a confidence)", "learned"),
+                                     ("Written rule, auditable", "rule"), ("People and their inputs", "human")],
+                                    ["code", "partly", "spec"]):
+        e, f = kinds[kkey]
+        handles.append(Patch(facecolor=f, edgecolor=e, label=klabel))
+        slabel, sf, se, _ = PIPE_STATUS[skey]
+        handles.append(Patch(facecolor=sf, edgecolor=se, label=f"Status: {slabel}" + (" (designed, not coded yet)" if skey == "spec" else "")))
+    ax.legend(handles=handles, loc="lower center", bbox_to_anchor=(0.5, -0.1), ncol=3, frameon=False,
+              fontsize=10.5)
+    ax.set_xlim(-2.4, x0[4] + w + 0.2)
+    ax.set_ylim(-0.1, 11.3)
+    fig.subplots_adjust(left=0.02, right=0.99, top=0.85, bottom=0.08)
     return fig
 
 
@@ -125,7 +203,7 @@ def decision_flow():
                       "Order of checks in triage.matrix.assess(); Low is reachable only after all three checks say yes. "
                       "Thresholds illustrative")
     q_fill, q_edge = "#f0efec", MUTED
-    _box(ax, 0, 6.6, 3.8, 1, "1  Image usable?\nblur, light, coin visible", q_fill, q_edge)
+    _box(ax, 0, 6.6, 3.8, 1, "1  Image usable?\nblur, light, scale card visible", q_fill, q_edge)
     _box(ax, 0, 4.8, 3.8, 1, "2  Reinforced concrete?\nmaterial confidence ≥ 0.8", q_fill, q_edge)
     _box(ax, 0, 3.0, 3.8, 1, "3  Element and pattern known and fit,\nconfidence ≥ 0.8, width measured?", q_fill, q_edge)
     _box(ax, 0, 1.2, 3.8, 1, "Matrix v2: pattern × width (upper end),\nthen element and warning signs raise", q_fill,
@@ -203,16 +281,36 @@ def risk_matrix():
     return fig
 
 
-# Only what the tool works on (decision D16); out-of-scope and Phase 3 items are in docs/segmentation_tree.md.
-TREE = {
-    "A. Buildings deteriorate unwatched": ["A1 Ageing, no maintenance", "A2 Added floors, poor ground"],
-    "B. Residents cannot read the signs": ["B1 Harmless vs structural", "B2 Wrong all-clear", "B3 Photo quality, scale",
-                                           "B4 Not every wall is concrete"],
-    "C. Too few engineers": ["C1 No ranked list", "C2 Reports not acted on", "C3 Backlog: 114 buildings"],
-    "D. Data is scarce": ["D1 Public data: bridges and roads", "D2 No engineer labels"],
-}
-ATOMIC_FROM = {"B1", "B2", "B3", "B4", "C1"}
-TREE_YELLOW, TREE_NAVY = "#F2C14E", "#2F4B7C"
+# Segmentation tree v3 (docs/segmentation_tree.md; decisions D16, D21, D25). Only what the tool works on.
+# Leaf: (code, label, path, scale, evidence). Paths: "crack" feeds the atomic problem, "building" feeds the building
+# risk score, "context" explains the need. Scale as in PHI-Net task 1 [55]. Evidence: source numbers in
+# docs/sources.md, expert input (studio professor, 27 Oct), measured (our data map) or assumption (to test).
+TREE = [
+    ("A", "Buildings change unwatched", "building", [
+        ("A1", "Ageing, no maintenance", "building", "S", "[3] [9]"),
+        ("A2", "Floors added on top", "building", "S", "expert input"),
+        ("A3", "Structure or use changed", "building", "S", "expert input"),
+    ]),
+    ("B", "Residents cannot read the signs", "crack", [
+        ("B1", "Harmless vs structural", "crack", "P", "assumption"),
+        ("B2", "No record of growth", "crack", "P", "expert input, [46]"),
+        ("B3", "Cheap phones, no scale", "crack", "P", "expert input, [46]"),
+        ("B4", "Is it concrete? Can't tell", "crack", "O", "assumption"),
+        ("B5", "Which element? Can't tell", "crack", "O", "assumption"),
+        ("B6", "One crack hides the pattern", "building", "S", "expert input"),
+    ]),
+    ("C", "Too few engineers", "building", [
+        ("C1", "No ranked list of buildings", "building", "S", "assumption"),
+        ("C2", "Reports not acted on", "context", "", "[3] [7] [10]"),
+        ("C3", "Backlog: 114 buildings", "context", "", "[3] [5]"),
+    ]),
+    ("D", "Data is scarce", "context", [
+        ("D1", "Public data: bridges, roads", "context", "", "measured: data map"),
+        ("D2", "No crack labels by engineers", "context", "", "measured: data map"),
+    ]),
+]
+TREE_YELLOW, TREE_NAVY, TREE_GREY = "#F2C14E", "#2F4B7C", "#a8a7a1"
+TREE_PATH = {"crack": TREE_YELLOW, "building": TREE_NAVY, "context": TREE_GREY}
 
 
 def _pill(ax, x, y, w, h, text, fill, ink, size):
@@ -224,6 +322,7 @@ def _pill(ax, x, y, w, h, text, fill, ink, size):
 def _elbow(ax, x0, y0, x1, y1, ymid, colour, r=0.28):
     """Vertical down from (x0, y0), across at ymid with rounded corners, down to (x1, y1)."""
     from matplotlib.path import Path as MPath
+    from matplotlib.patches import PathPatch
 
     dx = x1 - x0
     if abs(dx) < 1e-6:
@@ -234,102 +333,135 @@ def _elbow(ax, x0, y0, x1, y1, ymid, colour, r=0.28):
                  (x1, ymid - r), (x1, y1)]
         codes = [MPath.MOVETO, MPath.LINETO, MPath.CURVE3, MPath.CURVE3, MPath.LINETO, MPath.CURVE3, MPath.CURVE3,
                  MPath.LINETO]
-    from matplotlib.patches import PathPatch
     ax.add_patch(PathPatch(MPath(verts, codes), facecolor="none", edgecolor=colour, lw=2.2, zorder=1,
                            capstyle="round"))
 
 
-def _tag(ax, x, y, text, colour):
-    ax.add_patch(plt.Circle((x, y), 0.33, facecolor="white", edgecolor=colour, lw=2.2, zorder=3))
-    ax.text(x, y, text, ha="center", va="center", fontsize=11, weight="bold", color=TREE_NAVY, zorder=4)
+def _tag(ax, x, y, text, colour, r=0.33, size=11):
+    ax.add_patch(plt.Circle((x, y), r, facecolor="white", edgecolor=colour, lw=2.2, zorder=3))
+    ax.text(x, y, text, ha="center", va="center", fontsize=size, weight="bold", color=TREE_NAVY, zorder=4)
 
 
 def segmentation_tree():
-    """Flowchart style: pill nodes, rounded connectors with letter tags, circle leaves with caps labels.
-    Yellow marks the path into the atomic problem, navy the supporting context."""
+    """Flowchart tree: macro pill, four branch pills, leaf circles with scale badge and evidence, then the crack
+    path converges into the atomic problem and the building path into the building risk score."""
     import textwrap
 
-    fig, ax = plt.subplots(figsize=(18, 10.2))
+    fig, ax = plt.subplots(figsize=(22, 11.6))
     ax.set_axis_off()
-    fig.suptitle("Problem segmentation tree", x=0.02, ha="left", fontsize=15, weight="bold")
-    fig.text(0.02, 0.925, "Macro problem → four branches (meso) → causes and needs (micro) → the atomic problem we work "
-             "on first. Yellow: path into the atomic problem. Navy: supporting context. Sources in docs/sources.md",
-             fontsize=10.5, color=INK_2)
-    leaf_gap, group_gap, r_leaf = 1.75, 0.9, 0.62
-    y_top, y_meso, y_leaf, y_atomic, y_final = 11.0, 8.6, 5.7, 2.55, 1.15
+    fig.suptitle("Problem segmentation tree", x=0.02, ha="left", fontsize=16, weight="bold")
+    fig.text(0.02, 0.915, "Macro problem → four branches → causes and needs → the atomic problem (one crack) and the "
+             "building risk score (one building). Under each node: its evidence, as a source number (docs/sources.md),"
+             "\nexpert input (studio professor, 27 Oct), measured (our data map) or an assumption still to test. "
+             "S, O, P: the scale of the photo, as in PHI-Net task 1 (structural, object, pixel).", fontsize=11,
+             color=INK_2, linespacing=1.5)
+    leaf_gap, group_gap, r_leaf = 1.85, 0.9, 0.58
+    y_top, y_meso, y_leaf = 12.2, 10.0, 7.3
     xs, x = {}, 0.0
-    for meso, kids in TREE.items():
-        xs[meso] = []
+    for letter, _, _, kids in TREE:
+        xs[letter] = []
         for _ in kids:
-            xs[meso].append(x)
+            xs[letter].append(x)
             x += leaf_gap
         x += group_gap
     width = x - group_gap - leaf_gap
     centre = width / 2
-    feeds = {code[0] for code in ATOMIC_FROM}
+    y_label = y_leaf - r_leaf - 0.18
+    y_start = y_label - 1.05  # below label and evidence
 
-    _pill(ax, centre, y_top, 14.2, 0.95, "PEOPLE CANNOT JUDGE WHETHER THE CRACKS IN THEIR AGEING BUILDINGS ARE DANGEROUS",
-          TREE_YELLOW, TREE_NAVY, 12.5)
+    _pill(ax, centre, y_top, 14.6, 0.95, "PEOPLE CANNOT JUDGE WHETHER THE CRACKS IN THEIR AGEING BUILDINGS ARE "
+          "DANGEROUS", TREE_YELLOW, TREE_NAVY, 12.5)
     n = len(TREE)
-    for i, (meso, kids) in enumerate(TREE.items()):
-        letter = meso[0]
-        on_path = letter in feeds
-        colour = TREE_YELLOW if on_path else TREE_NAVY
-        mx = sum(xs[meso]) / len(xs[meso])
-        # outer branches leave the top pill further out and turn higher, so no two connectors cross
-        offset = (i - (n - 1) / 2) * 1.15
+    crack_x, building_x = [], []
+    for i, (letter, title, path, kids) in enumerate(TREE):
+        colour = TREE_PATH[path]
+        mx = sum(xs[letter]) / len(xs[letter])
+        offset = (i - (n - 1) / 2) * 1.25
         ymid = y_top - 0.95 if abs(offset) > 1 else y_top - 1.55
-        x0 = centre + offset
-        _elbow(ax, x0, y_top - 0.48, mx, y_meso + 0.36, ymid, colour)
-        _tag(ax, (x0 + mx) / 2, ymid, letter, colour)
-        title = meso.split(". ", 1)[1].upper()
-        _pill(ax, mx, y_meso, max(3.0, 0.172 * len(title)), 0.72, title, colour,
-              TREE_NAVY if on_path else "white", 10.5)
-        for lx, kid in zip(xs[meso], kids):
-            code, label = kid.split(" ", 1)
-            leaf_on_path = code in ATOMIC_FROM
-            lc = TREE_YELLOW if leaf_on_path else TREE_NAVY
+        _elbow(ax, centre + offset, y_top - 0.48, mx, y_meso + 0.36, ymid, colour)
+        _tag(ax, (centre + offset + mx) / 2, ymid, letter, colour)
+        pill_ink = TREE_NAVY if path == "crack" else ("white" if path == "building" else INK)
+        _pill(ax, mx, y_meso, max(3.0, 0.165 * len(title)), 0.72, title.upper(), colour, pill_ink, 10.5)
+        for lx, (code, label, leaf_path, scale, evidence) in zip(xs[letter], kids):
+            lc = TREE_PATH[leaf_path]
             _elbow(ax, mx, y_meso - 0.36, lx, y_leaf + r_leaf, y_meso - 1.15, lc)
             ax.add_patch(plt.Circle((lx, y_leaf), r_leaf, facecolor="white", edgecolor=lc, lw=3, zorder=3))
-            ax.text(lx, y_leaf, code, ha="center", va="center", fontsize=15, weight="bold", color=TREE_NAVY, zorder=4)
-            ax.text(lx, y_leaf - r_leaf - 0.2, textwrap.fill(label.upper(), 14, break_on_hyphens=False),
-                    ha="center", va="top", fontsize=8.8, color=INK, linespacing=1.15)
-            if leaf_on_path:
-                _elbow(ax, lx, y_leaf - r_leaf - 1.0, centre, y_atomic + 0.4, y_atomic + 0.85, TREE_YELLOW)
-    _pill(ax, centre, y_atomic, 16.5, 0.8, "ATOMIC PROBLEM: ONE PHOTO, ONE CRACK, ONE CONCRETE ELEMENT → LEVEL, CONFIDENCE, REASON",
-          TREE_YELLOW, TREE_NAVY, 12)
-    _elbow(ax, centre, y_atomic - 0.4, centre, y_final + 0.36, y_final + 0.9, TREE_NAVY)
-    _pill(ax, centre, y_final, 11.5, 0.72, "SECOND LOOK:  LOW · MEDIUM · HIGH · EXPERT NEEDED · RETAKE",
-          TREE_NAVY, "white", 11.5)
-    ax.set_xlim(-2.0, width + 2.0)
-    ax.set_ylim(0.6, 11.6)
+            ax.text(lx, y_leaf, code, ha="center", va="center", fontsize=14, weight="bold", color=TREE_NAVY,
+                    zorder=4)
+            if scale:
+                _tag(ax, lx + 0.5, y_leaf + 0.5, scale, lc, r=0.24, size=9)
+            ax.text(lx, y_label, textwrap.fill(label.upper(), 15, break_on_hyphens=False), ha="center",
+                    va="top", fontsize=8.8, color=INK, linespacing=1.15)
+            ax.text(lx, y_label - 0.62, evidence, ha="center", va="top", fontsize=8.3, color=INK_2, style="italic")
+            if leaf_path == "crack":
+                crack_x.append(lx)
+            elif leaf_path == "building":
+                building_x.append(lx)
+
+    # crack path: converge into the atomic problem
+    ax_c = sum(crack_x) / len(crack_x)
+    y_atomic, atomic_w = 4.35, max(crack_x) - min(crack_x) + 1.3
+    for lx in crack_x:
+        _elbow(ax, lx, y_start, ax_c, y_atomic + 0.55, y_atomic + 0.95, TREE_YELLOW)
+    ax.add_patch(FancyBboxPatch((ax_c - atomic_w / 2, y_atomic - 0.55), atomic_w, 1.1,
+                                boxstyle="round,pad=0,rounding_size=0.55", facecolor=TREE_YELLOW, edgecolor="none",
+                                zorder=3))
+    ax.text(ax_c, y_atomic + 0.2, "ATOMIC PROBLEM: IS THIS CRACK DANGEROUS, AND IS IT GROWING?", ha="center",
+            va="center", fontsize=10.5, weight="bold", color=TREE_NAVY, zorder=4)
+    ax.text(ax_c, y_atomic - 0.22, "one crack in one concrete element, with a scale, seen again → level, confidence, "
+            "reason, growth", ha="center", va="center", fontsize=9.3, color=TREE_NAVY, zorder=4)
+
+    # building path: straight down into the building risk score, joined by the atomic problem
+    y_build = 2.45
+    for lx in building_x:
+        ax.plot([lx, lx], [y_start, y_build + 0.55], color=TREE_NAVY, lw=2.2, zorder=1)
+    ax.annotate("", xy=(ax_c, y_build + 0.55), xytext=(ax_c, y_atomic - 0.55),
+                arrowprops=dict(arrowstyle="-|>", color=TREE_YELLOW, lw=2.4, shrinkA=0, shrinkB=0,
+                                mutation_scale=18), zorder=2)
+    ax.add_patch(FancyBboxPatch((-0.6, y_build - 0.55), width + 1.2, 1.1, boxstyle="round,pad=0,rounding_size=0.55",
+                                facecolor=TREE_NAVY, edgecolor="none", zorder=3))
+    ax.text(centre, y_build + 0.2, "BUILDING RISK SCORE: WHICH BUILDING DOES AN ENGINEER VISIT FIRST?   "
+            "P1 · P2 · P3", ha="center", va="center", fontsize=11, weight="bold", color="white", zorder=4)
+    ax.text(centre, y_build - 0.22, "crack levels and growth from the atomic problem + building data (age, added floors, "
+            "structure or use changed) + damage spread across elements", ha="center", va="center", fontsize=9.5,
+            color="#dfe6f2", zorder=4)
+
+    ax.legend(handles=[Line2D([], [], color=TREE_YELLOW, lw=4, label="Crack path → atomic problem (scales P, O)"),
+                       Line2D([], [], color=TREE_NAVY, lw=4, label="Building path → building risk score (scale S)"),
+                       Line2D([], [], color=TREE_GREY, lw=4, label="Context: why the need exists, not an input")],
+              loc="lower center", bbox_to_anchor=(0.5, -0.02), ncol=3, frameon=False, fontsize=11)
+    ax.set_xlim(-1.0, width + 1.0)
+    ax.set_ylim(0.9, 12.9)
     ax.set_aspect("equal")
+    fig.subplots_adjust(left=0.01, right=0.99, top=0.86, bottom=0.03)
     return fig
 
 
-STAGES = ["Quality gate", "Material check", "YOLO detector", "U-Net segmenter", "Measurement (mm)", "Pattern model",
-          "Agent: building data", "Triage rules sign-off", "Engineer review + retraining", "Evaluation (ground truth)"]
-SOURCES = ["SDNET2018", "CrackSeg9k", "crack-seg\n(Ultralytics)", "PHI-Net", "CODEBRIM", "Haiti + Nepal\nsurveys",
-           "Brick masonry\n(Darbhanga)", "Masonry masks\n(Dais et al.)", "Pilot photos", "Engineer-\nlabelled photos",
-           "Tripoli lists\n(106 / 114)", "Engineering\npartner"]
+STAGES = ["Quality gate", "Material model (O)", "Element model (O)", "Crack segmentation (P)", "Measurement in mm (P)",
+          "Pattern model (P)", "Building risk score (S)", "Agent: building data", "Triage rules sign-off",
+          "Engineer review + retraining", "Evaluation (ground truth)"]
+SOURCES = ["SDNET2018", "CrackSeg9k", "crack-seg\n(Ultralytics)", "METU", "PHI-Net", "CODEBRIM", "Haiti + Nepal\nsurveys",
+           "Brick masonry\n(Darbhanga)", "Brick facades\n(Strathclyde)", "Masonry masks\n(Dais et al.)", "Pilot photos",
+           "Engineer-\nlabelled photos", "Tripoli lists\n(106 / 114)", "Engineering\npartner"]
 # From docs/data_map.md, section 1. Rows follow STAGES, columns follow SOURCES.
 COVERAGE = [
-    ["none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
-    ["partial", "none", "none", "partial", "partial", "none", "partial", "partial", "planned", "planned", "none", "none"],
-    ["none", "none", "partial", "partial", "partial", "none", "partial", "none", "planned", "planned", "none", "none"],
-    ["none", "covered", "covered", "none", "none", "none", "none", "partial", "none", "planned", "none", "none"],
-    ["none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
-    ["partial", "none", "none", "partial", "partial", "partial", "partial", "none", "none", "planned", "none", "none"],
-    ["none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "partial", "none"],
-    ["none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "planned"],
-    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "planned", "none", "planned"],
-    ["none", "none", "none", "none", "none", "partial", "none", "none", "none", "planned", "partial", "planned"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
+    ["partial", "none", "none", "partial", "none", "partial", "none", "partial", "partial", "partial", "planned", "planned", "none", "none"],
+    ["none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
+    ["none", "covered", "covered", "none", "none", "none", "none", "none", "none", "partial", "none", "planned", "none", "none"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
+    ["none", "none", "none", "none", "partial", "partial", "none", "none", "none", "none", "none", "planned", "none", "none"],
+    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "partial", "planned"],
+    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "partial", "none"],
+    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "none", "planned"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "planned", "none", "planned"],
+    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "planned", "partial", "planned"],
 ]
 COVERAGE_LABEL = {"covered": "covers", "partial": "partly", "planned": "planned", "none": ""}
 
 
 def data_coverage():
-    fig, ax = plt.subplots(figsize=(18, 6.8))
+    fig, ax = plt.subplots(figsize=(21, 7.8))
     for r, row in enumerate(COVERAGE):
         for c, state in enumerate(row):
             ax.add_patch(FancyBboxPatch((c + 0.04, r + 0.08), 0.92, 0.84, boxstyle="round,pad=0,rounding_size=0.05",
@@ -349,8 +481,8 @@ def data_coverage():
                         ("none", "Nothing")]],
               loc="upper center", bbox_to_anchor=(0.5, -0.02), ncol=4, frameon=False)
     fig.suptitle("Data map: which source feeds which pipeline stage", x=0.02, ha="left", fontsize=14, weight="bold")
-    fig.text(0.02, 0.905, "Public data covers only U-Net training; every other stage needs our own photos or an "
-             "engineer. From docs/data_map.md (25 Oct 2026).", fontsize=10, color=INK_2)
+    fig.text(0.02, 0.905, "Public data covers only crack segmentation (P); every other stage needs our own photos or an "
+             "engineer. From docs/data_map.md, section 1 (27 Oct 2026).", fontsize=10, color=INK_2)
     fig.subplots_adjust(left=0.13, right=0.99, top=0.76, bottom=0.1)
     return fig
 
@@ -459,21 +591,23 @@ PLAN = [
     ("Deliverables", "Pitch deck, final presentation", 7, 8, False),
     ("Deliverables", "Blog post", 8, 9, False),
     ("Data", "Quality gate on public sets (done)", 1, 1, False),
-    ("Data", "Material check: concrete vs not, first test", 1, 1, False),
+    ("Data", "Material model: concrete vs not, first test", 1, 1, False),
     ("Data", "Map public labels to the 7 patterns", 2, 3, False),
-    ("Pilot", "Collect pilot photos (~30 cracks)", 2, 2, False),
+    ("Pilot", "Collect pilot photos: S, O, P scales", 2, 2, False),
     ("Pilot", "Prepare, label, tune quality gate", 2, 3, False),
-    ("Pilot", "Coin + width measurement (1st feature)", 3, 4, False),
+    ("Pilot", "Scale card + width ± uncertainty (1st feature)", 3, 4, False),
     ("Models", "U-Net on CrackSeg9k + crack-seg", 3, 4, False),
-    ("Models", "Pattern model (pre-trained)", 4, 5, False),
-    ("Models", "YOLO crack and element detector", 4, 6, False),
-    ("Agent and MCP", "First MCP connection attempt", 3, 3, False),
+    ("Models", "Element model (PHI-Net task 6)", 3, 4, False),
+    ("Models", "Pattern model (PHI-Net tasks 3, 8)", 4, 5, False),
+    ("Agent and MCP", "First MCP: OpenStreetMap building data", 3, 3, False),
     ("Agent and MCP", "Plan/build harness, MCP to all sources", 4, 5, False),
     ("Engineering partners", "Scope with EWB + structural engineer", 1, 2, False),
     ("Engineering partners", "Calibration: matrix, thresholds", 3, 5, True),
     ("Engineering partners", "Engineer-labelled photos + baseline", 4, 6, True),
     ("Integration", "Engineer review screen (mock-up)", 1, 2, False),
+    ("Integration", "Building questionnaire + risk score (code)", 2, 3, False),
     ("Integration", "Beta: end-to-end on pilot photos", 4, 4, False),
+    ("Integration", "Monitoring: crack IDs, stickers, revisit", 5, 5, False),
     ("Integration", "Corrections logged + retraining loop", 5, 6, True),
     ("Integration", "Comparison vs non-AI baseline", 6, 6, True),
     ("Integration", "Proof of concept, limits + ethics", 7, 7, False),
@@ -491,7 +625,7 @@ WEEK_STARTS = ["26 Oct", "2 Nov", "9 Nov", "16 Nov", "23 Nov", "30 Nov", "7 Dec"
 
 def timeline():
     weeks = len(WEEK_STARTS)
-    fig, ax = plt.subplots(figsize=(14, 10.2))
+    fig, ax = plt.subplots(figsize=(14, 10.9))
     n = len(PLAN)
     ax.axvspan(3, 4, color="#f0efec", zorder=0)
     ax.text(3.5, n - 0.9, "hackathon\n(no studio)", ha="center", va="center", fontsize=8.5, color=INK_2)

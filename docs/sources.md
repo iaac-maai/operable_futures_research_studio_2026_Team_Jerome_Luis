@@ -54,3 +54,6 @@ Numbered as in the 22 Oct 2026 presentation. [25] to [27] added for the data map
 50. Zaborac J., Athanasiou A., Salamone S., Bayrak O., Hrynyk T. D., Evaluation of Structural Cracking in Concrete, Center for Transportation Research, University of Texas at Austin, FHWA/TX-19/0-6919-1, 2019, as cited in [46]
 51. OFROU, Directive ASTRA 62016: Guide pour les inspecteurs d'ouvrages d'art, Office fédéral des routes, 2021, as cited in [46]
 52. DGC, Guía para la realización de inspecciones principales de obras de paso en la Red de Carreteras del Estado, Ministerio de Fomento, 2012, as cited in [46]
+53. Gao Y., Mosalam K. M., PEER Hub ImageNet (Φ-Net): A Large-Scale Multi-Attribute Benchmark Dataset of Structural Images, PEER Report No. 2019/07, Pacific Earthquake Engineering Research Center, UC Berkeley, 2019
+54. Gao Y., Mosalam K. M., Deep Transfer Learning for Image-based Structural Damage Recognition, Computer-Aided Civil and Infrastructure Engineering 33(9): 748-768, 2018
+55. PEER Hub ImageNet (Φ-Net), detection tasks (task 1 scene level: pixel P, object O, structural S; tasks 2 to 8), checked 27 Oct 2026: https://apps.peer.berkeley.edu/phi-net/detection-tasks/
