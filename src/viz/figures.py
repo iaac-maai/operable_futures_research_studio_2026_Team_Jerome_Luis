@@ -884,7 +884,7 @@ def dataset_sizes():
             used = row[3 + k]
             ax.plot(x, y, transform=trans, marker="o" if used else "_", ms=15 if used else 12,
                     color=K if used else "#9a9a9a", mew=2, clip_on=False)
-    fig.suptitle("What we found, and how it could help", x=0.02, ha="left", fontsize=18, weight="bold",
+    fig.suptitle("WHAT WE FOUND AND HOW IT COULD HELP", x=0.02, ha="left", fontsize=18, weight="bold",
                  color=K)
     fig.text(0.02, 0.905, "Train: teach a model.  Test: check a model or the quality gate on data it has not seen.  "
              "Measure: the photos carry a scale, so crack widths in mm can be checked.\nCounts and licences from each "
