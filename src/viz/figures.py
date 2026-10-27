@@ -828,47 +828,42 @@ def data_coverage():
     return fig
 
 
-# From docs/data_map.md, section 2 (checked on the source pages, 24 Oct 2026).
-DATASETS = [("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0  ·  bridge decks, pavement, walls"),
-            ("METU", 40_000, "40,000  ·  CC BY 4.0  ·  concrete walls of campus buildings"),
-            ("PHI-Net", 36_413, "36,413  ·  CC BY-NC-SA 4.0  ·  post-earthquake, no masks"),
-            ("CrackSeg9k", 9_255, "9,255  ·  CC0  ·  pixel masks, mostly pavement"),
-            ("crack-seg (Ultralytics)", 4_029, "4,029  ·  Public Domain  ·  polygons, roads and walls"),
-            ("Haiti 2010 survey", 6_526, "6,526 photos of 183 buildings  ·  engineer-rated  ·  licence not stated"),
-            ("Brick masonry (Darbhanga)", 4_259, "4,259  ·  CC BY 4.0  ·  brick, one heritage building"),
-            ("Brick facades (Strathclyde)", 700, "700  ·  CC BY 4.0  ·  brick facades"),
-            ("Pilot phone photos", 0, "0  ·  about 30 cracks this week  ·  no risk labels"),
-            ("Engineer-labelled phone photos", 0, "0  ·  to collect in Phase 2  ·  the target data")]
-
-
-# Fit to the concept, from docs/data_map.md section 0 (SDNET2018: walls low, decks and pavement off-concept).
-DATASET_FIT = {"SDNET2018": "LOW / OFF", "METU": "LOW", "PHI-Net": "MEDIUM", "CrackSeg9k": "LOW",
-               "crack-seg (Ultralytics)": "LOW", "Haiti 2010 survey": "HIGH", "Brick masonry (Darbhanga)": "MEDIUM",
-               "Brick facades (Strathclyde)": "MEDIUM", "Pilot phone photos": "MEDIUM",
-               "Engineer-labelled phone photos": "TARGET"}
+# From docs/data_map.md, sections 0b, 1, 2 and 6: (name, images, count and licence, train, test, measure, what for).
+# Train: teach a model. Test: check a model or the quality gate on data it has not seen. Measure: the photos carry a
+# scale, so crack widths in mm can be checked.
+DATASETS = [
+    ("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0", True, True, False, "crack / no crack; quality gate"),
+    ("METU", 40_000, "40,000  ·  CC BY 4.0", True, True, False, "crack / no crack; material: concrete"),
+    ("PHI-Net", 36_413, "36,413  ·  CC BY-NC-SA 4.0", True, True, False, "element, pattern, scene; own test splits"),
+    ("CrackSeg9k", 9_255, "9,255  ·  CC0", True, True, False, "crack pixels (U-Net)"),
+    ("crack-seg (Ultralytics)", 4_029, "4,029  ·  Public Domain", True, True, False, "crack pixels (U-Net)"),
+    ("Haiti 2010 survey", 6_526, "6,526 photos  ·  licence not stated", False, True, False,
+     "engineer ratings: check of levels"),
+    ("Brick masonry (Darbhanga)", 4_259, "4,259  ·  CC BY 4.0", True, True, False, "crack boxes; material: not concrete"),
+    ("Brick facades (Strathclyde)", 700, "700  ·  CC BY 4.0", True, True, False, "crack / no crack; not concrete"),
+    ("Pilot phone photos", 0, "0, about 30 cracks this week", False, True, True, "width in mm; tune the gate"),
+    ("Engineer-labelled phone photos", 0, "0, to collect in Phase 2", True, True, True,
+     "ground truth, baseline, calibration"),
+]
 
 
 def dataset_sizes():
-    """Image counts of the public datasets and of our own data, in black and white."""
+    """What data exists and what each set can be used for (train, test, measure), in black and white."""
     K = "#111111"
-    fig, ax = plt.subplots(figsize=(15, 8.4), facecolor="white")
-    ax.set_facecolor("white")
+    fig, ax = plt.subplots(figsize=(17, 8.6))
     names = [d[0] for d in DATASETS]
     ys = range(len(DATASETS))
     ax.barh(ys, [d[1] for d in DATASETS], height=0.5, color=K)
-    for y, (_, n, label) in zip(ys, DATASETS):
-        ax.text(n + 900, y, label, va="center", fontsize=11.5, color=K)
-        ax.text(1.0, y, DATASET_FIT[names[y]], transform=ax.get_yaxis_transform(), va="center", ha="right",
-                fontsize=13, weight="bold", color=K)
-    ax.text(1.0, -0.9, "FIT TO INFORMAL BUILDINGS", transform=ax.get_yaxis_transform(), va="center", ha="right",
-            fontsize=10.5, color="#444444")
+    for y, (_, n, count, *_flags, what) in zip(ys, DATASETS):
+        ax.text(n + 1200, y, f"{count}  ·  {what}", va="center", fontsize=11.5, color=K)
     ax.set_yticks(list(ys), names)
     for tick in ax.get_yticklabels():
         tick.set_fontsize(15)
         tick.set_fontweight("bold")
         tick.set_color(K)
     ax.invert_yaxis()
-    ax.set_xlim(0, 125_000)
+    ax.set_xlim(0, 150_000)
+    ax.set_xticks([0, 20_000, 40_000, 60_000])
     ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v / 1000:.0f}K" if v else "0"))
     ax.tick_params(axis="x", colors=K, labelsize=11.5, length=0)
     ax.tick_params(axis="y", length=0, pad=10)
@@ -876,14 +871,26 @@ def dataset_sizes():
     ax.set_axisbelow(True)
     for s in ("top", "right", "left"):
         ax.spines[s].set_visible(False)
+    ax.spines["bottom"].set_bounds(0, 60_000)
     ax.spines["bottom"].set_color(K)
-    ax.set_xlabel("Images", fontsize=12, color=K)
-    fig.suptitle("What data exists, and how good it is",
-                 x=0.02, ha="left", fontsize=18, weight="bold", color=K)
-    fig.text(0.02, 0.905, "Size: image counts and licences from each dataset's page. Fit: how close each dataset is to "
-             "buildings in informal neighbourhoods (docs/data_map.md).\nThe largest sets fit worst; the target data does "
-             "not exist yet.", fontsize=11.5, color="#444444", va="top", linespacing=1.5)
-    fig.subplots_adjust(left=0.27, right=0.98, top=0.83, bottom=0.1)
+    ax.text(30_000, len(DATASETS) + 0.15, "Images", ha="center", va="top", fontsize=12, color=K)
+
+    # what each set can be used for: a filled dot means yes
+    trans = ax.get_yaxis_transform()
+    for k, head in enumerate(("TRAIN", "TEST", "MEASURE")):
+        x = 0.80 + k * 0.085
+        ax.text(x, -0.95, head, transform=trans, ha="center", va="center", fontsize=13, weight="bold", color=K)
+        for y, row in zip(ys, DATASETS):
+            used = row[3 + k]
+            ax.plot(x, y, transform=trans, marker="o" if used else "_", ms=15 if used else 12,
+                    color=K if used else "#9a9a9a", mew=2, clip_on=False)
+    fig.suptitle("What we found, and how it could help", x=0.02, ha="left", fontsize=18, weight="bold",
+                 color=K)
+    fig.text(0.02, 0.905, "Train: teach a model.  Test: check a model or the quality gate on data it has not seen.  "
+             "Measure: the photos carry a scale, so crack widths in mm can be checked.\nCounts and licences from each "
+             "dataset's page; uses from docs/data_map.md. Only our own photos have a scale.", fontsize=11.5,
+             color="#444444", va="top", linespacing=1.5)
+    fig.subplots_adjust(left=0.22, right=0.985, top=0.8, bottom=0.08)
     return fig
 
 
