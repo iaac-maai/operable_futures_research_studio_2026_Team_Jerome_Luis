@@ -16,9 +16,12 @@ PHI-Net puts the scene level first because it "can help decrease the doubt of sc
 Note: PHI-Net's material task (task 4) is steel vs other materials, so it cannot separate concrete from brick; our material check needs its own data (`docs/data_map.md`).
 
 ## Users and devices
-- **Field worker:** first visit of a building, with a reference phone and the printed scale card. Cheap phones are not reliable enough to measure crack width (professor, 27 Oct; at least 3 pixels across the crack are needed [46]). Trained to confirm the material, the element and the crack pattern when a model is unsure.
-- **Resident:** reports a crack and does the follow-up photos on the recheck dates, with any phone; the app guides the capture. A resident is **never asked** the material, the element or the crack pattern: residents cannot tell concrete from other materials, or a column from a wall (D25).
+- **Field worker:** first visit of a building, sent by the dispatch rule of step 0 (D27), with a reference phone and the printed scale card. Cheap phones are not reliable enough to measure crack width (professor, 27 Oct; at least 3 pixels across the crack are needed [46]). Trained to confirm the material, the element and the crack pattern when a model is unsure.
+- **Resident:** reports a crack (step 0) and does the follow-up photos on the recheck dates, with any phone; the app guides the capture. A resident is **never asked** the material, the element or the crack pattern: residents cannot tell concrete from other materials, or a column from a wall (D25).
 - **Engineer:** reviews on the engineer screen and on site.
+
+## Step 0: report and dispatch (D27)
+A resident reports a crack with any phone: a close-up with the scale card or a coin, and answers they can know. The quality gate, a crack model and a rough width feed a written dispatch rule (`spec/features/dispatch.md`, in code: `src/triage/dispatch.py`) that returns a visit priority: **V1** visit within 1 week, **V2** within 1 month, **V3** no visit yet (recheck in 1 month; 1 in 10 audited), or Retake. Only V1 and V2 (and audited V3) start the field visit below. These are visit priorities, not triage levels.
 
 ## Stages: three scales x five phases
 Kinds: learned model (reports a confidence), written rule (auditable), people. Status on 27 Oct 2026: **in code**, **partly in code**, **specified** (designed here, not coded yet).

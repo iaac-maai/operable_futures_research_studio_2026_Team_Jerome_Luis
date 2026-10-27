@@ -776,10 +776,10 @@ FLOW_CHECKS = {"S": ("ALL\nANSWERED?", None), "O": ("CARD +\nANGLE OK?", "RETAKE
 
 def pipeline_flow():
     """Pipeline v3 drawn as a task flow: phases as columns, scales as lanes; colour = photo, rule or model."""
-    fig = plt.figure(figsize=(24, 14.4), facecolor="white")
+    fig = plt.figure(figsize=(24, 17.6), facecolor="white")
     ax = fig.add_axes([0, 0, 1, 1])
     ax.set_xlim(0, 120)
-    ax.set_ylim(0, 72)
+    ax.set_ylim(0, 88)
     ax.set_axis_off()
 
     def label(x, y, s, size=11, colour=FLOW_INK, weight="normal", **kw):
@@ -810,13 +810,13 @@ def pipeline_flow():
                                                 closed=True, facecolor=FLOW_RULE, edgecolor="none", zorder=4))
         label(cx, cy, text, size=10, weight="bold")
 
-    def para(cx, cy, w, h, text):  # white: result shown to a person
+    def para(cx, cy, w, h, text, size=10.5):  # white: result shown to a person
         k = 0.8
         ax.add_patch(matplotlib.patches.Polygon([(cx - w / 2 - k, cy - h / 2), (cx + w / 2 - k, cy - h / 2),
                                                  (cx + w / 2 + k, cy + h / 2), (cx - w / 2 + k, cy + h / 2)],
                                                 closed=True, facecolor="white", edgecolor=FLOW_INK, lw=1.8,
                                                 zorder=4))
-        label(cx, cy, text, size=10.5, weight="bold")
+        label(cx, cy, text, size=size, weight="bold")
 
     def pill(cx, cy, w, h, text):  # white: where a person starts
         ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2), w, h, boxstyle=f"round,pad=0,rounding_size={h / 2}",
@@ -865,15 +865,15 @@ def pipeline_flow():
         label(cx, y_top, text, size=10, colour=FLOW_TEXT, va="top")
 
     # title, section heading, colour key, columns
-    label(1.5, 68.6, "Pipeline", size=40, weight="bold", ha="left")
-    label(118.5, 68.6, "01", size=40, weight="bold", ha="right")
-    label(1.5, 63.2, "From a phone photo to a decision", size=22, colour=FLOW_TEXT, weight="bold", ha="left")
+    label(1.5, 84.6, "Pipeline", size=40, weight="bold", ha="left")
+    label(118.5, 84.6, "01", size=40, weight="bold", ha="right")
+    label(1.5, 79.2, "From a phone photo to a decision", size=22, colour=FLOW_TEXT, weight="bold", ha="left")
     kx = 61.5
     for fill, edge, name in (("white", FLOW_INK, "PHOTOS AND PEOPLE"), (FLOW_RULE, FLOW_RULE, "WRITTEN RULES (CODE)"),
                              (FLOW_MODEL, FLOW_MODEL, "LEARNED MODELS (WITH A CONFIDENCE)")):
-        ax.add_patch(FancyBboxPatch((kx, 62.4), 2.6, 1.6, boxstyle="round,pad=0,rounding_size=0.3", facecolor=fill,
+        ax.add_patch(FancyBboxPatch((kx, 78.4), 2.6, 1.6, boxstyle="round,pad=0,rounding_size=0.3", facecolor=fill,
                                     edgecolor=edge, lw=1.6, zorder=4))
-        label(kx + 3.3, 63.2, name, size=11.5, weight="bold", ha="left")
+        label(kx + 3.3, 79.2, name, size=11.5, weight="bold", ha="left")
         kx += 4.6 + 0.62 * len(name)
     for x in FLOW_SEPARATORS:
         ax.plot([x, x], [3.6, 60], color="#cfcfcf", lw=1.2, ls=(0, (5, 4)), zorder=0)
@@ -885,7 +885,45 @@ def pipeline_flow():
         else:
             label(cx, 57.2, head, size=11.5)
 
-    label(11.5, 52.4, "a resident reports\na crack: a field\nworker visits", size=10, weight="bold")
+    # step 0: report and dispatch, a written rule decides when a field worker visits (spec/features/dispatch.md, D27)
+    ry = 71.0
+    label(2.6, ry, "REPORT (0)\nresident's phone", size=12, weight="bold", rotation=90)
+    pill(11.5, ry, 7.4, 3.8, "CRACK\nREPORTED")
+    photo_box(26.5, ry, 13, 5, "CRACK PHOTO\n+ ANSWERS")
+    status(26.5, ry + 2.5, "spec")
+    detail(26.5, ry - 3.1, "any phone · scale card or coin\nnew? growing? doors stick?\nearthquake? building questions")
+    line([(15.2, ry), (20.0, ry)])
+    diamond(43.5, ry, 4.4, 3.2, "USABLE?")
+    status(43.5, ry + 3.2, "partly")
+    line([(33.0, ry), (39.1, ry)])
+    line([(43.5, ry - 3.2), (43.5, ry - 4.9)], head=False, dot=False)
+    mark(43.5, ry - 5.8, False)
+    label(45.0, ry - 5.8, "RETAKE\n(after 2: V2)", size=10, weight="bold", ha="left")
+    line([(47.9, ry), (55.9, ry)], dot=False)
+    mark(50.2, ry, True, r=0.8)
+    model_box(62.5, ry, 13, 5, "CRACK + ROUGH\nWIDTH")
+    status(62.5, ry + 2.5, "spec")
+    detail(62.5, ry - 4.3, "crack found + confidence\nwidth upper end, if scale visible")
+    line([(69.0, ry), (82.0, ry)])
+    rule_box(88.5, ry, 13, 5, "DISPATCH RULE")
+    status(88.5, ry + 2.5, "code")
+    detail(88.5, ry - 3.1, "urgent signs → width → warning signs\n→ doubt → no scale → building flags\n"
+           "(spec/features/dispatch.md)")
+    outcomes = [(74.3, "V3 · NO VISIT YET\nrecheck in 1 month"), (71.0, "V2 · VISIT\nWITHIN 1 MONTH"),
+                (67.7, "V1 · VISIT WITHIN 1 WEEK\nengineer told today")]
+    for oy, text_ in outcomes:
+        para(106.2, oy, 10.6, 2.9, text_, size=9)
+        line([(95.0, ry), (100.6, oy)], dot=False)
+    # V3: the resident's recheck is a new report
+    line([(112.3, 74.3), (114.0, 74.3), (114.0, 77.0), (11.5, 77.0), (11.5, ry + 1.9)], ls="--", dot=False)
+    label(47.5, 77.9, "V3: the recheck in 1 month is a new report", size=10, weight="bold")
+    # V1 and V2: the field worker's first visit starts the three scales below
+    for oy in (71.0, 67.7):
+        line([(112.3, oy), (117.8, oy)], head=False, dot=False)
+    line([(117.8, 71.0), (117.8, 61.8), (6.2, 61.8), (6.2, 46.0), (7.8, 46.0)], lw=2.4, dot=False)
+    label(62.0, 60.7, "V1 OR V2: A FIELD WORKER VISITS with a reliable phone and the scale card, and photographs "
+          "the building once, every cracked element and every crack  (also 1 in 10 V3 reports, as an audit)",
+          size=10.5, weight="bold")
     for r, (y, code, name, what, start, who) in enumerate(FLOW_LANES):
         label(2.6, y, f"{name} ({code})\n{what}", size=12, weight="bold", rotation=90)
         pill(11.5, y, 7.4, 3.8, start)

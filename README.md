@@ -34,7 +34,7 @@ The concept is cracks in buildings in slum-like, informal neighbourhoods. See `d
 Raw data is not committed; `data/` stays empty in the repository.
 
 ## Method and status
-The risk matrix and decision rules are implemented in `src/triage/` with tests. Thresholds are illustrative until calibrated with a structural engineer.
+The risk matrix and decision rules are implemented in `src/triage/` with tests, and so is the dispatch rule that decides when a field worker visits after a resident's report (`spec/features/dispatch.md`, D27). Thresholds are illustrative until calibrated with a structural engineer.
 The confusion tables (true and false positives and negatives, with missed High as the key error) are defined in `spec/features/evaluation.md` and coded in `src/triage/evaluate.py`.
 The quality gate (`src/quality/`) ran as a first test on real images from five public datasets. It found and fixed a resolution bug in the blur check, and showed that the blur check confuses smooth plaster and concrete with blur (open, decision D12) (`docs/experiments/`).
 Models are not trained yet. Decisions are logged in `spec/decisions.md`. The plan to the final presentation (17 Dec) is in `spec/constitution/roadmap.md`; this week's tasks in `docs/weekly_todo.md`.
@@ -52,7 +52,7 @@ Public crack data is mostly concrete and pavement.
 - `spec/constitution/`: mission, roadmap, tech stack
 - `spec/features/`: triage and evaluation specs; `spec/decisions.md`: decisions log
 - `docs/`: segmentation tree, data map, sources, experiments, literature notes (`docs/literature/`), weekly to-do (`docs/weekly_todo.md`)
-- `src/triage/`: risk matrix, decision logic and evaluation tables
+- `src/triage/`: risk matrix, decision logic, dispatch rule and evaluation tables
 - `tests/`: tests (the comparison against the non-AI baseline runs once engineer-labelled photos exist)
 - `notebook/`, `figures/`, `models/`, `data/`: notebooks, plots, model files, local data (large files are not committed)
 - `branding/logos/`: logo ideas (SVG)
