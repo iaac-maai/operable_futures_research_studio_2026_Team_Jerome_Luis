@@ -1110,6 +1110,9 @@ FLOW_COLUMNS = [(11.5, None, "START"), (26.5, "1", "CAPTURE\nPHOTOS AND ANSWERS"
                 (66, "3", "PERCEIVE\nMODELS + CONFIDENCE"), (88.5, "4", "DECIDE\nWRITTEN RULES, AUDITABLE"),
                 (109.5, "5", "ACT\nPEOPLE")]
 FLOW_SEPARATORS = [17.5, 35.5, 51.5, 79.5, 98.5]
+# The models each Perceive box needs (spec/constitution/tech_stack.md); architectures beyond U-Net not chosen yet.
+FLOW_MODELS = {"S": "FACADE\nCLASSIFIER\n(later)", "O": "MATERIAL\n+ ELEMENT\nCLASSIFIERS",
+               "P": "U-NET\n+ PATTERN\nCLASSIFIER"}
 # Check diamonds per lane: (question, failure label or None)
 FLOW_CHECKS = {"S": ("ALL\nANSWERED?", None), "O": ("CARD +\nANGLE OK?", "RETAKE"),
                "P": ("SHARP, LIT,\n≥ 3 PX?", "RETAKE")}
@@ -1222,12 +1225,12 @@ def pipeline_flow():
         cut = min(spaces, key=lambda i: abs(i - mid))
         return title[:cut] + "\n" + title[cut + 1:]
 
-    def with_icon(draw, cx, cy, w, h, title, icon, ink=FLOW_INK, paper="white"):
+    def with_icon(draw, cx, cy, w, h, title, icon, ink=FLOW_INK, paper="white", size_text=10.5):
         """A box with its symbol on the left and its title on the right."""
         draw(cx, cy, w, h, "")
         size = min(h * 0.7, 3.6)
         _handoff_icon(ax, icon, cx - w / 2 + 0.9 + size / 2, cy, s=size, ink=ink, paper=paper)
-        label(cx + (size + 0.9) / 2, cy, wrap(title), colour=ink, weight="bold", size=10.5)
+        label(cx + (size + 0.9) / 2, cy, wrap(title), colour=ink, weight="bold", size=size_text)
 
     def ipill(cx, cy, title, icon):
         pill(cx, cy, 9.0, 3.8, "")
@@ -1258,7 +1261,7 @@ def pipeline_flow():
             label(cx - 7.2, 57.2, num, size=14, colour="white", weight="bold")
             label(cx - 5.2, 57.2, head, size=11.5, ha="left")
         else:
-            label(cx, 57.2, head, size=11.5)
+            label(cx, 57.2, head, size=15, weight="bold")
 
     # step 0: report and dispatch, a written rule decides when a field worker visits (spec/features/dispatch.md, D27)
     ry = 71.0
@@ -1275,7 +1278,7 @@ def pipeline_flow():
     label(45.0, ry - 5.8, "RETAKE\n(after 2: V2)", size=10, weight="bold", ha="left")
     line([(47.9, ry), (55.9, ry)], dot=False)
     mark(50.2, ry, True, r=0.8)
-    with_icon(model_box, 62.5, ry, 13, 5, "CRACK + ROUGH\nWIDTH", "network", ink="white", paper=FLOW_MODEL)
+    with_icon(model_box, 62.5, ry, 13, 5, "U-NET\nSEGMENTATION", "network", ink="white", paper=FLOW_MODEL)
     status(62.5, ry + 2.5, "spec")
     line([(69.0, ry), (82.0, ry)])
     with_icon(rule_box, 88.5, ry, 13, 5, "DISPATCH RULE", "rulebook", paper=FLOW_RULE)
@@ -1315,7 +1318,8 @@ def pipeline_flow():
         mark(50.2, y, True, r=0.8)
         # perceive: learned model, then 'sure?' for the models that exist this semester
         per = PIPE_BOXES[(r, 2)]
-        with_icon(model_box, 62.5, y, 13, 5, per[1].upper(), "network", ink="white", paper=FLOW_MODEL)
+        with_icon(model_box, 62.5, y, 13, 5, FLOW_MODELS[code], "network", ink="white", paper=FLOW_MODEL,
+                  size_text=9.8)
         status(62.5, y + 2.5, per[3])
         dec = PIPE_BOXES[(r, 3)]
         if code == "S":
