@@ -755,10 +755,11 @@ def dataset_comparison():
     return fig
 
 
-# Pipeline v3 as a task flow (same content as 01_pipeline.png; spec/features/pipeline.md).
-# Shapes: pill = start, rectangle = people input, diamond = written check, stacked = learned model,
+# Pipeline v3 as a task flow (same content as 01_pipeline.png; spec/features/pipeline.md), in black, white and grey.
+# Colour says who does the work: white = photos and people, grey = written rules (code), black = learned models.
+# Shape says what it is: pill = start, rectangle = step, diamond = check, stacked = model,
 # parallelogram = result shown to a person, striped block = the person who acts.
-FLOW_TEAL, FLOW_DARK, FLOW_LINE, FLOW_BG = "#2e7d64", "#173d33", "#9db8ad", "#f5f8f6"
+FLOW_INK, FLOW_RULE, FLOW_MODEL, FLOW_TEXT, FLOW_SOFT = "#111111", "#d2d2d2", "#111111", "#2b2b2b", "#6b6b6b"
 FLOW_LANES = [  # (lane y, code, name, what, start pill)
     (46, "S", "STRUCTURAL", "the building", "NEW\nBUILDING"),
     (32, "O", "OBJECT", "one element", "EACH\nELEMENT"),
@@ -774,109 +775,121 @@ FLOW_CHECKS = {"S": ("ALL\nANSWERED?", None), "O": ("CARD +\nANGLE OK?", "RETAKE
 
 
 def pipeline_flow():
-    """Pipeline v3 drawn as a task flow: phases as columns, scales as lanes, checks as diamonds."""
-    fig = plt.figure(figsize=(24, 14.4), facecolor=FLOW_BG)
+    """Pipeline v3 drawn as a task flow: phases as columns, scales as lanes; colour = photo, rule or model."""
+    fig = plt.figure(figsize=(24, 14.4), facecolor="white")
     ax = fig.add_axes([0, 0, 1, 1])
     ax.set_xlim(0, 120)
     ax.set_ylim(0, 72)
     ax.set_axis_off()
-    ax.set_facecolor(FLOW_BG)
-    boxes = {code: {(c, ): PIPE_BOXES.get((r, c)) for c in range(5)} for r, (_, code, *_rest) in enumerate(FLOW_LANES)}
 
-    def label(x, y, s, size=10, colour=FLOW_DARK, weight="normal", **kw):
+    def label(x, y, s, size=11, colour=FLOW_INK, weight="normal", **kw):
         ax.text(x, y, s, ha=kw.pop("ha", "center"), va=kw.pop("va", "center"), fontsize=size, color=colour,
                 weight=weight, linespacing=1.25, zorder=kw.pop("zorder", 6), **kw)
 
-    def rect(cx, cy, w, h, title, stacked=False):
-        if stacked:
-            for k in (2, 1):
-                ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2 - 0.55 * k), w, h, zorder=3 - k * 0.1,
-                                            boxstyle="round,pad=0,rounding_size=0.5", facecolor="white",
-                                            edgecolor=FLOW_LINE, lw=1.3))
+    def photo_box(cx, cy, w, h, title):  # white: photos and people
         ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2), w, h, boxstyle="round,pad=0,rounding_size=0.5",
-                                    facecolor="white", edgecolor=FLOW_LINE, lw=1.4, zorder=4))
+                                    facecolor="white", edgecolor=FLOW_INK, lw=1.8, zorder=4))
         label(cx, cy, title, weight="bold")
 
-    def diamond(cx, cy, hw, hh, text):
-        ax.add_patch(matplotlib.patches.Polygon([(cx - hw, cy), (cx, cy + hh), (cx + hw, cy), (cx, cy - hh)],
-                                                closed=True, facecolor=FLOW_TEAL, edgecolor="none", zorder=4))
-        label(cx, cy, text, size=9, colour="white", weight="bold")
+    def rule_box(cx, cy, w, h, title):  # grey: written rules
+        ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2), w, h, boxstyle="round,pad=0,rounding_size=0.5",
+                                    facecolor=FLOW_RULE, edgecolor=FLOW_RULE, lw=1.4, zorder=4))
+        label(cx, cy, title, weight="bold")
 
-    def para(cx, cy, w, h, text):
+    def model_box(cx, cy, w, h, title):  # black: learned models, stacked
+        for k in (2, 1):
+            ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2 - 0.55 * k), w, h, zorder=3 - k * 0.1,
+                                        boxstyle="round,pad=0,rounding_size=0.5", facecolor="#4a4a4a",
+                                        edgecolor="white", lw=1.4))
+        ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2), w, h, boxstyle="round,pad=0,rounding_size=0.5",
+                                    facecolor=FLOW_MODEL, edgecolor="white", lw=1.4, zorder=4))
+        label(cx, cy, title, colour="white", weight="bold")
+
+    def diamond(cx, cy, hw, hh, text):  # grey: a written check
+        ax.add_patch(matplotlib.patches.Polygon([(cx - hw, cy), (cx, cy + hh), (cx + hw, cy), (cx, cy - hh)],
+                                                closed=True, facecolor=FLOW_RULE, edgecolor="none", zorder=4))
+        label(cx, cy, text, size=10, weight="bold")
+
+    def para(cx, cy, w, h, text):  # white: result shown to a person
         k = 0.8
         ax.add_patch(matplotlib.patches.Polygon([(cx - w / 2 - k, cy - h / 2), (cx + w / 2 - k, cy - h / 2),
                                                  (cx + w / 2 + k, cy + h / 2), (cx - w / 2 + k, cy + h / 2)],
-                                                closed=True, facecolor="white", edgecolor=FLOW_LINE, lw=1.4,
+                                                closed=True, facecolor="white", edgecolor=FLOW_INK, lw=1.8,
                                                 zorder=4))
-        label(cx, cy, text, weight="bold")
+        label(cx, cy, text, size=10.5, weight="bold")
 
-    def pill(cx, cy, w, h, text):
+    def pill(cx, cy, w, h, text):  # white: where a person starts
         ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2), w, h, boxstyle=f"round,pad=0,rounding_size={h / 2}",
-                                    facecolor=FLOW_TEAL, edgecolor="none", zorder=4))
-        label(cx, cy, text, size=9.4, colour="white", weight="bold")
+                                    facecolor="white", edgecolor=FLOW_INK, lw=1.8, zorder=4))
+        label(cx, cy, text, size=10.5, weight="bold")
 
-    def terminal(cx, cy, w, h, text):
-        ax.add_patch(matplotlib.patches.Rectangle((cx - w / 2, cy - h / 2), w, h, facecolor=FLOW_TEAL,
-                                                  edgecolor="none", zorder=4))
-        for dx in (-w / 2 + 0.55, w / 2 - 0.55):
-            ax.plot([cx + dx] * 2, [cy - h / 2, cy + h / 2], color="white", lw=1.6, zorder=5)
-        label(cx, cy, text, size=9.4, colour="white", weight="bold")
+    def terminal(cx, cy, w, h, text):  # white: the person who acts
+        ax.add_patch(matplotlib.patches.Rectangle((cx - w / 2, cy - h / 2), w, h, facecolor="white",
+                                                  edgecolor=FLOW_INK, lw=1.8, zorder=4))
+        for dx in (-w / 2 + 0.6, w / 2 - 0.6):
+            ax.plot([cx + dx] * 2, [cy - h / 2, cy + h / 2], color=FLOW_INK, lw=1.8, zorder=5)
+        label(cx, cy, text, size=10, weight="bold")
 
     def mark(cx, cy, ok, r=0.95):
-        ax.add_patch(plt.Circle((cx, cy), r, facecolor="white", edgecolor=FLOW_TEAL, lw=1.6, zorder=5))
+        ax.add_patch(plt.Circle((cx, cy), r, facecolor="white", edgecolor=FLOW_INK, lw=1.6, zorder=5))
         k = r * 0.45
         if ok:
-            ax.plot([cx - k, cx - k * 0.2, cx + k], [cy, cy - k * 0.7, cy + k * 0.8], color=FLOW_DARK, lw=1.9,
+            ax.plot([cx - k, cx - k * 0.2, cx + k], [cy, cy - k * 0.7, cy + k * 0.8], color=FLOW_INK, lw=2.1,
                     zorder=7, solid_capstyle="round")
         else:
             for sgn in (1, -1):
-                ax.plot([cx - k, cx + k], [cy - sgn * k, cy + sgn * k], color=FLOW_DARK, lw=1.9, zorder=7,
+                ax.plot([cx - k, cx + k], [cy - sgn * k, cy + sgn * k], color=FLOW_INK, lw=2.1, zorder=7,
                         solid_capstyle="round")
 
-    def line(points, colour=FLOW_TEAL, ls="-", lw=1.7, head=True, dot=True):
+    def line(points, ls="-", lw=1.8, head=True, dot=True):
         xs, ys = zip(*points)
-        ax.plot(xs[:-1] + (xs[-1],) if not head else xs[:-1], ys[:-1] if head else ys, color=colour, lw=lw, ls=ls,
-                zorder=2, solid_capstyle="round")
+        ax.plot(xs[:-1] if head else xs, ys[:-1] if head else ys, color=FLOW_TEXT, lw=lw, ls=ls, zorder=2,
+                solid_capstyle="round")
         if head:
             ax.annotate("", xy=points[-1], xytext=points[-2], zorder=2,
-                        arrowprops=dict(arrowstyle="-|>", color=colour, lw=lw, ls=ls, shrinkA=0, shrinkB=0,
-                                        mutation_scale=13))
+                        arrowprops=dict(arrowstyle="-|>", color=FLOW_TEXT, lw=lw, ls=ls, shrinkA=0, shrinkB=0,
+                                        mutation_scale=14))
         if dot:
-            ax.plot(*points[0], "o", color=colour, ms=4.5, zorder=3)
+            ax.plot(*points[0], "o", color=FLOW_TEXT, ms=5, zorder=3)
 
     def status(cx, top, key):
-        text_, fill, edge, ink = {"code": ("IN CODE", FLOW_TEAL, FLOW_TEAL, "white"),
-                                  "partly": ("PARTLY IN CODE", "white", FLOW_TEAL, FLOW_TEAL),
-                                  "spec": ("SPECIFIED", "none", "none", MUTED)}[key]
-        w = 0.5 * len(text_) + 1.2
-        ax.add_patch(FancyBboxPatch((cx - w / 2, top + 0.35), w, 1.4, boxstyle="round,pad=0,rounding_size=0.6",
-                                    facecolor=fill, edgecolor=edge, lw=1.0, zorder=4))
-        label(cx, top + 1.05, text_, size=7.6, colour=ink, weight="bold")
+        text_, fill, edge, ls, ink = {"code": ("IN CODE", FLOW_RULE, FLOW_INK, "-", FLOW_INK),
+                                      "partly": ("PARTLY IN CODE", "white", FLOW_INK, "-", FLOW_INK),
+                                      "spec": ("SPECIFIED", "white", "#b5b5b5", (0, (2, 2)), FLOW_SOFT)}[key]
+        w = 0.55 * len(text_) + 1.4
+        ax.add_patch(FancyBboxPatch((cx - w / 2, top + 0.35), w, 1.5, boxstyle="round,pad=0,rounding_size=0.7",
+                                    facecolor=fill, edgecolor=edge, lw=1.1, ls=ls, zorder=4))
+        label(cx, top + 1.1, text_, size=8.2, colour=ink, weight="bold")
 
     def detail(cx, y_top, text):
-        label(cx, y_top, text, size=9.3, colour=INK_2, va="top")
+        label(cx, y_top, text, size=10, colour=FLOW_TEXT, va="top")
 
-    # title, section heading, columns
+    # title, section heading, colour key, columns
     label(1.5, 68.6, "Pipeline", size=40, weight="bold", ha="left")
     label(118.5, 68.6, "01", size=40, weight="bold", ha="right")
-    label(1.5, 63.2, "From a phone photo to a decision", size=22, colour=FLOW_TEAL, weight="bold", ha="left")
-    label(118.5, 63.2, "Second Look · pipeline v3 · three scales as in PHI-Net task 1 [53][55]", size=11,
-          colour=INK_2, ha="right")
+    label(1.5, 63.2, "From a phone photo to a decision", size=22, colour=FLOW_TEXT, weight="bold", ha="left")
+    kx = 61.5
+    for fill, edge, name in (("white", FLOW_INK, "PHOTOS AND PEOPLE"), (FLOW_RULE, FLOW_RULE, "WRITTEN RULES (CODE)"),
+                             (FLOW_MODEL, FLOW_MODEL, "LEARNED MODELS (WITH A CONFIDENCE)")):
+        ax.add_patch(FancyBboxPatch((kx, 62.4), 2.6, 1.6, boxstyle="round,pad=0,rounding_size=0.3", facecolor=fill,
+                                    edgecolor=edge, lw=1.6, zorder=4))
+        label(kx + 3.3, 63.2, name, size=11.5, weight="bold", ha="left")
+        kx += 4.6 + 0.62 * len(name)
     for x in FLOW_SEPARATORS:
-        ax.plot([x, x], [3.6, 60], color="#d3dcd8", lw=1.2, ls=(0, (5, 4)), zorder=0)
+        ax.plot([x, x], [3.6, 60], color="#cfcfcf", lw=1.2, ls=(0, (5, 4)), zorder=0)
     for cx, num, head in FLOW_COLUMNS:
         if num:
-            ax.add_patch(plt.Circle((cx - 7.2, 57.2), 1.45, color=FLOW_DARK, zorder=4))
-            label(cx - 7.2, 57.2, num, size=13, colour="white", weight="bold")
-            label(cx - 5.2, 57.2, head, size=11, ha="left")
+            ax.add_patch(plt.Circle((cx - 7.2, 57.2), 1.45, color=FLOW_INK, zorder=4))
+            label(cx - 7.2, 57.2, num, size=14, colour="white", weight="bold")
+            label(cx - 5.2, 57.2, head, size=11.5, ha="left")
         else:
-            label(cx, 57.2, head, size=11)
+            label(cx, 57.2, head, size=11.5)
 
     for r, (y, code, name, what, start) in enumerate(FLOW_LANES):
-        label(2.6, y, f"{name} ({code})\n{what}", size=11.5, rotation=90)
-        pill(11.5, y, 7.4, 3.6, start)
+        label(2.6, y, f"{name} ({code})\n{what}", size=12, weight="bold", rotation=90)
+        pill(11.5, y, 7.4, 3.8, start)
         cap = PIPE_BOXES[(r, 0)]
-        rect(26.5, y, 13, 5, cap[1].upper())
+        photo_box(26.5, y, 13, 5, cap[1].upper())
         status(26.5, y + 2.5, cap[3])
         detail(26.5, y - 3.1, cap[2])
         line([(15.2, y), (20.0, y)])
@@ -888,14 +901,14 @@ def pipeline_flow():
         if fail:
             line([(43.5, y - 3.4), (43.5, y - 5.6)], head=False, dot=False)
             mark(43.5, y - 6.5, False)
-            label(45.0, y - 6.5, fail, size=9.6, weight="bold", ha="left")
+            label(45.0, y - 6.5, fail, size=10.5, weight="bold", ha="left")
         else:
             detail(43.5, y - 3.9, "unknown is allowed:\nit counts as a risk flag")
         line([(47.9, y), (55.5, y)], dot=False)
         mark(50.2, y, True, r=0.8)
         # perceive: learned model, then 'sure?' for the models that exist this semester
         per = PIPE_BOXES[(r, 2)]
-        rect(62.5, y, 13, 5, per[1].upper(), stacked=True)
+        model_box(62.5, y, 13, 5, per[1].upper())
         status(62.5, y + 2.5, per[3])
         detail(62.5, y - 4.3, per[2])
         dec = PIPE_BOXES[(r, 3)]
@@ -906,10 +919,10 @@ def pipeline_flow():
             line([(69.0, y), (70.7, y)], dot=False)
             line([(73.6, y - 2.6), (73.6, y - 4.6)], head=False, dot=False)
             mark(73.6, y - 5.5, False)
-            label(75.0, y - 5.5, "EXPERT\nNEEDED", size=9.6, weight="bold", ha="left")
+            label(75.0, y - 5.5, "EXPERT\nNEEDED", size=10.5, weight="bold", ha="left")
             line([(76.5, y), (82.0, y)], dot=False)
             mark(78.4, y, True, r=0.8)
-        rect(88.5, y, 13, 5, dec[1].upper())
+        rule_box(88.5, y, 13, 5, dec[1].upper())
         status(88.5, y + 2.5, dec[3])
         detail(88.5, y - 3.1, dec[2])
         if (r, 4) in PIPE_BOXES:
@@ -922,60 +935,59 @@ def pipeline_flow():
             line([(95.0, y), (99.5, y)])
             line([(110.5, y), (112.8, y)], dot=False)
         else:
-            detail(108.5, y + 1.2, "no action at this scale:\nmaterial and element go\nto the crack level", )
+            detail(108.5, y + 1.4, "no action at this scale:\nmaterial and element go\nto the crack level")
 
     yS, yO, yP = (lane[0] for lane in FLOW_LANES)
     # scene check band between Check and Perceive, all scales
     ax.add_patch(FancyBboxPatch((52.4, yP - 6.8), 2.6, yS - yP + 10.6, boxstyle="round,pad=0,rounding_size=0.8",
-                                facecolor="white", edgecolor=FLOW_TEAL, lw=1.4, ls=(0, (4, 3)), zorder=3))
+                                facecolor="white", edgecolor=FLOW_INK, lw=1.4, ls=(0, (4, 3)), zorder=3))
     label(53.7, (yS + yP) / 2 - 1.2, "SCENE CHECK (PHI-Net task 1): is this photo S, O or P?   now the guided "
-          "capture sets it · later a scene model", size=8.6, weight="bold", rotation=90)
+          "capture sets it · later a scene model", size=9.6, weight="bold", rotation=90)
     # between the lanes: material + element down to the crack level; crack results up to the building score
-    line([(82.0, yO - 1.6), (81.0, yO - 1.6), (81.0, yP + 1.6), (82.0, yP + 1.6)], colour=FLOW_DARK)
-    label(80.5, yO - 8.6, "material,\nelement", size=9.3, colour=FLOW_DARK, weight="bold", ha="right")
-    line([(95.0, yP + 1.4), (96.8, yP + 1.4), (96.8, yS - 1.4), (95.0, yS - 1.4)], colour=FLOW_DARK)
-    label(97.3, yO + 0.2, "crack levels,\ngrowth, damage\nspread across\nelements", size=9.3, colour=FLOW_DARK,
-          weight="bold", ha="left")
+    line([(82.0, yO - 1.6), (81.0, yO - 1.6), (81.0, yP + 1.6), (82.0, yP + 1.6)])
+    label(80.5, yO - 8.6, "material,\nelement", size=10, weight="bold", ha="right")
+    line([(95.0, yP + 1.4), (96.8, yP + 1.4), (96.8, yS - 1.4), (95.0, yS - 1.4)])
+    label(97.3, yO + 0.2, "crack levels,\ngrowth, damage\nspread across\nelements", size=10, weight="bold", ha="left")
     # learning loop: engineer -> the learned models of phase 3
     ly = 51.6
-    line([(115.6, yS + 2.5), (115.6, ly), (62.5, ly), (62.5, yS + 4.3)], colour=VIOLET, ls="--", dot=False)
+    line([(115.6, yS + 2.5), (115.6, ly), (62.5, ly), (62.5, yS + 4.3)], ls="--", dot=False)
     label(89.0, ly + 1.5, "LEARNING LOOP: engineer corrections and on-site ratings become labels and retrain the "
           "models (phase 3)\neach new version is checked on held-out photos before use; written rules change only by "
-          "a reviewed decision", size=9.8, colour=VIOLET, weight="bold")
+          "a reviewed decision", size=10.5, weight="bold")
     # monitoring loop: the resident's recheck date brings the same crack back
     my = 7.9
-    line([(115.6, yP - 2.5), (115.6, my), (11.5, my), (11.5, yP - 1.8)], colour=BLUE, ls="--", dot=False)
+    line([(115.6, yP - 2.5), (115.6, my), (11.5, my), (11.5, yP - 1.9)], ls="--", dot=False)
     label(63.5, my - 1.8, "MONITORING LOOP: on the recheck date (Low: 6 months, Medium: 1 month) the same crack ID "
           "and stickers are photographed again, with the last photo as an overlay\ngrowth larger than the measurement "
-          "uncertainty raises the crack level, and through it the building risk score", size=9.8, colour=BLUE,
-          weight="bold")
+          "uncertainty raises the crack level, and through it the building risk score", size=10.5, weight="bold")
 
     # legend of shapes
     ly0, x = 1.9, 1.5
-    items = [("pill", "START"), ("rect", "PEOPLE INPUT"), ("diamond", "WRITTEN CHECK"),
-             ("stack", "LEARNED MODEL (REPORTS A CONFIDENCE)"), ("para", "RESULT SHOWN TO A PERSON"),
-             ("term", "PERSON WHO ACTS"), ("ok", "CONTINUE"), ("no", "STOP HERE")]
+    items = [("pill", "START"), ("rect", "STEP"), ("diamond", "CHECK"), ("stack", "MODEL"),
+             ("para", "RESULT SHOWN TO A PERSON"), ("term", "PERSON WHO ACTS"), ("ok", "CONTINUE"),
+             ("no", "STOP HERE")]
     for kind, text_ in items:
         if kind == "pill":
             pill(x + 1.3, ly0, 2.6, 1.3, "")
         elif kind == "rect":
-            rect(x + 1.3, ly0, 2.6, 1.5, "")
+            photo_box(x + 1.3, ly0, 2.6, 1.5, "")
         elif kind == "diamond":
             diamond(x + 1.3, ly0, 1.3, 0.95, "")
         elif kind == "stack":
-            rect(x + 1.3, ly0 + 0.2, 2.6, 1.3, "", stacked=False)
             ax.add_patch(FancyBboxPatch((x, ly0 - 0.75), 2.6, 1.3, boxstyle="round,pad=0,rounding_size=0.3",
-                                        facecolor="white", edgecolor=FLOW_LINE, lw=1.2, zorder=3))
+                                        facecolor="#4a4a4a", edgecolor="white", lw=1.2, zorder=3))
+            ax.add_patch(FancyBboxPatch((x, ly0 - 0.45), 2.6, 1.3, boxstyle="round,pad=0,rounding_size=0.3",
+                                        facecolor=FLOW_MODEL, edgecolor="white", lw=1.2, zorder=4))
         elif kind == "para":
             para(x + 1.3, ly0, 1.8, 1.5, "")
         elif kind == "term":
             terminal(x + 1.3, ly0, 2.6, 1.5, "")
         else:
             mark(x + 1.3, ly0, kind == "ok", r=0.7)
-        label(x + 3.2, ly0, text_, size=9.2, ha="left")
-        x += 3.9 + 0.47 * len(text_)
+        label(x + 3.2, ly0, text_, size=10, ha="left")
+        x += 4.2 + 0.52 * len(text_)
     label(118.5, ly0, "Source: spec/features/pipeline.md, 27 Oct 2026 · thresholds illustrative until calibrated",
-          size=8.6, colour=MUTED, ha="right")
+          size=9, colour=FLOW_SOFT, ha="right")
     return fig
 
 
