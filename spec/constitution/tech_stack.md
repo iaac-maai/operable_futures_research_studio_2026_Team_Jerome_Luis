@@ -10,7 +10,7 @@ Status: planned, not final. Full pipeline: `spec/features/pipeline.md`.
 - Measurement: plain code (width from the printed scale card, coin as backup, with an uncertainty of ±1 pixel; length, orientation).
 - Pattern model: classifies the crack pattern and reports its probability; pre-trained on PHI-Net tasks 3 and 8, the other patterns need our labels.
 - Agent: adds construction type and footprint from a structural database over MCP.
-- Rules: written triage rules in `src/triage/` (auditable, not learned): risk matrix v2 per crack; building risk score per building (`spec/features/building_score.md`).
+- Rules: written triage rules in `src/triage/` (auditable, not learned): risk matrix v3 per crack; building risk score per building (`spec/features/building_score.md`).
 - Monitoring: crack IDs, marker stickers and repeat photos (`spec/features/monitoring.md`).
 - Interfaces: resident app and engineer review screen (Streamlit prototype).
 - Learning loop: engineer corrections stored as labels; batch retraining of the learned models, checked on held-out data before use (human-in-the-loop learning).

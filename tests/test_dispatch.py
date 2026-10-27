@@ -31,6 +31,8 @@ def test_growing_plus_another_sign_is_urgent():
     dict(HAIRLINE, signs=["growing"]),
     dict(HAIRLINE, signs=["rust_stain"]),
     dict(HAIRLINE, signs=["recent_earthquake"]),
+    dict(HAIRLINE, signs=["damp"]),
+    dict(HAIRLINE, signs=["thin_cover"]),
     dict(HAIRLINE, crack_confidence=0.5),
     dict(HAIRLINE, crack_confidence=math.nan),
     dict(HAIRLINE, width_upper_mm=None),

@@ -10,10 +10,10 @@ from dataclasses import dataclass
 
 from triage.matrix import CONFIDENCE_THRESHOLD, ESCALATORS
 
-URGENT_SIGNS = {"offset", "sagging"}  # straight to High in matrix v2
+URGENT_SIGNS = {"offset", "sagging"}  # straight to High in the risk matrix
 WATCH_SIGNS = {"growing", "rust_stain", "sticking_openings", "recent_earthquake"}  # residents can report these
-URGENT_WIDTH_MM = 1.0  # upper end of the width; from 1 mm matrix v2 can reach High
-VISIT_WIDTH_MM = 0.3  # first band edge of matrix v2
+URGENT_WIDTH_MM = 1.0  # upper end of the width; from 1 mm the risk matrix can reach High
+VISIT_WIDTH_MM = 0.3  # first band edge of the risk matrix
 MAX_RETAKES = 2
 BUILDING_FLAGS_FOR_VISIT = 2  # as in the building risk score (D22)
 AUDIT_ONE_IN = 10
@@ -58,7 +58,7 @@ def screen(image_ok: bool, crack_confidence: float, width_upper_mm: float | None
     width_known = _known(width_upper_mm)
     if width_known and width_upper_mm >= URGENT_WIDTH_MM:
         return _dispatch("V1", f"The crack may be {width_upper_mm:.1f} mm wide or more: a wide crack is seen soon.")
-    watch = sorted(signs & WATCH_SIGNS)
+    watch = sorted(signs - URGENT_SIGNS)  # any other known sign, not only the ones residents are asked about
     if "growing" in watch and len(watch) > 1:
         return _dispatch("V1", "The crack is growing and there is another warning sign.")
     if watch:

@@ -20,7 +20,7 @@ Engineers do not judge a crack alone: they read the pattern across the building 
 
 The age, added floors and typology changes come from the professor's list of building data (27 Oct). Unknown counts as a flag because a missing answer must not make a building look safer; the dossier shows it as unknown.
 
-**Crack results (P and O scales):** the level of every crack recorded in the building, after the element rule and the warning signs, including growth (matrix v2, `spec/features/monitoring.md`).
+**Crack results (P and O scales):** the level of every crack recorded in the building, after the element rule and the warning signs, including growth (risk matrix v3, `spec/features/monitoring.md`).
 
 ## Rules (illustrative)
 1. **Base tier from the worst crack:** any High: P1. Otherwise any Medium or Expert needed: P2. Otherwise (only Low, or no crack recorded yet): P3.

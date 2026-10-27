@@ -1,0 +1,211 @@
+{
+ "version": "3.0-illustrative",
+ "status": "Illustrative until calibrated with the engineering partners (spec/features/risk_matrix.md). Every value carries its basis: a source number from docs/sources.md, a decision, or 'assumption'.",
+ "levels": [
+  "Low",
+  "Medium",
+  "High"
+ ],
+ "width_bands": [
+  {
+   "key": "under_0.3",
+   "name": "under 0.3 mm",
+   "upper_mm": 0.3
+  },
+  {
+   "key": "0.3_to_1",
+   "name": "0.3 to 1 mm",
+   "upper_mm": 1.0
+  },
+  {
+   "key": "1_to_3",
+   "name": "1 to 3 mm",
+   "upper_mm": 3.0
+  },
+  {
+   "key": "over_3",
+   "name": "over 3 mm",
+   "upper_mm": null
+  }
+ ],
+ "patterns": {
+  "surface_map": {
+   "name": "surface map cracking",
+   "levels": [
+    "Low",
+    "Low",
+    "Medium",
+    "Medium"
+   ],
+   "elements": "all"
+  },
+  "flexural": {
+   "name": "flexural crack",
+   "levels": [
+    "Low",
+    "Medium",
+    "High",
+    "High"
+   ],
+   "elements": "all"
+  },
+  "diagonal_shear": {
+   "name": "diagonal shear crack",
+   "levels": [
+    "Medium",
+    "High",
+    "High",
+    "High"
+   ],
+   "elements": "all"
+  },
+  "along_bar": {
+   "name": "crack along a bar",
+   "levels": [
+    "Medium",
+    "Medium",
+    "High",
+    "High"
+   ],
+   "elements": "all"
+  },
+  "column_horizontal": {
+   "name": "horizontal crack in a column",
+   "levels": [
+    "Medium",
+    "High",
+    "High",
+    "High"
+   ],
+   "elements": [
+    "column"
+   ]
+  },
+  "spalling_exposed_bar": {
+   "name": "spalling with exposed bar",
+   "levels": [
+    "Medium",
+    "High",
+    "High",
+    "High"
+   ],
+   "elements": "all"
+  },
+  "joint": {
+   "name": "beam-column joint crack",
+   "levels": [
+    "Medium",
+    "High",
+    "High",
+    "High"
+   ],
+   "elements": [
+    "column",
+    "beam"
+   ]
+  }
+ },
+ "elements": {
+  "column": {
+   "name": "column",
+   "raise": 1
+  },
+  "beam": {
+   "name": "beam",
+   "raise": 0
+  },
+  "slab": {
+   "name": "slab",
+   "raise": 0
+  },
+  "load_bearing_wall": {
+   "name": "load-bearing wall",
+   "raise": 0
+  },
+  "infill_wall": {
+   "name": "infill wall",
+   "raise": 0
+  }
+ },
+ "locations": {
+  "end_zone": {
+   "name": "end zone (near a joint or support, where bars are anchored or lapped)",
+   "raise": 1,
+   "patterns": [
+    "along_bar",
+    "diagonal_shear"
+   ],
+   "basis": "[46] ch. 2.1, 2.3: splitting starts where the bar is anchored; anchorages with cracks along bars. Diagonal shear near supports: assumption, to confirm. Length of the zone (about one element depth): assumption."
+  },
+  "middle": {
+   "name": "middle of the element",
+   "raise": 0,
+   "patterns": [],
+   "basis": "v3"
+  },
+  "unknown": {
+   "name": "location unknown",
+   "same_as": "end_zone",
+   "basis": "AGENTS.md rule 2: doubt never lowers a level"
+  }
+ },
+ "escalators": {
+  "growing": {
+   "name": "the crack has grown since the last photo",
+   "effect": "+1",
+   "basis": "[46] ch. 5.3; D23: only growth larger than the measurement uncertainty"
+  },
+  "rust_stain": {
+   "name": "rust staining along the crack",
+   "effect": "+1",
+   "basis": "v2 (D20)"
+  },
+  "sticking_openings": {
+   "name": "doors or windows started to stick",
+   "effect": "+1",
+   "basis": "v2 (D20)"
+  },
+  "recent_earthquake": {
+   "name": "an earthquake since the crack was last seen",
+   "effect": "+1",
+   "basis": "v2 (D20)"
+  },
+  "added_floors": {
+   "name": "floors were added to the building",
+   "effect": "+1",
+   "basis": "studio professor, 27 Oct 2026 (D22)"
+  },
+  "thin_cover": {
+   "name": "thin cover or no stirrups where the bar is exposed",
+   "effect": "+1",
+   "basis": "[46] ch. 2.3.3 (cover of 1 bar diameter: brittle failure), ch. 3.2 (thin cover and no transverse reinforcement: brittle splitting). Line of 'about one bar diameter': assumption."
+  },
+  "crossing_bar_crack": {
+   "name": "the crack meets a crack along a bar or stirrup",
+   "effect": "+1",
+   "basis": "[46] ch. 4.4: cracks along stirrups lower the bond; ch. 2.1"
+  },
+  "damp": {
+   "name": "damp, water marks or moss at the crack",
+   "effect": "+1",
+   "basis": "assumption: [46] ch. 6.2 lists these signs as not yet evaluated; Eurocode 2 exposure classes not yet read"
+  },
+  "offset": {
+   "name": "one side of the crack is displaced",
+   "effect": "High",
+   "basis": "v2 (D20); measured as sliding larger than its uncertainty, about 2 px [46] ch. 5.1, 5.2"
+  },
+  "sagging": {
+   "name": "visible sagging of a beam or slab",
+   "effect": "High",
+   "basis": "v2 (D20)"
+  }
+ },
+ "next_steps": {
+  "Low": "Routine monitoring: photograph the same crack again in 6 months.",
+  "Medium": "Low-cost advice; photograph the same crack again in 1 month. If it has grown, it goes to an engineer.",
+  "High": "An engineer must confirm; the case is sent now.",
+  "Expert needed": "An engineer decides; the case is sent now.",
+  "Retake": "Retake the photo following the protocol."
+ }
+}

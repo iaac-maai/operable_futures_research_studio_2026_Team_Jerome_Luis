@@ -40,7 +40,7 @@ Kinds: learned model (reports a confidence), written rule (auditable), people. S
 | P | 1 Capture | Crack close-up | people | Scale card and two marker stickers in the photo; a burst of photos with and without flash (`spec/features/photo_protocol.md`) | - | specified |
 | P | 2 Check | Photo checks | rule | Sharp and lit; at least 3 pixels across the crack [46] | Not sharp or lit: Retake. Under 3 pixels: retake closer; still under 3: width band read on the card by eye | **partly in code** (sharpness, brightness: `src/quality/gate.py`) |
 | P | 3 Perceive | Crack reading | learned | Crack pixels (segmentation), then width in mm with an uncertainty of ±1 pixel [46], length, orientation. Pattern: a model (PHI-Net tasks 3 and 8 cover spalling, flexural and shear; the other patterns need our labels); until it is confident, a field worker chooses from drawings; the resident is never asked | No crack found with confidence, or pattern unknown: Expert needed | specified |
-| P | 4 Decide | Crack level + growth | rule | Matrix v2: level, reason, next step. Growth counts only if the change is larger than the measurement uncertainty (`spec/features/monitoring.md`) | - | **partly in code** (matrix v2; growth check not yet) |
+| P | 4 Decide | Crack level + growth | rule | Matrix v3: level, reason, next step. Growth counts only if the change is larger than the measurement uncertainty (`spec/features/monitoring.md`) | - | **partly in code** (matrix v3; growth check not yet) |
 | P | 5 Act | Resident | people | Level, reason, next step, recheck date; never "safe", never a clearance | - | **partly in code** (outputs of `assess()`; app screen not yet) |
 
 **Scene check** (between Check and Perceive, all scales): is this photo S, O or P? Now the app's guided capture sets the scale (step 1 building, step 2 element, step 3 crack). Later a scene model (PHI-Net task 1) confirms it; a mismatch asks for a retake. Status: specified.
@@ -48,7 +48,7 @@ Kinds: learned model (reports a confidence), written rule (auditable), people. S
 **Between the rows:** the element rules (O) pass the material and the element to the crack level (P); the crack levels, their growth and the spread of damage across elements pass up to the building risk score (S).
 
 ## Two loops
-- **Monitoring loop:** on the recheck date (Low: 6 months, Medium: 1 month, from matrix v2) the same crack ID and marker stickers are photographed again, with the previous photo shown as an overlay. Growth larger than the measurement uncertainty raises the crack level and, through it, the building priority (`spec/features/monitoring.md`). Status: specified.
+- **Monitoring loop:** on the recheck date (Low: 6 months, Medium: 1 month, from the risk matrix) the same crack ID and marker stickers are photographed again, with the previous photo shown as an overlay. Growth larger than the measurement uncertainty raises the crack level and, through it, the building priority (`spec/features/monitoring.md`). Status: specified.
 - **Learning loop:** engineer corrections and on-site ratings are stored as labels; the learned models (phase 3) are retrained in batches and each new version is checked on held-out engineer-rated photos before use. Written rules change only by a reviewed decision in `spec/decisions.md` (AGENTS.md rule 5). This semester: one manual retraining as a demonstration. This is human-in-the-loop learning, not reinforcement learning (D18). Status: specified.
 
 ## Who answers what (D25)

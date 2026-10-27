@@ -128,7 +128,7 @@ def test_low_medium_retake_do_not_flag_engineer(args):
 
 
 def test_every_result_has_a_reason_a_next_step_and_no_safe_claim():
-    result = assess("diagonal_shear", "beam", 1.5, 0.9, True, escalators=("rust_stain",))
+    result = assess("diagonal_shear", "beam", 1.5, 0.9, True, escalators=("rust_stain",), location="middle")
     assert result.reason == ("diagonal shear crack in a beam, 1.5 mm wide, 1 to 3 mm band: High; "
                              "raised because rust staining along the crack.")
     assert result.next_step == NEXT_STEPS["High"]
@@ -160,3 +160,43 @@ def test_confident_concrete_reaches_the_matrix():
 
 def test_bad_photo_is_retake_before_material_check():
     assert triage("surface_map", "slab", 0.1, 0.99, False, material="brick", material_confidence=0.2) == "Retake"
+
+
+# matrix v3: location on the element and the new warning signs (spec/features/risk_matrix.md, D28)
+def test_end_zone_raises_cracks_along_bars_and_diagonal_shear():
+    assert triage("along_bar", "beam", 0.2, 0.9, True, location="middle") == "Medium"
+    assert triage("along_bar", "beam", 0.2, 0.9, True, location="end_zone") == "High"
+    assert triage("diagonal_shear", "slab", 0.1, 0.9, True, location="end_zone") == "High"
+
+
+def test_end_zone_does_not_raise_other_patterns():
+    assert triage("flexural", "beam", 0.5, 0.9, True, location="end_zone") == "Medium"
+    assert triage("surface_map", "slab", 0.1, 0.9, True, location="end_zone") == "Low"
+
+
+def test_unknown_location_counts_as_end_zone():
+    result = assess("along_bar", "beam", 0.2, 0.9, True)
+    assert result.level == "High" and "location is unknown" in result.reason
+    assert triage("along_bar", "beam", 0.2, 0.9, True, location="unknown") == "High"
+
+
+def test_unknown_location_name_is_an_error_not_a_guess():
+    with pytest.raises(ValueError):
+        triage("along_bar", "beam", 0.2, 0.9, True, location="near the window")
+
+
+@pytest.mark.parametrize("sign", ["thin_cover", "crossing_bar_crack", "damp"])
+def test_new_v3_signs_raise_one_level(sign):
+    assert triage("flexural", "beam", 0.5, 0.9, True, escalators=(sign,)) == "High"
+    assert triage("surface_map", "slab", 0.1, 0.9, True, escalators=(sign,)) == "Medium"
+
+
+def test_every_location_and_sign_has_a_basis():
+    from triage.matrix import BASIS, LOCATIONS
+    for key in list(LOCATIONS) + list(ESCALATORS):
+        assert BASIS[key].strip()
+
+
+def test_assumptions_are_marked_as_assumptions():
+    from triage.matrix import BASIS
+    assert "assumption" in BASIS["damp"] and "assumption" in BASIS["end_zone"]

@@ -1,6 +1,6 @@
 # Feature: triage rules (`src/triage/matrix.py`)
 
-Status: implemented with risk matrix v2.0-illustrative (`spec/features/risk_matrix.md`). All thresholds are illustrative until calibrated with the engineering partners.
+Status: implemented with risk matrix v3.0-illustrative (`spec/features/risk_matrix.md`). All thresholds are illustrative until calibrated with the engineering partners.
 
 ## Inputs
 - `pattern`: one of the seven reinforced-concrete patterns in `spec/features/risk_matrix.md`, from the pattern model.
@@ -9,7 +9,8 @@ Status: implemented with risk matrix v2.0-illustrative (`spec/features/risk_matr
 - `confidence`: pattern-model confidence, 0 to 1.
 - `image_ok`: result of the quality gate (blur, light, scale card visible).
 - `material` and `material_confidence`: result of the material check (decision D17).
-- `escalators`: warning signs (growing, rust staining, sticking openings, recent earthquake, added floors, offset, sagging).
+- `escalators`: warning signs (growing, rust staining, sticking openings, recent earthquake, added floors, thin cover or no stirrups, a crack meeting a crack along a bar, damp, offset, sagging).
+- `location`: where on the element the crack is: end zone, middle or unknown (unknown counts as an end zone; matrix v3, D28).
 
 ## Outputs
 | Level | Meaning (deck, slide 6) | Engineer review |
@@ -32,9 +33,9 @@ The tool never outputs "safe", a clearance or a permit.
    - confidence missing, not a number, outside 0 to 1, or below the threshold (0.8, illustrative);
    - width or its uncertainty missing, not a number, negative or infinite (measurement failed).
 3. Base level from pattern x width band, using the upper end of the measured width.
-4. Element criticality and warning signs raise the level (never lower it); capped at High.
+4. Element criticality, the location on the element (end zone: cracks along bars and diagonal shear cracks +1) and warning signs raise the level (never lower it); capped at High.
 
-The confidence thresholds are module constants, not function arguments, so they can only change in a reviewed commit. The matrix values live in `src/triage/risk_matrix_v2.json`.
+The confidence thresholds are module constants, not function arguments, so they can only change in a reviewed commit. The matrix values live in `src/triage/risk_matrix_v3.json`.
 
 ## Tests (`tests/test_matrix.py`)
 - Bad photo -> Retake; low, NaN or out-of-range confidence -> Expert needed (never Low).

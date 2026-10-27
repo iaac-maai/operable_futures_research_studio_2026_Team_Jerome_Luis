@@ -19,18 +19,18 @@ A field worker cannot visit every crack a resident photographs. The professor's 
 
 | # | If | Then | Why |
 |---|---|---|---|
-| 1 | Offset or sagging reported | **V1: visit within 1 week**, engineer told today | These go straight to High in matrix v2 |
+| 1 | Offset or sagging reported | **V1: visit within 1 week**, engineer told today | These go straight to High in the risk matrix |
 | 2 | Photo not usable | **Retake**; after 2 failed retakes, **V2** | A resident who cannot take the photo is not left alone |
 | 3 | Width upper end ≥ 1 mm | **V1** | From 1 mm the matrix can reach High |
 | 4 | "Growing" plus any other warning sign | **V1** | Growth is what engineers look at first |
-| 5 | Any warning sign (growing, rust staining, sticking doors or windows, recent earthquake) | **V2: visit within 1 month** | Each raises the level in matrix v2 |
+| 5 | Any other warning sign (growing, rust staining, sticking doors or windows, recent earthquake, damp, or any sign of the risk matrix) | **V2: visit within 1 month** | Each raises the level in the risk matrix; no reported sign is ever ignored |
 | 6 | Crack not found with confidence | **V2** | Any doubt goes to a person (rule 2) |
 | 7 | No scale in the photo, so no width | **V2** | Without a width, Low cannot be earned |
 | 8 | Width upper end ≥ 0.3 mm | **V2** | Above the first matrix band |
 | 9 | 2 or more building risk flags (unknown counts) | **V2** | Same flags as the building risk score (D22) |
 | 10 | Otherwise: hairline under 0.3 mm, crack found with confidence, no sign, fewer than 2 flags | **V3: no visit yet** | The only case that can wait |
 
-Times (1 week, 1 month), widths (0.3 and 1 mm, the matrix v2 band edges) and the confidence threshold (0.8, as in `matrix.py`) are illustrative.
+Times (1 week, 1 month), widths (0.3 and 1 mm, the risk matrix band edges) and the confidence threshold (0.8, as in `matrix.py`) are illustrative.
 
 ## What the resident sees
 - **V1:** "A field worker will visit within a week. An engineer has been told today."

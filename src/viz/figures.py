@@ -17,8 +17,8 @@ from matplotlib.patches import FancyBboxPatch, Patch
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from triage.matrix import (_ESCALATOR_EFFECT, BAND_NAMES, BANDS, ELEMENT_RAISE, ELEMENTS, ESCALATORS, MATRIX,
-                           PATTERN_NAMES, PATTERNS, VERSION)
+from triage.matrix import (_ESCALATOR_EFFECT, _LOCATION_RULE, BAND_NAMES, BANDS, BASIS, ELEMENT_RAISE, ELEMENTS,
+                           ESCALATORS, MATRIX, PATTERN_NAMES, PATTERNS, VERSION)
 
 # Palette: reference instance of the dataviz skill (light mode).
 SURFACE, INK, INK_2, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9"
@@ -87,7 +87,7 @@ PIPE_BOXES = {
     (2, 0): ("human", "Crack close-up", "scale card + 2 marker stickers\nburst of photos, flash on and off\nresident or field worker", "spec"),
     (2, 1): ("rule", "Photo checks", "sharp and lit? ≥ 3 px across the crack?\nno → retake closer; still no →\nwidth band read on the card", "partly"),
     (2, 2): ("learned", "Crack reading", "crack pixels → width mm ± 1 px\npattern model (PHI-Net tasks 3, 8)\nfield worker until confident", "spec"),
-    (2, 3): ("rule", "Crack level + growth", "matrix v2 → level, reason, next step\ngrowth counts only if larger\nthan the measurement uncertainty", "partly"),
+    (2, 3): ("rule", "Crack level + growth", "matrix v3 → level, reason, next step\ngrowth counts only if larger\nthan the measurement uncertainty", "partly"),
     (2, 4): ("human", "Resident", "level, reason, next step,\nrecheck date\nnever 'safe', never a clearance", "partly"),
 }
 PIPE_STATUS = {"code": ("in code", "#2F4B7C", "#2F4B7C", "white"),
@@ -341,10 +341,13 @@ def decisions_and_players():
     return fig
 
 
+NEW_IN_V3 = {"thin_cover", "crossing_bar_crack", "damp"}
+
+
 def risk_matrix():
-    """Matrix v2: base level per pattern x width band, plus what can raise it (read from risk_matrix_v2.json)."""
-    fig = plt.figure(figsize=(15, 7.2))
-    ax = fig.add_axes([0.2, 0.12, 0.47, 0.66])
+    """Matrix v3: base level per pattern x width band, plus what can raise it (read from risk_matrix_v3.json)."""
+    fig = plt.figure(figsize=(16, 8.6))
+    ax = fig.add_axes([0.18, 0.1, 0.42, 0.66])
     for r, pattern in enumerate(PATTERNS):
         for c, band in enumerate(BANDS):
             lvl = MATRIX[band][r]
@@ -362,28 +365,37 @@ def risk_matrix():
         s.set_visible(False)
     ax.text(len(BANDS) / 2, -0.75, "Crack width (upper end of the measurement)", ha="center", fontsize=10, color=INK_2)
 
-    side = fig.add_axes([0.71, 0.12, 0.27, 0.66])
+    side = fig.add_axes([0.63, 0.06, 0.36, 0.76])
     side.set_axis_off()
     side.set_xlim(0, 1)
     side.set_ylim(0, 1)
     side.text(0, 0.98, "What raises the level (never lowers it)", fontsize=11.5, weight="bold", va="top")
-    lines = [(f"It is a {ELEMENTS[e]}", f"+{n}") for e, n in ELEMENT_RAISE.items() if n]
-    lines += [(name[0].upper() + name[1:], "to High" if effect == "High" else effect)
-              for name, effect in ((ESCALATORS[k], _ESCALATOR_EFFECT[k]) for k in ESCALATORS)]
-    for i, (text, effect) in enumerate(lines):
-        y = 0.86 - i * 0.092
-        side.add_patch(FancyBboxPatch((0, y - 0.035), 0.17, 0.07, boxstyle="round,pad=0,rounding_size=0.02",
+    end = _LOCATION_RULE["end_zone"]
+    lines = [(f"It is a {ELEMENTS[e]}", f"+{n}", "") for e, n in ELEMENT_RAISE.items() if n]
+    plural = {"along_bar": "cracks along bars", "diagonal_shear": "diagonal shear cracks"}
+    lines.append(("In an end zone (or location unknown):\n" + ", ".join(plural.get(p, PATTERN_NAMES[p])
+                                                                      for p in end["patterns"]),
+                  f"+{end['raise']}", "assumption" if "assumption" in BASIS["end_zone"] else ""))
+    lines += [(name[0].upper() + name[1:], "to High" if effect == "High" else effect,
+               "assumption" if BASIS[k].startswith("assumption") else ("new in v3" if k in NEW_IN_V3 else ""))
+              for k, name, effect in ((k, ESCALATORS[k], _ESCALATOR_EFFECT[k]) for k in ESCALATORS)]
+    for i, (text, effect, tag) in enumerate(lines):
+        y = 0.9 - i * 0.07
+        side.add_patch(FancyBboxPatch((0, y - 0.027), 0.17, 0.054, boxstyle="round,pad=0,rounding_size=0.02",
                                       facecolor="#f0efec" if effect != "to High" else LEVEL["High"], edgecolor="none"))
         side.text(0.085, y, effect, ha="center", va="center", fontsize=9.5, weight="bold",
                   color=INK if effect != "to High" else "white")
         side.text(0.2, y, text, va="center", fontsize=9.8, color=INK)
+        if tag:
+            side.text(0.99, y, tag, va="center", ha="right", fontsize=8.5, color=INK_2, style="italic")
     side.text(0, 0.03, "Levels stop at High. Any doubt (photo, material,\nelement, pattern, width) goes to Expert needed.",
               fontsize=9, color=INK_2, va="bottom")
 
     fig.suptitle(f"Risk matrix for reinforced concrete, v{VERSION}", x=0.02, ha="left", fontsize=14, weight="bold")
-    fig.text(0.02, 0.905, "Base level from crack pattern × width; the element and warning signs can only raise it. "
-             "All values illustrative until calibrated with the engineering partners. Source: src/triage/risk_matrix_v2.json",
-             fontsize=10, color=INK_2)
+    fig.text(0.02, 0.905, "Base level from crack pattern × width; the element, the location on the element and warning "
+             "signs can only raise it. All values illustrative until calibrated with the engineering partners.\n"
+             "Source: src/triage/risk_matrix_v3.json, where every raise records its basis (thesis [46] chapter, "
+             "decision or assumption).", fontsize=10, color=INK_2, va="top", linespacing=1.5)
     return fig
 
 
