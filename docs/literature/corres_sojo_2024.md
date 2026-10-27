@@ -1,7 +1,7 @@
 # Reference thesis: Corres Sojo (2024), EPFL
 
 **Corres Sojo E.**, *Contributions to rebar-to-concrete interaction and its structural implications for design and monitoring applications*, PhD thesis n° 10772, EPFL, Structural Concrete Laboratory (IBETON), supervised by Prof. A. Muttoni, 2024. doi:10.5075/epfl-thesis-10772 [46].
-Read on 26 Oct 2026: abstract, chapter 1, chapter 2 set-up, chapters 4, 5 and 6 in full, and the cited references below. Sent by the studio professor as the main reference for the state of the art and the methodology.
+Read on 26 Oct 2026: abstract, chapter 1, chapter 2 set-up, chapters 4, 5 and 6 in full, and the cited references below. Read on 27 Oct 2026 (full text from the EPFL repository): chapter 2 results (2.3 to 2.5), chapter 3 (3.1, 3.2) and chapter 4 again (4.1, 4.2, 4.4, 4.5), for features of the risk matrix (section D). Sent by the studio professor as the main reference for the state of the art and the methodology.
 
 ## What the thesis is about
 How reinforcing bars and concrete hold together (bond), how that governs cracking in reinforced concrete, and how cracks in existing structures can be measured from images. Chapters 2 to 5 are journal articles (Structural Concrete 2023; others submitted).
@@ -37,6 +37,19 @@ How reinforcing bars and concrete hold together (bond), how that governs crackin
 13. Averaging about 10 images reduces both random noise and bias.
    → Taking a short burst of photos and averaging the measurement is a cheap accuracy gain.
 
+### D. Cracks along the bars, cover and confinement (chapters 2, 3, 4; read 27 Oct)
+14. **Cracks along a bar weaken its grip.** "Longitudinal cracking along the bar has been shown to significantly reduce the bond stresses" (ch. 2.1); in the beam tests, regions with longitudinal cracks along the stirrups had lower bond stresses (ch. 4.4). The reduction grows with the width of the crack along the bar relative to the bar diameter (factor of Brantschen et al. 2016, Eq. 4.9, ch. 4.5).
+   → Supports our `along_bar` pattern as a serious pattern; suggests that its width matters relative to the bar diameter, which a photo only shows when the bar is exposed.
+15. **Confinement decides brittle or ductile.** With thin cover and no transverse reinforcement (stirrups), splitting cracks run through the cover and cause a brittle failure; with larger cover or some stirrups the brittle failure is prevented; well confined (heavy stirrups or cover of at least 5 bar diameters) gives a ductile pull-out (ch. 3.2, citing fib 2000 and Model Code 2010). In the pull-out tests, specimens with a cover of 1 bar diameter "present a relatively brittle failure with a sudden drop in the force" (ch. 2.3.3).
+   → A possible new dimension: **thin cover or missing stirrups**, visible only where concrete has spalled and the bar is exposed (the scale card gives the cover depth in mm).
+16. **Anchorage zones.** Splitting cracks appeared first at the loaded end of the bar and spread from there (ch. 2.3); the thesis names "anchorages affected by longitudinal cracks due to corrosion" as a case for assessing existing structures (ch. 2.1, 2.4).
+   → A possible new dimension: **where on the element** the crack is. Cracks along bars at the ends of beams and columns, where bars are anchored or lapped, are more critical than mid-span (to confirm with the engineer; the thesis studies anchorages, not building elements).
+17. **Crack spacing can be measured in existing structures** and is the main uncertainty when linking crack width to the stress in the bar (ch. 4.1, Figure 4.2). Secondary and splitting cracks "can be measured or visually verified".
+   → Record the **number and spacing of parallel cracks** on an element as a measured feature for the engineer; the thesis gives no rule linking spacing to risk, so it does not enter the matrix.
+18. **Crack limits in codes depend on exposure.** Eurocode 2 and Model Code 2010 limit crack widths "based on the environmental exposure", for durability and water tightness (ch. 4.1); the thesis gives no numbers. Chapter 6.2 lists corrosion traces, water, sediment marks and moss as signs not yet evaluated.
+   → A possible **damp or wet exposure** warning sign, only after reading the exposure classes in Eurocode 2 itself.
+19. **What the thesis does not give:** no crack-width thresholds for safety (0.3 mm, 1 mm or similar do not appear), and bar-stress estimates need bar diameter, cover, crack spacing and bond conditions that a phone photo cannot give (ch. 4). Our band edges must come from the guides it cites [50][51][52] and from the engineers.
+
 ## What we can take from it (proposed, not yet implemented)
 | # | Feature | Where | Based on |
 |---|---|---|---|
@@ -47,9 +60,16 @@ How reinforcing bars and concrete hold together (bond), how that governs crackin
 | 5 | "Growing" only when growth exceeds the measurement uncertainty; repeat photos in similar light and time of day; burst of photos averaged | Matrix escalator `growing`, follow-up flow | Findings 12, 13 |
 | 6 | Check the matrix against inspection guides (OFROU 2021, DGC 2012) and Zaborac et al. 2019 before the engineer session | Calibration plan | Finding 2 |
 | 7 | Report honestly that a phone photo cannot estimate bar stress | Limits, pitch | Finding 4 |
+| 8 | Matrix dimension "location on the element": end zone (anchorage, lap, joint) vs middle; along-bar and diagonal cracks in end zones +1 (illustrative) | Risk matrix v3 (proposal) | Findings 14, 16 |
+| 9 | Warning sign "thin cover or no stirrups", seen where the bar is exposed: cover under about 1 bar diameter, measured on the scale card, +1 (illustrative) | Risk matrix v3 (proposal) | Finding 15 |
+| 10 | Warning sign "crack along a bar or stirrup meets another crack" (transverse + longitudinal), +1 (illustrative) | Risk matrix v3 (proposal) | Findings 14, 17 |
+| 11 | Record crack count and spacing per element in the engineer's dossier (not a rule) | Building case, dossier | Finding 17 |
+| 12 | Damp or wet exposure as a warning sign, after reading Eurocode 2 exposure classes | Risk matrix (later) | Finding 18 |
 
 ## Open questions for the expert (Enrique Corres Sojo)
 - Which crack patterns in reinforced concrete homes would you treat as brittle (High even when narrow)?
 - Is ±1 pixel (±30 %) at 3 pixels per crack acceptable for triage, or should we require 6 to 8 pixels?
 - What would you accept as evidence that a crack is growing, from two phone photos months apart?
 - Would you rate our 30 to 40 calibration cards (element x pattern x width x warning signs)?
+- In self-built concrete homes, is thin cover with few stirrups common enough that an exposed bar should always raise the level?
+- Are cracks along bars at the ends of beams and columns (anchorage and lap zones) more critical than mid-span ones, and by how much?
