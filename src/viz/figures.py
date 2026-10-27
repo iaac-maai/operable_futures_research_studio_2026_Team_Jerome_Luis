@@ -308,6 +308,12 @@ def _handoff_icon(ax, key, cx, cy, s=2.8, ink="#111111", paper="white"):
         for layer in nodes:
             for x, y in layer:
                 circ(x, y, 1.1, fc=K)
+    elif key == "column":  # a structural element
+        rect(2.2, 8.6, 5.6, 1.2, fc=K)
+        rect(3.5, 1.2, 3.0, 7.4)
+        rect(2.2, 0.2, 5.6, 1.0, fc=K)
+    elif key == "crack":
+        ln([(5.2, 9.8), (4.0, 7.6), (5.9, 5.2), (4.1, 2.8), (5.3, 0.2)], lw=2.2)
     elif key == "person":  # the resident
         circ(5, 7.4, 2.0)
         shoulders(5.0, 4.2)
@@ -1100,7 +1106,7 @@ FLOW_LANES = [  # (lane y, code, name, what, start pill, who takes the photo; sp
     (32, "O", "OBJECT", "one element", "ELEMENT", "field worker, first visit\nevery element with a crack"),
     (18, "P", "PIXEL", "the crack", "CRACK", "field worker, first visit\nresident, at every recheck"),
 ]
-FLOW_COLUMNS = [(11.5, None, "WHAT · WHO"), (26.5, "1", "CAPTURE\nPHOTOS AND ANSWERS"), (43.5, "2", "CHECK\nWRITTEN RULES"),
+FLOW_COLUMNS = [(11.5, None, "START"), (26.5, "1", "CAPTURE\nPHOTOS AND ANSWERS"), (43.5, "2", "CHECK\nWRITTEN RULES"),
                 (66, "3", "PERCEIVE\nMODELS + CONFIDENCE"), (88.5, "4", "DECIDE\nWRITTEN RULES, AUDITABLE"),
                 (109.5, "5", "ACT\nPEOPLE")]
 FLOW_SEPARATORS = [17.5, 35.5, 51.5, 79.5, 98.5]
@@ -1207,6 +1213,32 @@ def pipeline_flow():
     t = _flow_tools(ax)
     label, photo_box, rule_box, model_box, diamond, para, pill, terminal, mark, line, status, detail = (t.label, t.photo_box, t.rule_box, t.model_box, t.diamond, t.para, t.pill, t.terminal, t.mark, t.line, t.status, t.detail)
 
+    def wrap(title):
+        if "\n" in title or len(title) <= 12:
+            return title
+        if " + " in title:
+            return title.replace(" + ", "\n+ ", 1)
+        mid, spaces = len(title) / 2, [i for i, ch in enumerate(title) if ch == " "]
+        cut = min(spaces, key=lambda i: abs(i - mid))
+        return title[:cut] + "\n" + title[cut + 1:]
+
+    def with_icon(draw, cx, cy, w, h, title, icon, ink=FLOW_INK, paper="white"):
+        """A box with its symbol on the left and its title on the right."""
+        draw(cx, cy, w, h, "")
+        size = min(h * 0.7, 3.6)
+        _handoff_icon(ax, icon, cx - w / 2 + 0.9 + size / 2, cy, s=size, ink=ink, paper=paper)
+        label(cx + (size + 0.9) / 2, cy, wrap(title), colour=ink, weight="bold", size=10.5)
+
+    def ipill(cx, cy, title, icon):
+        pill(cx, cy, 9.0, 3.8, "")
+        _handoff_icon(ax, icon, cx - 2.9, cy, s=2.6)
+        label(cx + 1.3, cy, title, size=9.5, weight="bold")
+
+    def iterminal(cx, cy, title, icon):
+        terminal(cx, cy, 5.6, 5, "")
+        _handoff_icon(ax, icon, cx, cy + 1.0, s=2.4)
+        label(cx, cy - 1.5, title, size=8.5, weight="bold")
+
     # title, section heading, colour key, columns
     label(1.5, 84.6, "Pipeline", size=40, weight="bold", ha="left")
     label(118.5, 84.6, "01", size=40, weight="bold", ha="right")
@@ -1231,11 +1263,10 @@ def pipeline_flow():
     # step 0: report and dispatch, a written rule decides when a field worker visits (spec/features/dispatch.md, D27)
     ry = 71.0
     label(2.6, ry, "REPORT (0)\nresident's phone", size=12, weight="bold", rotation=90)
-    pill(11.5, ry, 7.4, 3.8, "CRACK\nREPORTED")
-    photo_box(26.5, ry, 13, 5, "CRACK PHOTO\n+ ANSWERS")
+    ipill(11.5, ry, "CRACK\nREPORTED", "person")
+    with_icon(photo_box, 26.5, ry, 13, 5, "CRACK PHOTO\n+ ANSWERS", "camera")
     status(26.5, ry + 2.5, "spec")
-    detail(26.5, ry - 3.1, "any phone · scale card or coin\nnew? growing? doors stick?\nearthquake? building questions")
-    line([(15.2, ry), (20.0, ry)])
+    line([(16.0, ry), (20.0, ry)])
     diamond(43.5, ry, 4.4, 3.2, "USABLE?")
     status(43.5, ry + 3.2, "partly")
     line([(33.0, ry), (39.1, ry)])
@@ -1244,14 +1275,11 @@ def pipeline_flow():
     label(45.0, ry - 5.8, "RETAKE\n(after 2: V2)", size=10, weight="bold", ha="left")
     line([(47.9, ry), (55.9, ry)], dot=False)
     mark(50.2, ry, True, r=0.8)
-    model_box(62.5, ry, 13, 5, "CRACK + ROUGH\nWIDTH")
+    with_icon(model_box, 62.5, ry, 13, 5, "CRACK + ROUGH\nWIDTH", "network", ink="white", paper=FLOW_MODEL)
     status(62.5, ry + 2.5, "spec")
-    detail(62.5, ry - 4.3, "crack found + confidence\nwidth upper end, if scale visible")
     line([(69.0, ry), (82.0, ry)])
-    rule_box(88.5, ry, 13, 5, "DISPATCH RULE")
+    with_icon(rule_box, 88.5, ry, 13, 5, "DISPATCH RULE", "rulebook", paper=FLOW_RULE)
     status(88.5, ry + 2.5, "code")
-    detail(88.5, ry - 3.1, "urgent signs → width → warning signs\n→ doubt → no scale → building flags\n"
-           "(spec/features/dispatch.md)")
     outcomes = [(74.3, "V3 · NO VISIT YET\nrecheck in 1 month"), (71.0, "V2 · VISIT\nWITHIN 1 MONTH"),
                 (67.7, "V1 · VISIT WITHIN 1 WEEK\nengineer told today")]
     for oy, text_ in outcomes:
@@ -1263,19 +1291,17 @@ def pipeline_flow():
     # V1 and V2: the field worker's first visit starts the three scales below
     for oy in (71.0, 67.7):
         line([(112.3, oy), (117.8, oy)], head=False, dot=False)
-    line([(117.8, 71.0), (117.8, 61.8), (6.2, 61.8), (6.2, 46.0), (7.8, 46.0)], lw=2.4, dot=False)
+    line([(117.8, 71.0), (117.8, 61.8), (6.2, 61.8), (6.2, 46.0), (7.0, 46.0)], lw=2.4, dot=False)
     label(62.0, 60.7, "V1 OR V2: A FIELD WORKER VISITS with a reliable phone and the scale card, and photographs "
           "the building once, every cracked element and every crack  (also 1 in 10 V3 reports, as an audit)",
           size=10.5, weight="bold")
     for r, (y, code, name, what, start, who) in enumerate(FLOW_LANES):
         label(2.6, y, f"{name} ({code})\n{what}", size=12, weight="bold", rotation=90)
-        pill(11.5, y, 7.4, 3.8, start)
-        detail(11.5, y - 2.6, who)
+        ipill(11.5, y, start, {"S": "house", "O": "column", "P": "crack"}[code])
         cap = PIPE_BOXES[(r, 0)]
-        photo_box(26.5, y, 13, 5, cap[1].upper())
+        with_icon(photo_box, 26.5, y, 13, 5, cap[1].upper(), {"S": "clipboard", "O": "camera", "P": "ruler"}[code])
         status(26.5, y + 2.5, cap[3])
-        detail(26.5, y - 3.1, cap[2])
-        line([(15.2, y), (20.0, y)])
+        line([(16.0, y), (20.0, y)])
         # check diamond and its failure branch
         question, fail = FLOW_CHECKS[code]
         diamond(43.5, y, 4.4, 3.4, question)
@@ -1285,15 +1311,12 @@ def pipeline_flow():
             line([(43.5, y - 3.4), (43.5, y - 5.6)], head=False, dot=False)
             mark(43.5, y - 6.5, False)
             label(45.0, y - 6.5, fail, size=10.5, weight="bold", ha="left")
-        else:
-            detail(43.5, y - 3.9, "unknown is allowed:\nit counts as a risk flag")
         line([(47.9, y), (55.5, y)], dot=False)
         mark(50.2, y, True, r=0.8)
         # perceive: learned model, then 'sure?' for the models that exist this semester
         per = PIPE_BOXES[(r, 2)]
-        model_box(62.5, y, 13, 5, per[1].upper())
+        with_icon(model_box, 62.5, y, 13, 5, per[1].upper(), "network", ink="white", paper=FLOW_MODEL)
         status(62.5, y + 2.5, per[3])
-        detail(62.5, y - 4.3, per[2])
         dec = PIPE_BOXES[(r, 3)]
         if code == "S":
             line([(69.0, y), (82.0, y)])
@@ -1305,20 +1328,16 @@ def pipeline_flow():
             label(75.0, y - 5.5, "EXPERT\nNEEDED", size=10.5, weight="bold", ha="left")
             line([(76.5, y), (82.0, y)], dot=False)
             mark(78.4, y, True, r=0.8)
-        rule_box(88.5, y, 13, 5, dec[1].upper())
+        with_icon(rule_box, 88.5, y, 13, 5, dec[1].upper(), "bars" if code == "S" else "rulebook", paper=FLOW_RULE)
         status(88.5, y + 2.5, dec[3])
-        detail(88.5, y - 3.1, dec[2])
         if (r, 4) in PIPE_BOXES:
             act = PIPE_BOXES[(r, 4)]
             out = "PRIORITY LIST\n+ DOSSIER" if code == "S" else "LEVEL, REASON,\nNEXT STEP"
             para(105.0, y, 9.4, 5, out)
             status(105.0, y + 2.5, act[3])
-            detail(105.0, y - 3.1, act[2])
-            terminal(115.6, y, 5.6, 5, act[1].upper())
+            iterminal(115.6, y, act[1].upper(), "hardhat" if code == "S" else "person")
             line([(95.0, y), (99.5, y)])
             line([(110.5, y), (112.8, y)], dot=False)
-        else:
-            detail(108.5, y + 1.4, "no action at this scale:\nmaterial and element go\nto the crack level")
 
     yS, yO, yP = (lane[0] for lane in FLOW_LANES)
     # scene check band between Check and Perceive, all scales
@@ -1339,7 +1358,7 @@ def pipeline_flow():
           "a reviewed decision", size=10.5, weight="bold")
     # monitoring loop: the resident's recheck date brings the same crack back
     my = 7.9
-    line([(115.6, yP - 2.5), (115.6, my), (5.6, my), (5.6, yP), (7.8, yP)], ls="--", dot=False)
+    line([(115.6, yP - 2.5), (115.6, my), (5.6, my), (5.6, yP), (7.0, yP)], ls="--", dot=False)
     label(63.5, my - 1.8, "MONITORING LOOP: on the recheck date (Category 1: 6 months, Category 2: 1 month) the same crack ID "
           "and stickers are photographed again, with the last photo as an overlay\ngrowth larger than the measurement "
           "uncertainty raises the crack level, and through it the building risk score", size=10.5, weight="bold")
