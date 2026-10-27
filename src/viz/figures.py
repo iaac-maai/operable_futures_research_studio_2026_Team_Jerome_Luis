@@ -667,28 +667,28 @@ def timeline():
 
 # Every dataset on our disk (docs/data_map.md, sections 0 and 6), in order of fit to the concept (D14).
 # (name, fit, images on disk or None, quality-gate pass % or None, labels it gives, what it trains, licence).
-# Gate %: data/processed/real_data_quality.csv (25 Oct 2026). PHI-Net counts: train + test from the npy files [53][55].
+# Gate %: data/processed/real_data_quality.csv (27 Oct 2026). PHI-Net counts: train + test from the npy files [53][55].
 HELD = [
     ("Haiti 2010 survey", "high", 4_450, 95, "engineer rating per building:\nlight / moderate / severe (183)",
      "building risk score evidence,\nsanity check of levels", "not stated"),
-    ("PHI-Net t1 scene level", "medium", None, None, "pixel / object / structural", "scene check (S, O, P)",
+    ("PHI-Net t1 scene level", "medium", 27_306, None, "pixel / object / structural", "scene check (S, O, P)",
      "CC BY-NC-SA 4.0"),
-    ("PHI-Net t2 damage state", "medium", None, None, "damaged / undamaged", "crack or no crack", "CC BY-NC-SA 4.0"),
-    ("PHI-Net t3 spalling", "medium", 7_735, None, "spalling / none", "pattern: spalling", "CC BY-NC-SA 4.0"),
+    ("PHI-Net t2 damage state", "medium", 13_271, None, "damaged / undamaged", "crack or no crack", "CC BY-NC-SA 4.0"),
+    ("PHI-Net t3 spalling", "medium", 7_735, 62, "spalling / none", "pattern: spalling", "CC BY-NC-SA 4.0"),
     ("PHI-Net t4 material", "medium", 9_291, None, "steel / other\n(not concrete vs brick)", "not the material model",
      "CC BY-NC-SA 4.0"),
-    ("PHI-Net t5 collapse mode", "medium", None, None, "none / partial / global collapse", "building reading (S)",
+    ("PHI-Net t5 collapse mode", "medium", 1_372, None, "none / partial / global collapse", "building reading (S)",
      "CC BY-NC-SA 4.0"),
-    ("PHI-Net t6 component", "medium", 5_334, None, "beam / column / wall / other", "element model",
+    ("PHI-Net t6 component", "medium", 5_334, 79, "beam / column / wall / other", "element model",
      "CC BY-NC-SA 4.0"),
     ("PHI-Net t7 damage level", "medium", 4_636, None, "undamaged / minor /\nmoderate / heavy",
      "second opinion only", "CC BY-NC-SA 4.0"),
-    ("PHI-Net t8 damage type", "medium", 4_585, None, "undamaged / flexural /\nshear / combined",
+    ("PHI-Net t8 damage type", "medium", 4_585, 78, "undamaged / flexural /\nshear / combined",
      "pattern model", "CC BY-NC-SA 4.0"),
-    ("Darbhanga brick masonry", "medium", 4_259, 76, "crack boxes on brick walls", "crack detector", "CC BY 4.0"),
+    ("Darbhanga brick masonry", "medium", 4_259, 75, "crack boxes on brick walls", "crack detector", "CC BY 4.0"),
     ("Strathclyde brick facades", "medium", 700, 100, "crack / no crack", "crack or no crack, material",
      "CC BY 4.0"),
-    ("METU building concrete", "low", 40_000, 20, "crack / no crack", "crack or no crack, material", "CC BY 4.0"),
+    ("METU building concrete", "low", 40_000, 21, "crack / no crack", "crack or no crack, material", "CC BY 4.0"),
     ("SDNET2018 walls", "low", 18_138, 16, "crack / no crack", "crack or no crack", "CC BY 4.0"),
     ("crack-seg (Ultralytics)", "low", 4_029, 97, "crack outlines (polygons)", "crack segmentation",
      "Public Domain"),
@@ -697,7 +697,7 @@ HELD = [
     ("SDNET2018 bridge decks", "off-concept", 13_620, 19, "crack / no crack", "nothing (bridges)", "CC BY 4.0"),
 ]
 FIT_FILL = {"high": SEQ["covered"], "medium": SEQ["partial"], "low": SEQ["planned"], "off-concept": SURFACE}
-HELD_MISSING = {"PHI-Net": "downloading", "CrackSeg9k": "zip not extracted"}
+HELD_MISSING = {"CrackSeg9k": "zip not extracted"}
 
 
 def dataset_comparison():
@@ -730,7 +730,7 @@ def dataset_comparison():
                                         facecolor=BLUE, edgecolor="none"))
             ax.text(x_img + w + 0.08, r, f"{images:,}", va="center", fontsize=9.5, color=INK)
         if gate is None:
-            ax.text(x_gate, r, "not run" if images is None or "PHI" not in name else "not run (224 px crops)",
+            ax.text(x_gate, r, "not run",
                     va="center", fontsize=9, color=MUTED, style="italic")
         else:
             ax.add_patch(FancyBboxPatch((x_gate, r - 0.17), w_gate, 0.34, boxstyle="round,pad=0,rounding_size=0.04",
@@ -749,13 +749,267 @@ def dataset_comparison():
     fig.text(0.01, 1 - 0.95 / fig.get_figheight(),
              "Ordered by fit to the concept (D14). Image bars capped at 40,000. Low gate rates on METU and SDNET "
              "come from smooth concrete read as blur (open issue D12), not from bad photos. PHI-Net is post-earthquake "
-             "damage, research use only. Sources: docs/data_map.md, sections 0 and 6.", fontsize=9.5, color=INK_2)
+             "damage, research use only;\nits images are 224 px crops. Sources: docs/data_map.md, sections 0 and 6.",
+             fontsize=9.5, color=INK_2, va="top")
     fig.subplots_adjust(left=0.01, right=0.99, top=1 - 1.5 / fig.get_figheight(), bottom=0.02)
+    return fig
+
+
+# Pipeline v3 as a one-page explainer (same content as 01_pipeline.png; spec/features/pipeline.md).
+# Core flow panels follow the flow of information: element (O) -> crack (P) -> building (S).
+# Each box: (phase, kind, title, body, status); None leaves the row empty.
+INFO_PANELS = [
+    ("1", "ELEMENT", "O", "mid-range: one element", [
+        ("1 CAPTURE", "human", "Element photo", "whole element + scale card\nthe resident is never asked", "spec"),
+        ("2 CHECK", "rule", "Scale and angle", "card visible, phone parallel\nno → Retake", "spec"),
+        ("3 PERCEIVE", "learned", "Material + element", "concrete or not · column, beam,\nslab, wall (PHI-Net t6) + confidence", "spec"),
+        ("4 DECIDE", "rule", "Element rules", "not concrete or unsure → Expert\ncolumn → +1 level", "code"),
+        None]),
+    ("2", "CRACK", "P", "close-up: the crack", [
+        ("1 CAPTURE", "human", "Crack close-up", "scale card + 2 marker stickers\nburst, flash on and off", "spec"),
+        ("2 CHECK", "rule", "Photo checks", "sharp, lit, ≥ 3 px across the crack\nno → Retake", "partly"),
+        ("3 PERCEIVE", "learned", "Crack reading", "width in mm ± 1 px, pattern\n(PHI-Net t3, t8) + confidence", "spec"),
+        ("4 DECIDE", "rule", "Crack level + growth", "matrix v2: level, reason,\nnext step; growth > uncertainty", "partly"),
+        ("5 ACT", "human", "Resident", "level, reason, recheck date\nnever 'safe', never a clearance", "partly")]),
+    ("3", "BUILDING", "S", "from far: the building", [
+        ("1 CAPTURE", "human", "Building case", "questionnaire + facade photo\nage, floors added, changes", "spec"),
+        ("2 CHECK", "rule", "Completeness", "every answer known or 'unknown'\nunknown counts as a risk flag", "spec"),
+        ("3 PERCEIVE", "learned", "Building reading", "now: the answers\nlater: facade model (PHI-Net t5)", "spec"),
+        ("4 DECIDE", "rule", "Building risk score", "priority P1 · P2 · P3\nwith its reasons", "spec"),
+        ("5 ACT", "human", "Engineer", "ranked list + dossier; confirms\nevery High and every referral", "spec")]),
+]
+INFO_OVERVIEW = [("human", "Photos + answers", "people capture"), ("rule", "Written checks", "fail → Retake"),
+                 ("learned", "Learned models", "each with a confidence"), ("rule", "Written rules", "level + reason"),
+                 ("human", "People act", "resident, engineer")]
+INFO_COMPONENTS = [
+    ("card", "Scale card", "A printed card with mm marks in every close-up. It turns pixels\ninto millimetres; a coin is "
+     "only the backup."),
+    ("gate", "Quality gate", "Written checks: sharp, lit, card visible, at least 3 px across\nthe crack [46]. A failed "
+     "check means Retake, never a guess."),
+    ("bars", "Learned models with a confidence", "Material, element, crack pixels, pattern. Each reports how\nsure it "
+     "is; unsure means Expert needed."),
+    ("grid", "Risk matrix v2 (written rules)", "7 concrete patterns x 4 width bands; a column adds a level;\nwarning "
+     "signs raise it. Illustrative until calibrated."),
+    ("person", "Engineer in the loop", "Confirms every High and every referral; corrections become\nlabels that "
+     "retrain the models."),
+]
+INFO_CARDS = [
+    (BLUE, "Monitoring loop", "On the recheck date (Low: 6 months,\nMedium: 1 month) the same crack and\nstickers are "
+     "photographed again,\nwith the last photo as an overlay.\nGrowth beyond the uncertainty\nraises the level."),
+    (VIOLET, "Learning loop", "Engineer corrections and on-site\nratings become labels. Models are\nretrained in "
+     "batches and checked on\nheld-out photos before use. Rules\nchange only by a reviewed decision.\n"
+     "Human in the loop, not RL."),
+    (TREE_NAVY, "Building risk score", "Worst crack: High → P1,\nMedium or Expert → P2, else P3.\n+1 tier with ≥ 2 "
+     "risk flags (older\nthan 50 years, floors added, changes,\nopen ground floor; unknown counts).\n+1 tier if Medium+ "
+     "in ≥ 2 elements."),
+    (AQUA, "Built today (27 Oct)", "In code: element rules, matrix v2,\nthe five outputs.\nPartly: photo checks "
+     "(sharpness,\nbrightness), crack level (no growth\ncheck yet).\nThe rest: specified, not coded."),
+]
+
+
+def _icon(ax, kind, x, y, colour):
+    """Small drawn icon in a 5 x 5 tile whose top-left corner is (x, y) (axis y grows upwards)."""
+    ax.add_patch(FancyBboxPatch((x, y - 5), 5, 5, boxstyle="round,pad=0,rounding_size=0.8", facecolor=colour,
+                                edgecolor="none", alpha=0.14))
+    cx, cy = x + 2.5, y - 2.5
+    if kind == "card":
+        ax.add_patch(FancyBboxPatch((cx - 1.8, cy - 1.0), 3.6, 2.0, boxstyle="round,pad=0,rounding_size=0.2",
+                                    facecolor="white", edgecolor=colour, lw=1.6))
+        for i in range(7):
+            ax.plot([cx - 1.5 + i * 0.5] * 2, [cy + 1.0, cy + (0.3 if i % 2 else 0.0)], color=colour, lw=1.1)
+    elif kind == "gate":
+        ax.plot([cx - 1.4, cx - 0.4, cx + 1.6], [cy, cy - 1.1, cy + 1.3], color=colour, lw=3, solid_capstyle="round")
+    elif kind == "bars":
+        for i, hgt in enumerate((1.2, 2.6, 1.8)):
+            ax.add_patch(FancyBboxPatch((cx - 1.6 + i * 1.2, cy - 1.4), 0.8, hgt, boxstyle="round,pad=0,rounding_size=0.15",
+                                        facecolor=colour, edgecolor="none"))
+    elif kind == "grid":
+        for i in range(3):
+            for j in range(3):
+                ax.add_patch(FancyBboxPatch((cx - 1.6 + i * 1.1, cy - 1.6 + j * 1.1), 0.9, 0.9,
+                                            boxstyle="round,pad=0,rounding_size=0.1", facecolor=colour,
+                                            edgecolor="none", alpha=0.35 + 0.2 * (i + j) / 2))
+    elif kind == "person":
+        ax.add_patch(plt.Circle((cx, cy + 0.8), 0.75, color=colour))
+        ax.add_patch(matplotlib.patches.Wedge((cx, cy - 1.5), 1.7, 0, 180, color=colour))
+
+
+def pipeline_infographic():
+    """Pipeline v3 as a one-page explainer: core flow, key components, decision rules, loops, in short."""
+    H = 152
+    fig = plt.figure(figsize=(15, 22.8))
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, H)
+    ax.set_axis_off()
+    kinds = {"learned": (VIOLET, "#ecebfb"), "rule": (AQUA, "#e3f5ee"), "human": (MUTED, "#f0efec")}
+
+    def box(x, top, w, h, fill, edge="none", lw=1.4, ls="-", r=1.0, z=1):
+        ax.add_patch(FancyBboxPatch((x, H - top - h), w, h, boxstyle=f"round,pad=0,rounding_size={r}",
+                                    facecolor=fill, edgecolor=edge, lw=lw, ls=ls, zorder=z))
+
+    def text(x, top, s, **kw):
+        kw.setdefault("color", INK)
+        kw.setdefault("va", "center")
+        ax.text(x, H - top, s, **kw)
+
+    def arrow(x0, t0, x1, t1, colour=INK_2, ls="-", lw=1.6, z=3):
+        ax.annotate("", xy=(x1, H - t1), xytext=(x0, H - t0), zorder=z,
+                    arrowprops=dict(arrowstyle="-|>", color=colour, lw=lw, ls=ls, shrinkA=0, shrinkB=0,
+                                    mutation_scale=16))
+
+    def banner(xc, top, label, w):
+        box(xc - w / 2, top - 1.6, w, 3.2, TREE_NAVY, r=1.6, z=4)
+        text(xc, top, label, ha="center", color="white", fontsize=14, weight="bold", zorder=5)
+
+    # title
+    text(50, 4.2, "Second Look: from a phone photo to a decision", ha="center", fontsize=33, weight="bold",
+         color=TREE_NAVY)
+    text(50, 8.6, "Step-by-step pipeline for cracks in reinforced concrete", ha="center", fontsize=22,
+         weight="bold", color=VIOLET)
+    text(50, 12.6, "How a crack in a building nobody inspects becomes a level, a reason and a next step.\nModels read "
+         "the photos and say how sure they are; written rules decide; any doubt goes to an engineer.",
+         ha="center", fontsize=12.5, color=INK_2, linespacing=1.5)
+
+    # 1. core flow
+    box(1.5, 17, 97, 64.5, SURFACE, edge=GRID, lw=1.2)
+    banner(50, 17, "CORE FLOW: ONE BUILDING, THREE SCALES", 44)
+    px, pw, bx_off, bw = [2.8, 27.8, 52.8], 23.4, 1.7, 20
+    rows = [29.0, 37.6, 49.4, 58.0, 66.6]  # box tops; the scene check sits between rows 2 and 3
+    bh = 7.0
+    for (num, name, code, sub, boxes), x in zip(INFO_PANELS, px):
+        box(x, 20.2, pw, 54.6, "#f4f6fa", edge="#c9d3e6", lw=1.3)
+        ax.add_patch(plt.Circle((x + 3.2, H - 23.4), 1.8, color=TREE_NAVY, zorder=3))
+        text(x + 3.2, 23.4, num, ha="center", color=TREE_YELLOW, fontsize=17, weight="bold", zorder=4)
+        text(x + 5.8, 22.7, f"{name}  ({code})", fontsize=15, weight="bold", color=TREE_NAVY)
+        text(x + 5.8, 25.2, sub, fontsize=10.5, color=INK_2)
+        bx = x + bx_off
+        for k, (b, top) in enumerate(zip(boxes, rows)):
+            if b is None:
+                box(bx, top, bw, bh, "none", edge=GRID, lw=1.2, ls="--")
+                text(bx + bw / 2, top + bh / 2, "5 ACT: through the crack result\n(material and element hand over)",
+                     ha="center", fontsize=9, color=MUTED, linespacing=1.3)
+                continue
+            phase, kind, title, body, status = b
+            edge, fill = kinds[kind]
+            box(bx, top, bw, bh, fill, edge=edge, lw=1.5, z=2)
+            text(bx + 0.9, top + 1.25, phase, fontsize=7.8, color=edge, weight="bold", zorder=3)
+            text(bx + bw / 2, top + 3.0, title, ha="center", fontsize=11.5, weight="bold", zorder=3)
+            text(bx + bw / 2, top + 5.3, body, ha="center", fontsize=8.9, color=INK_2, linespacing=1.25, zorder=3)
+            label, chip_fill, chip_edge, chip_ink = PIPE_STATUS[status]
+            cw = 0.36 * len(label) + 1.4
+            box(bx + bw - cw - 0.6, top + 0.45, cw, 1.6, chip_fill, edge=chip_edge, lw=1, r=0.8, z=3)
+            text(bx + bw - cw / 2 - 0.6, top + 1.25, label, ha="center", fontsize=7.4, color=chip_ink,
+                 weight="bold", zorder=4)
+            if k < 4 and boxes[k + 1] is not None:
+                arrow(bx + bw / 2, top + bh, bx + bw / 2, rows[k + 1])
+    # scene check band across the three panels
+    box(px[0] + 0.8, 45.4, px[2] + pw - px[0] - 1.6, 3.1, kinds["learned"][1], edge=VIOLET, lw=1.4, r=1.5, z=4)
+    text(50 - 11.3, 46.95, "SCENE CHECK (PHI-Net task 1): is this photo O, P or S?   now the guided capture sets "
+         "it · later a scene model", ha="center", fontsize=10, weight="bold", color=INK, zorder=5)
+    # between panels at the Decide row
+    mid = rows[3] + bh / 2
+    for i, label in enumerate(("material\n+ element", "levels\n+ growth")):
+        x_from, x_to = px[i] + bx_off + bw, px[i + 1] + bx_off
+        arrow(x_from, mid, x_to, mid, colour=TREE_NAVY, lw=2.2, z=5)
+        text((x_from + x_to) / 2, mid - 2.6, label, ha="center", fontsize=7.8, color=TREE_NAVY, weight="bold",
+             linespacing=1.15, zorder=5)
+    # monitoring loop inside the crack panel: resident -> crack close-up on the recheck date
+    lx = px[1] + bx_off + bw + 0.75
+    ax.plot([px[1] + bx_off + bw, lx, lx], [H - rows[4] - bh / 2, H - rows[4] - bh / 2, H - rows[0] - bh / 2],
+            color=BLUE, lw=1.8, ls="--", zorder=4)
+    arrow(lx, rows[0] + bh / 2, px[1] + bx_off + bw, rows[0] + bh / 2, colour=BLUE, ls="--", lw=1.8, z=4)
+    text(lx + 0.3, rows[1] + 3.5, "recheck date", rotation=90, fontsize=7.8, color=BLUE, weight="bold", ha="left",
+         va="center")
+    # simplified overview
+    ox, ow = 78.6, 18.6
+    box(ox, 20.2, ow, 54.6, "white", edge=MUTED, lw=1.3, ls="--")
+    text(ox + ow / 2, 23.9, "SIMPLIFIED\nOVERVIEW", ha="center", fontsize=13, weight="bold", color=TREE_NAVY,
+         linespacing=1.15)
+    for k, ((kind, title, body), top) in enumerate(zip(INFO_OVERVIEW, rows)):
+        edge, fill = kinds[kind]
+        box(ox + 1.6, top, ow - 3.2, bh, fill, edge=edge, lw=1.5)
+        text(ox + ow / 2, top + 2.6, title, ha="center", fontsize=11.5, weight="bold")
+        text(ox + ow / 2, top + 4.8, body, ha="center", fontsize=9.3, color=INK_2)
+        if k < 4:
+            arrow(ox + ow / 2, top + bh, ox + ow / 2, rows[k + 1])
+    for x, kind, label in ((4.0, "human", "People and their inputs"), (23.5, "rule", "Written rule, auditable"),
+                           (42.5, "learned", "Learned model (reports a confidence)")):
+        box(x, 76.9, 1.6, 1.4, kinds[kind][1], edge=kinds[kind][0], lw=1.3, r=0.3)
+        text(x + 2.2, 77.6, label, fontsize=9.5, color=INK_2)
+    text(97, 77.6, "Chips: in code · partly in code · specified (designed, not coded yet)", fontsize=9.5,
+         color=INK_2, ha="right")
+
+    # 2. key components and the decision rules
+    box(1.5, 84, 47.5, 44.5, SURFACE, edge=GRID, lw=1.2)
+    banner(19, 84, "KEY COMPONENTS EXPLAINED", 31)
+    colours = [TREE_NAVY, AQUA, VIOLET, BLUE, TREE_NAVY]
+    for k, ((icon, title, body), colour) in enumerate(zip(INFO_COMPONENTS, colours)):
+        top = 88.5 + k * 7.9
+        _icon(ax, icon, 3.5, H - top, colour)
+        text(10.2, top + 1.0, title, fontsize=12, weight="bold", color=colour)
+        text(10.2, top + 3.6, body, fontsize=9.4, color=INK_2, linespacing=1.3)
+        if k < 4:
+            ax.plot([3.5, 47.5], [H - top - 6.6] * 2, color=GRID, lw=0.8)
+
+    box(51, 84, 47.5, 44.5, SURFACE, edge=GRID, lw=1.2)
+    banner(74.75, 84, "DECISION RULES (INSIDE VIEW)", 33)
+    text(74.75, 88.0, "Checked in this order; the first 'no' stops the photo there.", ha="center", fontsize=9.8,
+         color=INK_2)
+    steps = [("Is the photo usable?", "sharp, lit, card visible, ≥ 3 px", "Retake"),
+             ("Reinforced concrete, model sure?", "material + element confidence", "Expert needed"),
+             ("Crack and pattern read with confidence?", "segmentation + pattern", "Expert needed")]
+    for k, (q, sub, out) in enumerate(steps):
+        top = 90.3 + k * 6.6
+        box(53, top, 30, 5.0, "white", edge=AQUA, lw=1.5)
+        text(68, top + 1.8, q, ha="center", fontsize=10.3, weight="bold")
+        text(68, top + 3.6, sub, ha="center", fontsize=8.8, color=INK_2)
+        arrow(83, top + 2.5, 87.2, top + 2.5)
+        text(85.1, top + 1.5, "no", ha="center", fontsize=8.5, color=INK_2)
+        box(87.4, top + 0.9, 9.6, 3.2, LEVEL[out], r=1.0)
+        text(92.2, top + 2.5, out, ha="center", fontsize=9.2, weight="bold", color=ON_FILL.get(out, "white"))
+        arrow(68, top + 5.0, 68, top + 6.6)
+        text(68.6, top + 5.8, "yes", fontsize=8.5, color=INK_2)
+    top = 110.1
+    box(53, top, 30, 6.4, "white", edge=AQUA, lw=1.5)
+    text(68, top + 1.7, "Risk matrix v2 (written rules)", ha="center", fontsize=10.3, weight="bold")
+    text(68, top + 4.2, "pattern x width band (upper end of width ± uncertainty)\na column +1 level · warning signs "
+         "raise it", ha="center", fontsize=8.6, color=INK_2, linespacing=1.25)
+    for k, out in enumerate(("Low", "Medium", "High")):
+        t = top - 0.3 + k * 2.4
+        arrow(83, top + 3.2, 87.2, t + 1.1, lw=1.1)
+        box(87.4, t, 9.6, 2.2, LEVEL[out], r=0.9)
+        text(92.2, t + 1.1, out, ha="center", fontsize=9.2, weight="bold", color=ON_FILL.get(out, "white"))
+    box(53, 118.6, 44, 8.4, "#f4f6fa", edge="#c9d3e6", lw=1.2)
+    text(75, 120.6, "Engineer confirms every High and every Expert needed", ha="center", fontsize=10.5,
+         weight="bold", color=TREE_NAVY)
+    text(75, 124.0, "Every result carries a one-sentence reason and a next step\n(Low: recheck in 6 months · Medium: "
+         "advice, recheck in 1 month). Never 'safe'.", ha="center", fontsize=9.2, color=INK_2, linespacing=1.3)
+
+    # 3. loops and the building score
+    banner(50, 131.5, "TWO LOOPS, ONE BUILDING SCORE, AND WHAT IS BUILT", 56)
+    for k, (colour, title, body) in enumerate(INFO_CARDS):
+        x = 1.5 + k * 24.4
+        box(x, 133.6, 23.2, 12.2, "white", edge=colour, lw=1.6)
+        box(x, 133.6, 23.2, 2.6, colour, r=1.0)
+        text(x + 11.6, 134.9, title, ha="center", fontsize=11.5, weight="bold", color="white")
+        text(x + 1.2, 140.6, body, fontsize=8.9, color=INK_2, linespacing=1.3)
+
+    # in short
+    box(1.5, 146.6, 97, 4.0, "#f4f6fa", edge="#c9d3e6", lw=1.2)
+    box(1.5, 146.6, 14, 4.0, TREE_NAVY, r=1.0)
+    text(8.5, 148.6, "IN SHORT", ha="center", fontsize=13.5, weight="bold", color="white")
+    text(17.5, 148.6, "Phone photos are checked, read by models that say how sure they are, and judged by written "
+         "rules.\nAny doubt goes to an engineer; growth is tracked over time; Second Look never says 'safe'.",
+         fontsize=11, color=INK, linespacing=1.4)
+    text(98.5, 151.5, "Source: spec/features/pipeline.md (v3, 27 Oct 2026). Thresholds illustrative until calibrated.",
+         ha="right", fontsize=8, color=MUTED)
     return fig
 
 
 FIGURES = {
     "01_pipeline.png": pipeline,
+    "01b_pipeline_infographic.png": pipeline_infographic,
     "02_decision_flow.png": decision_flow,
     "03_risk_matrix.png": risk_matrix,
     "04_segmentation_tree.png": segmentation_tree,

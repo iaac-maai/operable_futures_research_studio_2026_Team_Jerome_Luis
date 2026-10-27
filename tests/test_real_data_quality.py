@@ -94,3 +94,18 @@ def test_main_runs_both_and_skips_empty_roots(tmp_path):
                  "--per-group", "2", "--out", str(out), "--figure", str(fig)])
     assert len(rows) == 6 * 2 + 2 * 2
     assert out.exists() and fig.exists()
+
+
+def test_find_images_phinet_prepared_layout(tmp_path):
+    """PHI-Net as written by phinet_prepare.py (synthetic arrays, not real data)."""
+    for task, readme, y in [("task8_damage_type", "\t0: Combined damage (COMB)\n\t2: Undamaged state (UD)\n", [0, 2, 2]),
+                            ("task6_component_type", "\t0: Beam (B)\n", [0, 0])]:
+        (tmp_path / task).mkdir()
+        (tmp_path / task / "README.txt").write_text(readme)
+        np.save(tmp_path / task / "X_test.npy", rng.integers(60, 200, (len(y), 32, 32, 3), dtype=np.uint8))
+        np.save(tmp_path / task / "y_test.npy", np.array(y))
+    groups = {k: len(v) for k, v in find_images(tmp_path).items()}
+    assert groups == {("PHI-Net t8 damage type", "damaged"): 1, ("PHI-Net t8 damage type", "undamaged"): 2,
+                      ("PHI-Net t6 components", "unlabelled"): 2}
+    rows = run([tmp_path], per_group=5)
+    assert len(rows) == 5 and all("X_test.npy#" in r["file"] for r in rows)

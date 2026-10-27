@@ -36,3 +36,20 @@ def test_prepare_writes_uint8_arrays_and_labels(tmp_path):
     assert np.load(out / "y_train.npy").tolist() == [0, 1, 0, 1, 1, 0]
     assert rows[0]["classes"] == {"Alpha": 3, "Beta": 3}
     assert (tmp_path / "out" / "samples" / "task9_test_task_train.png").exists()
+
+
+def test_prepare_joins_a_task_split_over_two_zips(tmp_path):
+    rgb = np.random.default_rng(2).integers(0, 256, (4, 8, 8, 3), dtype=np.uint8)
+    zips = tmp_path / "zips"
+    zips.mkdir()
+    np.save(tmp_path / "x.npy", rgb[..., ::-1].astype(np.float32) - MEAN_BGR)
+    np.save(tmp_path / "y.npy", np.eye(3)[[2, 0, 1, 2]])
+    with zipfile.ZipFile(zips / "task1_scene_1.zip", "w") as z:  # labels and README in part 1
+        z.write(tmp_path / "y.npy", "task1_y_train.npy")
+        z.writestr("README.txt", "\t0: Object level (O)\n\t1: Pixel level (P)\n\t2: Structural level (S)\n")
+    with zipfile.ZipFile(zips / "task1_scene_2.zip", "w") as z:  # images in part 2
+        z.write(tmp_path / "x.npy", "task1_X_train.npy")
+    rows = prepare(zips, tmp_path / "out")
+    assert [r["zip"] for r in rows] == ["task1_scene"]
+    assert rows[0]["classes"] == {"Object level": 1, "Pixel level": 1, "Structural level": 2}
+    assert np.array_equal(np.load(tmp_path / "out" / "task1_scene" / "X_train.npy"), rgb)

@@ -34,21 +34,25 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 | # | Dataset | Fit to our concept | Accepted by the quality gate |
 |---|---|---|---|
 | 1 | Haiti 2010 (engineer survey) | high | 95% |
-| 2 | Darbhanga (brick masonry) | medium | 76% |
+| 2 | Darbhanga (brick masonry) | medium | 75% |
 | 3 | Strathclyde (brick facades) | medium | 100% |
-| 4 | METU (building concrete) | low | 20% |
-| 5 | SDNET2018 wall | low | 16% |
-| 6 | crack-seg (roads, walls) | low | 97% |
-| 7 | SDNET2018 pavement | off-concept | 87% |
-| 8 | SDNET2018 bridge deck | off-concept | 19% |
+| 4 | PHI-Net task 8, damage type | medium | 78% (damaged 85%, undamaged 71%) |
+| 5 | PHI-Net task 3, spalling | medium | 62% (spalling 66%, no spalling 57%) |
+| 6 | PHI-Net task 6, components | medium | 79% |
+| 7 | METU (building concrete) | low | 21% |
+| 8 | SDNET2018 wall | low | 16% |
+| 9 | crack-seg (roads, walls) | low | 97% |
+| 10 | SDNET2018 pavement | off-concept | 87% |
+| 11 | SDNET2018 bridge deck | off-concept | 19% |
 
-"Accepted" counts cracked and uncracked images together (up to 2,000 per group, last run on 25 Oct 2026); the split is in `docs/experiments/2026-10-25_quality_gate_first_test.md`. A low share means the gate struggles with that surface (smooth plaster and concrete, D12), not that the data is bad.
+"Accepted" counts cracked and uncracked images together (up to 2,000 per group, last run on 27 Oct 2026); the split is in `docs/experiments/2026-10-25_quality_gate_first_test.md`. A low share means the gate struggles with that surface (smooth plaster and concrete, D12), not that the data is bad.
+PHI-Net images are 224 x 224 px crops, measured as they are (the gate scales large photos down to 512 px and never scales up). About a quarter of them fall under the blur limit. Why is not checked yet: look at the rejected ones before training.
 
 ### Every dataset we hold, side by side (27 Oct 2026)
 
 ![Every dataset we hold, compared](../figures/10_dataset_comparison.png)
 
-One row per dataset (one per PHI-Net task), in order of fit: images on our disk, share accepted by the quality gate, the labels it gives, what it can train in our pipeline, and the licence. PHI-Net images were not put through the gate: they are 224 x 224 px crops, smaller than the gate's 512 px working size. Details of PHI-Net on our disk are in section 6.
+One row per dataset (one per PHI-Net task), in order of fit: images on our disk, share accepted by the quality gate, the labels it gives, what it can train in our pipeline, and the licence. PHI-Net went through the gate for the three tasks we plan to train on (3, 6, 8); the other tasks were not run. Details of PHI-Net on our disk are in section 6.
 
 ## 0b. What we can train now, and what we cannot (25 Oct 2026)
 
@@ -155,7 +159,7 @@ What is downloaded on Jerome's PC as of 25 Oct 2026. Anyone else downloads from 
 | `strathclyde-brickwork/` | Brickwork cracks [44] | 19 MB | 700 | MD5 matches Zenodo |
 | `crackseg9k/` | CrackSeg9k Vol1 [25] | 1.5 GB | not extracted | MD5 matches Dataverse |
 | `haiti2010/` | Haiti Earthquake Database [41] | 12 GB extracted (broken zip deleted) | 4,450 photos (1,041 linked to a building rating); spreadsheet of 183 buildings | Partial zip, every recovered file CRC-checked |
-| `phinet/` | PHI-Net, 8 tasks [53][54][55] | see below | see below | Zip sizes match the server |
+| `phinet/` | PHI-Net, 8 tasks [53][54][55] | 19 GB (zips 9.0 GB + uint8 arrays) | 73,530 image-label pairs over 8 tasks; PHI-Net reports 36,413 images in all [26], so tasks likely reuse images (assumption, not checked) | Zip sizes match the server; every zip passed its CRC check |
 | `nepal2015/` | Nepal 2015 surveys [42] | - | not downloaded | Nepal folder to download in a browser |
 
 Run the real-data test on all of them: `py src/experiments/real_data_quality.py data/raw/crack-seg data/raw/darbhanga data/raw/metu data/raw/sdnet2018 data/raw/strathclyde-brickwork --per-group 2000`.
@@ -170,11 +174,11 @@ Run the real-data test on all of them: `py src/experiments/real_data_quality.py 
 
 | Task | Classes (code: name) | Train | Test | Train per class | Use for us |
 |---|---|---|---|---|---|
-| 1 scene level (2 parts) | pixel / object / structural | downloading | | | Scene check (S, O, P) |
-| 2 damage state (2 parts) | damaged / undamaged | downloading | | | Crack or no crack |
+| 1 scene level (2 zips) | 0 object, 1 pixel, 2 structural | 24,309 | 2,997 | 8,111 / 7,690 / 8,508 | Scene check (S, O, P) |
+| 2 damage state (2 zips) | 0 damaged, 1 undamaged | 11,811 | 1,460 | 6,282 / 5,529 | Crack or no crack |
 | 3 spalling | 0 non-spalling, 1 spalling | 6,898 | 837 | 4,294 / 2,604 | Pattern: spalling |
 | 4 material | 0 other materials, 1 steel | 8,312 | 979 | 6,506 / 1,806 | Not the material model: steel vs other, not concrete vs brick |
-| 5 collapse mode | non-collapse / partial / global | downloading | | | Building reading (S) |
+| 5 collapse mode | 0 global, 1 non-collapse, 2 partial | 1,226 | 146 | 525 / 322 / 379 | Building reading (S) |
 | 6 component | 0 beam, 1 column, 2 others, 3 wall | 4,755 | 579 | 511 / 1,618 / 358 / 2,268 | Element model; no slab class |
 | 7 damage level | 0 heavy, 1 minor, 2 moderate, 3 undamaged | 4,138 | 498 | 919 / 869 / 799 / 1,551 | Second opinion only |
 | 8 damage type | 0 combined, 1 flexural, 2 undamaged, 3 shear | 4,093 | 492 | 1,193 / 476 / 1,598 / 826 | Pattern model |

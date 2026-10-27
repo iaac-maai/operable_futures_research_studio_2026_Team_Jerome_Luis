@@ -63,36 +63,43 @@ def prepare(zips: Path, out: Path) -> list[dict]:
     rows = []
     (out / "samples").mkdir(parents=True, exist_ok=True)
     tmp = out / "_tmp"
+    parts = {}  # tasks 1 and 2 come in two zips (_1, _2): images in one, their labels in the other
     for zpath in sorted(zips.glob("task*.zip")):
         try:
             z = zipfile.ZipFile(zpath)
         except zipfile.BadZipFile:
             print(zpath.stem, "incomplete or broken zip, skipped", flush=True)
             continue
-        names = z.namelist()
-        task = re.match(r"(task\d+)", zpath.stem).group(1)
-        dest = out / zpath.stem
+        parts.setdefault(re.sub(r"_\d+$", "", zpath.stem), []).append(z)
+    for stem, zs in parts.items():
+        where = {n: z for z in zs for n in z.namelist()}
+        task = re.match(r"(task\d+)", stem).group(1)
+        dest = out / stem
         dest.mkdir(parents=True, exist_ok=True)
-        readme = next((n for n in names if n.lower().endswith("readme.txt")), None)
-        text = z.read(readme).decode("utf-8", "replace") if readme else ""
+        readme = next((n for n in where if n.lower().endswith("readme.txt")), None)
+        text = where[readme].read(readme).decode("utf-8", "replace") if readme else ""
         labels = class_names(text)
-        for n in names:
+        for n in where:
             if n.lower().endswith(("readme.txt", "license.txt")):
-                (dest / Path(n).name).write_bytes(z.read(n))
-        for member in sorted(n for n in names if re.search(r"_X_\w+\.npy$", n)):
+                (dest / Path(n).name).write_bytes(where[n].read(n))
+        for member in sorted(n for n in where if re.search(r"_X_\w+\.npy$", n)):
             split = re.search(r"_X_(\w+)\.npy$", member).group(1)
-            x_out = dest / f"X_{split}.npy"
-            shape = np.load(x_out, mmap_mode="r").shape if x_out.exists() else convert_member(z, member, tmp, x_out)
             y_member = member.replace("_X_", "_y_")
-            y = np.load(z.open(y_member), allow_pickle=False)
+            if y_member not in where:
+                print(stem, split, "labels missing (other part not downloaded?), skipped", flush=True)
+                continue
+            x_out = dest / f"X_{split}.npy"
+            shape = np.load(x_out, mmap_mode="r").shape if x_out.exists() else \
+                convert_member(where[member], member, tmp, x_out)
+            y = np.load(where[y_member].open(y_member), allow_pickle=False)
             y = y.argmax(axis=1) if y.ndim == 2 else y.ravel()
             np.save(dest / f"y_{split}.npy", y.astype(np.int64))
             x = np.load(x_out, mmap_mode="r")
-            sample_sheet(x, y, labels, out / "samples" / f"{zpath.stem}_{split}.png")
+            sample_sheet(x, y, labels, out / "samples" / f"{stem}_{split}.png")
             counts = {labels.get(int(k), str(k)): int((y == k).sum()) for k in sorted(set(y.tolist()))}
-            rows.append({"zip": zpath.stem, "task": task, "split": split, "n": int(shape[0]),
+            rows.append({"zip": stem, "task": task, "split": split, "n": int(shape[0]),
                          "size": f"{shape[1]}x{shape[2]}", "classes": counts})
-            print(zpath.stem, split, shape, counts, flush=True)
+            print(stem, split, shape, counts, flush=True)
     if tmp.exists():
         for p in sorted(tmp.rglob("*"), reverse=True):
             p.rmdir() if p.is_dir() else p.unlink()

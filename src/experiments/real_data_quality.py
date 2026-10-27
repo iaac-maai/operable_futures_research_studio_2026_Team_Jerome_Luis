@@ -7,6 +7,8 @@ Recognised layouts (a root with no images is skipped):
 - METU: Positive/*.jpg (crack) and Negative/*.jpg (no crack)
 - Haiti 2010 database: Photos/<building>/...; each photo takes its building's engineer rating from the
   database CSV (worse of RC and masonry-wall damage); photos outside a building folder are "not linked"
+- PHI-Net as written by phinet_prepare.py: <task>/X_<split>.npy (uint8 RGB) with y_<split>.npy and README.txt;
+  tasks 3 (spalling), 6 (components, no damage label) and 8 (damaged / undamaged) are checked
 - YOLO style (Ultralytics crack-seg, Darbhanga): an "images" folder with a sibling "labels" folder.
   A non-empty label file means crack, a missing or empty one no crack; no labels folder means unlabelled.
 Writes per-image results to data/processed/ (ignored) and a histogram to figures/.
@@ -17,11 +19,13 @@ import csv
 import random
 import re
 import sys
+import numpy as np
 from collections import defaultdict
 from pathlib import Path
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from experiments.phinet_prepare import class_names
 from quality.gate import MAX_BRIGHTNESS, MIN_BRIGHTNESS, MIN_SHARPNESS, check, to_grey
 
 SDNET_SURFACES = {"D": "bridge deck", "W": "wall", "P": "pavement"}
@@ -32,7 +36,8 @@ DATASET_NAMES = {"crack-seg": "crack-seg (roads, walls)", "darbhanga": "Darbhang
 # Panel order: fit to the concept, best first (docs/data_map.md, section 0).
 FIT_ORDER = [("Haiti 2010 (engineer survey)", "high"), ("Nepal 2015 (engineer survey)", "high"),
              ("Darbhanga (brick masonry)", "medium"), ("Strathclyde (brick facades)", "medium"),
-             ("METU (building concrete)", "low"), ("SDNET2018 wall", "low"), ("crack-seg (roads, walls)", "low"),
+             ("PHI-Net t8 damage type", "medium"), ("PHI-Net t3 spalling", "medium"),
+             ("PHI-Net t6 components", "medium"), ("METU (building concrete)", "low"), ("SDNET2018 wall", "low"), ("crack-seg (roads, walls)", "low"),
              ("SDNET2018 pavement", "off-concept"), ("SDNET2018 bridge deck", "off-concept")]
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -71,8 +76,41 @@ def haiti_ratings(root: Path) -> dict[str, str]:
     return ratings
 
 
+# PHI-Net task folder -> (group, label for each class name; None means no damage label)
+PHINET = {"task3_spalling_condition": ("PHI-Net t3 spalling", {"Spalling": "spalling", "Non-spalling": "no spalling"}),
+          "task6_component_type": ("PHI-Net t6 components", None),
+          "task8_damage_type": ("PHI-Net t8 damage type", {"Undamaged state": "undamaged"})}
+
+
+def phinet_images(root: Path) -> dict[tuple[str, str], list[tuple[Path, int]]]:
+    """(npy file, row) per image of the PHI-Net tasks in PHINET; damage types other than undamaged are 'damaged'."""
+    groups = defaultdict(list)
+    for task, (group, labels) in PHINET.items():
+        names = class_names((root / task / "README.txt").read_text(encoding="utf-8", errors="replace"))             if (root / task / "README.txt").is_file() else {}
+        for x in sorted((root / task).glob("X_*.npy")):
+            y = np.load(x.with_name("y_" + x.name[2:]), allow_pickle=False)
+            for i, c in enumerate(y.tolist()):
+                label = "unlabelled" if labels is None else labels.get(names.get(c, ""), "damaged")
+                groups[(group, label)].append((x, i))
+    return dict(groups)
+
+
+def load_grey(item: Path | tuple[Path, int]) -> np.ndarray:
+    """Grey image from a file, or from row i of a uint8 RGB npy array (PIL's L weights)."""
+    if isinstance(item, Path):
+        return to_grey(item)
+    rgb = np.load(item[0], mmap_mode="r", allow_pickle=False)[item[1]].astype(np.float64)
+    return rgb @ np.array([0.299, 0.587, 0.114])
+
+
+def item_name(item: Path | tuple[Path, int], root: Path) -> str:
+    return str(item.relative_to(root)) if isinstance(item, Path) else f"{item[0].relative_to(root)}#{item[1]}"
+
+
 def find_images(root: Path) -> dict[tuple[str, str], list[Path]]:
     """Group images by (dataset group, crack / no crack / unlabelled) from the folder layout."""
+    if any((root / task).is_dir() for task in PHINET):
+        return phinet_images(root)
     groups = defaultdict(list)
     ratings = haiti_ratings(root) if (root / HAITI_CSV).is_file() else None
     for path in root.rglob("*.jp*g"):
@@ -98,9 +136,9 @@ def run(roots: list[Path], per_group: int, seed: int = 0) -> list[dict]:
     for root in roots:
         for (group, label), paths in sorted(find_images(root).items()):
             for path in rng.sample(sorted(paths), min(per_group, len(paths))):
-                row = {"file": str(path.relative_to(root)), "group": group, "label": label}
+                row = {"file": item_name(path, root), "group": group, "label": label}
                 try:
-                    r = check(to_grey(path), scale_visible=True)  # scale check not implemented; these sets have no scale card
+                    r = check(load_grey(path), scale_visible=True)  # scale check not implemented; these sets have no scale card
                 except (OSError, ValueError):  # a broken file is a retake, not a crash
                     rows.append({**row, "sharpness": 0.0, "brightness": 0.0, "image_ok": False,
                                  "failed": "unreadable file"})
@@ -149,7 +187,9 @@ def histogram(rows: list[dict], path: Path) -> None:
     for ax, group in zip(axes.flat, groups):
         for label, colour in (("crack", BLUE), ("no crack", "#eb6834"), ("unlabelled", "#1baf7a"),
                               ("engineer: light", "#86b6ef"), ("engineer: moderate", "#3987e5"),
-                              ("engineer: severe", "#184f95"), ("not linked to a building", "#898781")):
+                              ("engineer: severe", "#184f95"), ("not linked to a building", "#898781"),
+                              ("damaged", BLUE), ("undamaged", "#eb6834"), ("spalling", BLUE),
+                              ("no spalling", "#eb6834")):
             vals = [max(r["sharpness"], 1) for r in rows if r["group"] == group and r["label"] == label]
             if vals:
                 ax.hist(vals, bins=bins, histtype="step", lw=2, color=colour, label=label)
@@ -174,7 +214,7 @@ def histogram(rows: list[dict], path: Path) -> None:
     fig.text(0.02, top + 0.02, f"Panels ordered by fit to our concept, best first (docs/data_map.md). "
              f"Images left of the red line would be asked to retake. Brightness limits "
              f"{MIN_BRIGHTNESS:g} to {MAX_BRIGHTNESS:g}.\nNot phone photos: tests the code, does not calibrate "
-             "thresholds.", fontsize=9.5, color=INK_2, va="bottom")
+             "thresholds. PHI-Net images are 224 px crops, measured as they are (never scaled up).", fontsize=9.5, color=INK_2, va="bottom")
     fig.subplots_adjust(left=0.07, right=0.98, top=top - 0.04, bottom=0.08, wspace=0.18, hspace=0.62)
     fig.savefig(path, dpi=200)
     plt.close(fig)

@@ -83,6 +83,19 @@ First run on every crack-seg image (4,029): 97% pass, 118 too bright, 14 blurred
 5. **Real field photos pass.** The Haiti photos are full-size camera photos of damaged buildings taken by engineers; 95% pass. Each photo in a building folder carries that building's engineer rating (1,041 photos; the other photos are camera dumps sorted by photographer and date, whose photo log was lost in the broken download). The gate accepts photos of lightly, moderately and severely damaged buildings at the same rate (92 to 94%), so it does not filter out the serious cases. One photo in the original archive is all zeros; the gate records it as "unreadable file" (a retake) instead of crashing. This is the first test on photos like the ones the tool will receive, and it shows the 512 px working size (D8) works on them. They are not phone photos and have no coin, so the thresholds are still not calibrated.
 6. **"Too bright" is the main failure on crack-seg** (118 of 4,029). Many images are pale concrete or pavement; the 220 limit may be too strict for light walls. To check on the pilot phone photos.
 
+## Update 27 Oct 2026: PHI-Net added
+Rerun on all seven datasets on disk, now with PHI-Net tasks 8 (damage type), 3 (spalling) and 6 (components), the three we plan to train on (`docs/data_map.md`, section 6). Up to 2,000 images per group, 33,971 images in all. Figure 8 now has 11 panels, ordered by fit. The other datasets' rates match the 25 Oct run within 1 point.
+
+| Group | Label | n | Pass rate | Median sharpness | Median brightness |
+|---|---|---|---|---|---|
+| PHI-Net t8 damage type | damaged | 2,000 | 85% | 463.9 | 127.3 |
+| PHI-Net t8 damage type | undamaged | 1,813 | 71% | 324.2 | 119.8 |
+| PHI-Net t3 spalling | spalling | 2,000 | 66% | 238.6 | 131.1 |
+| PHI-Net t3 spalling | no spalling | 2,000 | 57% | 193.4 | 135.0 |
+| PHI-Net t6 components | (no damage label) | 2,000 | 79% | 386.8 | 124.0 |
+
+7. **About a quarter of PHI-Net images fall under the blur limit**, mostly the undamaged and non-spalling ones. PHI-Net images are 224 px crops, measured as they are (the gate never scales up). Why they fail is not checked: real softness, upscaled small photos and smooth undamaged surfaces (D12) are all possible. Before training, look at the rejected images; the gate result can be a filter for the training set.
+
 ## Limits
 - None of these are phone photos with a coin, so the thresholds are not calibrated by this test (`spec/decisions.md` D7).
 - No ground truth for "usable": we only know what the gate decided, not whether a person would retake the photo. The pilot adds deliberately bad shots for that.
@@ -92,4 +105,4 @@ First run on every crack-seg image (4,029): 97% pass, 118 too bright, 14 blurred
 - Look at a sample of rejected Darbhanga and "too bright" crack-seg images.
 - Rerun with the pilot phone photos and their deliberately bad shots.
 - On the pilot photos, compare the current measure with ones less tied to texture (for example sharpness of the strongest edges only), using the deliberately blurred shots as ground truth.
-- Rerun: `py src/experiments/real_data_quality.py data/raw/crack-seg data/raw/darbhanga data/raw/sdnet2018 --per-group 2000`.
+- Rerun on everything: `py src/experiments/real_data_quality.py data/raw/haiti2010 data/raw/phinet data/raw/darbhanga data/raw/strathclyde-brickwork data/raw/metu data/raw/sdnet2018 data/raw/crack-seg --per-group 2000` (plain `py`, not `py -I`: matplotlib needs the user packages).
