@@ -760,12 +760,12 @@ def dataset_comparison():
 # Shape says what it is: pill = start, rectangle = step, diamond = check, stacked = model,
 # parallelogram = result shown to a person, striped block = the person who acts.
 FLOW_INK, FLOW_RULE, FLOW_MODEL, FLOW_TEXT, FLOW_SOFT = "#111111", "#d2d2d2", "#111111", "#2b2b2b", "#6b6b6b"
-FLOW_LANES = [  # (lane y, code, name, what, start pill)
-    (46, "S", "STRUCTURAL", "the building", "NEW\nBUILDING"),
-    (32, "O", "OBJECT", "one element", "EACH\nELEMENT"),
-    (18, "P", "PIXEL", "the crack", "EACH\nCRACK"),
+FLOW_LANES = [  # (lane y, code, name, what, start pill, who takes the photo; spec: "Users and devices")
+    (46, "S", "STRUCTURAL", "the building", "BUILDING", "field worker, first visit\n(resident answers questions)"),
+    (32, "O", "OBJECT", "one element", "ELEMENT", "field worker, first visit\nevery element with a crack"),
+    (18, "P", "PIXEL", "the crack", "CRACK", "field worker, first visit\nresident, at every recheck"),
 ]
-FLOW_COLUMNS = [(11.5, None, "START"), (26.5, "1", "CAPTURE\nPHOTOS AND ANSWERS"), (43.5, "2", "CHECK\nWRITTEN RULES"),
+FLOW_COLUMNS = [(11.5, None, "WHAT · WHO"), (26.5, "1", "CAPTURE\nPHOTOS AND ANSWERS"), (43.5, "2", "CHECK\nWRITTEN RULES"),
                 (66, "3", "PERCEIVE\nMODELS + CONFIDENCE"), (88.5, "4", "DECIDE\nWRITTEN RULES, AUDITABLE"),
                 (109.5, "5", "ACT\nPEOPLE")]
 FLOW_SEPARATORS = [17.5, 35.5, 51.5, 79.5, 98.5]
@@ -885,9 +885,11 @@ def pipeline_flow():
         else:
             label(cx, 57.2, head, size=11.5)
 
-    for r, (y, code, name, what, start) in enumerate(FLOW_LANES):
+    label(11.5, 52.4, "a resident reports\na crack: a field\nworker visits", size=10, weight="bold")
+    for r, (y, code, name, what, start, who) in enumerate(FLOW_LANES):
         label(2.6, y, f"{name} ({code})\n{what}", size=12, weight="bold", rotation=90)
         pill(11.5, y, 7.4, 3.8, start)
+        detail(11.5, y - 2.6, who)
         cap = PIPE_BOXES[(r, 0)]
         photo_box(26.5, y, 13, 5, cap[1].upper())
         status(26.5, y + 2.5, cap[3])
@@ -956,7 +958,7 @@ def pipeline_flow():
           "a reviewed decision", size=10.5, weight="bold")
     # monitoring loop: the resident's recheck date brings the same crack back
     my = 7.9
-    line([(115.6, yP - 2.5), (115.6, my), (11.5, my), (11.5, yP - 1.9)], ls="--", dot=False)
+    line([(115.6, yP - 2.5), (115.6, my), (5.6, my), (5.6, yP), (7.8, yP)], ls="--", dot=False)
     label(63.5, my - 1.8, "MONITORING LOOP: on the recheck date (Low: 6 months, Medium: 1 month) the same crack ID "
           "and stickers are photographed again, with the last photo as an overlay\ngrowth larger than the measurement "
           "uncertainty raises the crack level, and through it the building risk score", size=10.5, weight="bold")
