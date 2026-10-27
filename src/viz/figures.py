@@ -1233,14 +1233,14 @@ def pipeline_flow():
         label(cx + (size + 0.9) / 2, cy, wrap(title), colour=ink, weight="bold", size=size_text)
 
     def ipill(cx, cy, title, icon):
-        pill(cx, cy, 9.0, 3.8, "")
-        _handoff_icon(ax, icon, cx - 2.9, cy, s=2.6)
-        label(cx + 1.3, cy, title, size=9.5, weight="bold")
+        pill(cx, cy, 11.0, 4.2, "")
+        _handoff_icon(ax, icon, cx - 3.8, cy, s=2.8)
+        label(cx + 1.4, cy, title, size=15 if "\n" not in title else 12.5, weight="bold")
 
     def iterminal(cx, cy, title, icon):
-        terminal(cx, cy, 5.6, 5, "")
-        _handoff_icon(ax, icon, cx, cy + 1.0, s=2.4)
-        label(cx, cy - 1.5, title, size=8.5, weight="bold")
+        terminal(cx, cy, 7.6, 5.6, "")
+        _handoff_icon(ax, icon, cx, cy + 1.3, s=2.4)
+        label(cx, cy - 1.4, title, size=14, weight="bold")
 
     # title, section heading, colour key, columns
     label(1.5, 84.6, "Pipeline", size=40, weight="bold", ha="left")
@@ -1255,11 +1255,13 @@ def pipeline_flow():
         kx += 4.6 + 0.62 * len(name)
     for x in FLOW_SEPARATORS:
         ax.plot([x, x], [3.6, 60], color="#cfcfcf", lw=1.2, ls=(0, (5, 4)), zorder=0)
+    edges = FLOW_SEPARATORS + [120.0]  # each numbered phase sits midway between its two dotted lines
     for cx, num, head in FLOW_COLUMNS:
         if num:
-            ax.add_patch(plt.Circle((cx - 7.2, 57.2), 1.45, color=FLOW_INK, zorder=4))
-            label(cx - 7.2, 57.2, num, size=14, colour="white", weight="bold")
-            label(cx - 5.2, 57.2, head, size=11.5, ha="left")
+            mid = (edges[int(num) - 1] + edges[int(num)]) / 2
+            ax.add_patch(plt.Circle((mid, 58.2), 1.45, color=FLOW_INK, zorder=4))
+            label(mid, 58.2, num, size=14, colour="white", weight="bold")
+            label(mid, 55.6, head.replace("\n", " · "), size=10.5)
         else:
             label(cx, 57.2, head, size=15, weight="bold")
 
@@ -1269,7 +1271,7 @@ def pipeline_flow():
     ipill(11.5, ry, "CRACK\nREPORTED", "person")
     with_icon(photo_box, 26.5, ry, 13, 5, "CRACK PHOTO\n+ ANSWERS", "camera")
     status(26.5, ry + 2.5, "spec")
-    line([(16.0, ry), (20.0, ry)])
+    line([(17.0, ry), (20.0, ry)])
     diamond(43.5, ry, 4.4, 3.2, "USABLE?")
     status(43.5, ry + 3.2, "partly")
     line([(33.0, ry), (39.1, ry)])
@@ -1294,12 +1296,12 @@ def pipeline_flow():
     # V1 and V2: the field worker's first visit starts the three scales below
     for oy in (71.0, 67.7):
         line([(112.3, oy), (117.8, oy)], head=False, dot=False)
-    line([(117.8, 71.0), (117.8, 61.8), (6.2, 61.8), (6.2, 46.0), (7.0, 46.0)], lw=2.4, dot=False)
+    line([(117.8, 71.0), (117.8, 61.8), (5.2, 61.8), (5.2, 46.0), (6.0, 46.0)], lw=2.4, dot=False)
     # the same visit also photographs every cracked element and every crack
     lane_y = {code: y for y, code, *_ in FLOW_LANES}
-    ax.plot([6.2, 6.2], [46.0, lane_y["P"] + 0.9], color=FLOW_TEXT, lw=2.4, zorder=2)
-    line([(6.2, lane_y["O"]), (7.0, lane_y["O"])], lw=2.4, dot=False)
-    line([(6.2, lane_y["P"] + 0.9), (7.0, lane_y["P"] + 0.9)], lw=2.4, dot=False)
+    ax.plot([5.2, 5.2], [46.0, lane_y["P"] + 0.9], color=FLOW_TEXT, lw=2.4, zorder=2)
+    line([(5.2, lane_y["O"]), (6.0, lane_y["O"])], lw=2.4, dot=False)
+    line([(5.2, lane_y["P"] + 0.9), (6.0, lane_y["P"] + 0.9)], lw=2.4, dot=False)
     label(62.0, 60.7, "V1 OR V2: A FIELD WORKER VISITS with a reliable phone and the scale card, and photographs "
           "the building once, every cracked element and every crack  (also 1 in 10 V3 reports, as an audit)",
           size=10.5, weight="bold")
@@ -1309,7 +1311,7 @@ def pipeline_flow():
         cap = PIPE_BOXES[(r, 0)]
         with_icon(photo_box, 26.5, y, 13, 5, cap[1].upper(), {"S": "clipboard", "O": "camera", "P": "ruler"}[code])
         status(26.5, y + 2.5, cap[3])
-        line([(16.0, y), (20.0, y)])
+        line([(17.0, y), (20.0, y)])
         # check diamond and its failure branch
         question, fail = FLOW_CHECKS[code]
         diamond(43.5, y, 4.4, 3.4, question)
@@ -1346,7 +1348,7 @@ def pipeline_flow():
             status(105.0, y + 2.5, act[3])
             iterminal(115.6, y, act[1].upper(), "hardhat" if code == "S" else "person")
             line([(95.0, y), (99.5, y)])
-            line([(110.5, y), (112.8, y)], dot=False)
+            line([(110.5, y), (111.9, y)], dot=False)
 
     yS, yO, yP = (lane[0] for lane in FLOW_LANES)
     # scene check band between Check and Perceive, all scales
@@ -1361,13 +1363,13 @@ def pipeline_flow():
     label(97.3, yO + 0.2, "crack levels,\ngrowth, damage\nspread across\nelements", size=10, weight="bold", ha="left")
     # learning loop: engineer -> the learned models of phase 3
     ly = 51.6
-    line([(115.6, yS + 2.5), (115.6, ly), (62.5, ly), (62.5, yS + 4.3)], ls="--", dot=False)
+    line([(115.6, yS + 2.8), (115.6, ly), (62.5, ly), (62.5, yS + 4.3)], ls="--", dot=False)
     label(89.0, ly + 1.5, "LEARNING LOOP: engineer corrections and on-site ratings become labels and retrain the "
           "models (phase 3)\neach new version is checked on held-out photos before use; written rules change only by "
           "a reviewed decision", size=10.5, weight="bold")
     # monitoring loop: the resident's recheck date brings the same crack back
     my = 7.9
-    line([(115.6, yP - 2.5), (115.6, my), (4.4, my), (4.4, yP - 0.9), (7.0, yP - 0.9)], ls="--", dot=False)
+    line([(115.6, yP - 2.8), (115.6, my), (4.2, my), (4.2, yP - 0.9), (6.0, yP - 0.9)], ls="--", dot=False)
     label(63.5, my - 1.8, "MONITORING LOOP: on the recheck date (Category 1: 6 months, Category 2: 1 month) the same crack ID "
           "and stickers are photographed again, with the last photo as an overlay\ngrowth larger than the measurement "
           "uncertainty raises the crack level, and through it the building risk score", size=10.5, weight="bold")
