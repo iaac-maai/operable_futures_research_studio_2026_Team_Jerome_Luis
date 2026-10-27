@@ -107,3 +107,6 @@ A printed scale card replaces the coin (the coin stays as a backup). A photo mus
 
 ## D25 (2026-10-27): residents are never asked the material, the element or the pattern
 Residents cannot tell concrete from other materials, or a column from a wall (team, 27 Oct). Models identify the material, the element and the crack pattern from the photos, each with a confidence; when unsure, the case goes to an engineer. Residents answer only what they can know (building history, sticking doors, whether the crack is new). Confirmations by field workers and engineers become labels. Three models this semester: material, element (pre-trained on PHI-Net task 6) and crack segmentation.
+
+## D26 (2026-10-27): no validation site yet; Tripoli is a motivating example only
+The architecture is general. Tripoli was an example in the problem statement; we will not validate there now (possibly later, once the tool works). The Tripoli building lists are removed from the data map and the coverage figure. Cited examples in the problem statement and the segmentation tree stay as evidence of the problem, not as data.

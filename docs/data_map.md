@@ -105,10 +105,10 @@ Raw data is never committed; it lives in `data/` (git-ignored).
 
 ### Building data and ground-truth candidates
 
+No validation site is chosen: the architecture is general. Places named in the problem statement (for example Tripoli) are motivating examples only, not data or validation sites (`spec/decisions.md` D26).
+
 | Data | Source | Availability | Access | Format | Size | Licence | Covers | Gaps |
 |---|---|---|---|---|---|---|---|---|
-| List of 106 at-risk buildings, Tripoli | MTV Lebanon, 25 Jan 2026 [8] | Reported in the press; list itself not found | No access route identified | Unknown | 106 buildings | Unknown | Buildings engineers already judged at risk: candidate ground truth and photo sites | Access, content and format unknown |
-| Municipal evacuation list, Tripoli | Government announcement, 9 Feb 2026 [3][5] | Reported; list not found | Ask the municipality (assumption) | Unknown | 114 buildings | Unknown | Same as above | Same as above; overlap with the 106 list unknown [6] |
 | BUET factory survey, Dhaka | Reported by AFP, The Daily Star [16][17] | Reported; raw survey not found | Ask BUET (assumption) | Unknown | Unknown | Unknown | Engineer assessments of factory buildings | Frames, Phase 3; old (2013) |
 | Building database for the agent (construction type, footprint) | Not chosen | - | Over MCP (planned) | To define | - | - | Context for the agent | Source, schema and access all open |
 

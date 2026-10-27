@@ -442,20 +442,20 @@ STAGES = ["Quality gate", "Material model (O)", "Element model (O)", "Crack segm
           "Engineer review + retraining", "Evaluation (ground truth)"]
 SOURCES = ["SDNET2018", "CrackSeg9k", "crack-seg\n(Ultralytics)", "METU", "PHI-Net", "CODEBRIM", "Haiti + Nepal\nsurveys",
            "Brick masonry\n(Darbhanga)", "Brick facades\n(Strathclyde)", "Masonry masks\n(Dais et al.)", "Pilot photos",
-           "Engineer-\nlabelled photos", "Tripoli lists\n(106 / 114)", "Engineering\npartner"]
+           "Engineer-\nlabelled photos", "Engineering\npartner"]
 # From docs/data_map.md, section 1. Rows follow STAGES, columns follow SOURCES.
 COVERAGE = [
-    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
-    ["partial", "none", "none", "partial", "none", "partial", "none", "partial", "partial", "partial", "planned", "planned", "none", "none"],
-    ["none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
-    ["none", "covered", "covered", "none", "none", "none", "none", "none", "none", "partial", "none", "planned", "none", "none"],
-    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none", "none"],
-    ["none", "none", "none", "none", "partial", "partial", "none", "none", "none", "none", "none", "planned", "none", "none"],
-    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "partial", "planned"],
-    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "partial", "none"],
-    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "none", "planned"],
-    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "planned", "none", "planned"],
-    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "planned", "partial", "planned"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none"],
+    ["partial", "none", "none", "partial", "none", "partial", "none", "partial", "partial", "partial", "planned", "planned", "none"],
+    ["none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "planned", "planned", "none"],
+    ["none", "covered", "covered", "none", "none", "none", "none", "none", "none", "partial", "none", "planned", "none"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned", "none"],
+    ["none", "none", "none", "none", "partial", "partial", "none", "none", "none", "none", "none", "planned", "none"],
+    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "planned"],
+    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "none"],
+    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "none", "planned"],
+    ["none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "none", "planned", "planned"],
+    ["none", "none", "none", "none", "none", "none", "partial", "none", "none", "none", "none", "planned", "planned"],
 ]
 COVERAGE_LABEL = {"covered": "covers", "partial": "partly", "planned": "planned", "none": ""}
 
