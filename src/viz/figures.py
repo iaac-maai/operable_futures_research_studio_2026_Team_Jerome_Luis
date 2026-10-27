@@ -6,6 +6,7 @@ Every figure is drawn from the repo's own rules and data map. None shows a measu
 
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import matplotlib
 
@@ -199,39 +200,160 @@ def pipeline():
 
 
 def decision_flow():
-    fig, ax = _canvas(13, 8.2, "Decision logic: every doubt ends at an expert",
-                      "Order of checks in triage.matrix.assess(); Low is reachable only after all three checks say yes. "
-                      "Thresholds illustrative")
-    q_fill, q_edge = "#f0efec", MUTED
-    _box(ax, 0, 6.6, 3.8, 1, "1  Image usable?\nblur, light, scale card visible", q_fill, q_edge)
-    _box(ax, 0, 4.8, 3.8, 1, "2  Reinforced concrete?\nmaterial confidence ≥ 0.8", q_fill, q_edge)
-    _box(ax, 0, 3.0, 3.8, 1, "3  Element and pattern known and fit,\nconfidence ≥ 0.8, width measured?", q_fill, q_edge)
-    _box(ax, 0, 1.2, 3.8, 1, "Matrix v2: pattern × width (upper end),\nthen element and warning signs raise", q_fill,
-         q_edge, size=9)
-    _box(ax, 5.4, 6.6, 2.8, 1, "Retake", LEVEL["Retake"], LEVEL["Retake"], color="white", weight="bold")
-    _box(ax, 5.4, 4.8, 2.8, 1, "Expert needed\nmaterial not supported\nor unclear", LEVEL["Expert needed"],
-         LEVEL["Expert needed"], color="white", weight="bold", size=9)
-    _box(ax, 5.4, 3.0, 2.8, 1, "Expert needed\nmodel unsure", LEVEL["Expert needed"], LEVEL["Expert needed"],
-         color="white", weight="bold", size=9)
-    for i, lvl in enumerate(["Low", "Medium", "High"]):
-        x = -0.6 + i * 2.6
-        sub = {"Low": "routine monitoring", "Medium": "low-cost advice, recheck", "High": "engineer must confirm"}[lvl]
-        _box(ax, x, -0.8, 2.3, 1, f"{lvl}\n{sub}", LEVEL[lvl], LEVEL[lvl], color=ON_FILL.get(lvl, "white"),
-             weight="bold", size=9)
-        _arrow(ax, (1.9, 1.2), (x + 1.15, 0.2))
-    _box(ax, 9.6, 2.6, 2.9, 1.6, "Engineer review\nevery High and\nevery Expert needed", "#f0efec", INK_2,
-         weight="bold")
-    _box(ax, 9.6, 0.3, 2.9, 1.3, "Correction logged\n→ retrains the models", "#e4eefb", BLUE, size=9.5)
-    for y in (7.1, 5.3, 3.5):
-        _arrow(ax, (3.8, y), (5.4, y), "no")
-    for y0, y1 in ((6.6, 5.8), (4.8, 4.0), (3.0, 2.2)):
-        _arrow(ax, (1.9, y0), (1.9, y1), "yes", (0.28, 0))
-    _arrow(ax, (8.2, 5.3), (9.6, 4.0))
-    _arrow(ax, (8.2, 3.5), (9.6, 3.4))
-    _arrow(ax, (6.9, -0.3), (9.6, 2.7))
-    _arrow(ax, (11.05, 2.6), (11.05, 1.6))
-    ax.set_xlim(-0.8, 12.8)
-    ax.set_ylim(-1.1, 7.9)
+    """Who decides what, and when: one lane per player, from the resident's report to the engineer's review.
+    Order of checks as in triage.dispatch.screen() and triage.matrix.assess(); same style as 01b."""
+    fig = plt.figure(figsize=(28.2, 16.8), facecolor="white")
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_xlim(0, 141)
+    ax.set_ylim(0, 84)
+    ax.set_axis_off()
+    t = _flow_tools(ax)
+    label, photo_box, rule_box, model_box, diamond, para, terminal, mark, line, detail = (
+        t.label, t.photo_box, t.rule_box, t.model_box, t.diamond, t.para, t.terminal, t.mark, t.line, t.detail)
+    yR, yM, yW, yF, yE = 62.0, 50.5, 39.0, 27.5, 16.0  # resident, models, written rules, field worker, engineer
+
+    # title, heading, colour key
+    label(1.5, 80.6, "Decision flow", size=40, weight="bold", ha="left")
+    label(139.5, 80.6, "02", size=40, weight="bold", ha="right")
+    label(1.5, 75.6, "Who decides what, and when", size=22, colour=FLOW_TEXT, weight="bold", ha="left")
+    kx = 72.0
+    for fill, edge, name in (("white", FLOW_INK, "PEOPLE AND PHOTOS"), (FLOW_RULE, FLOW_RULE, "WRITTEN RULES (CODE)"),
+                             (FLOW_MODEL, FLOW_MODEL, "LEARNED MODELS (WITH A CONFIDENCE)")):
+        ax.add_patch(FancyBboxPatch((kx, 74.8), 2.6, 1.6, boxstyle="round,pad=0,rounding_size=0.3", facecolor=fill,
+                                    edgecolor=edge, lw=1.6, zorder=4))
+        label(kx + 3.3, 75.6, name, size=11.5, weight="bold", ha="left")
+        kx += 4.6 + 0.62 * len(name)
+
+    # lanes (players) and columns (when)
+    lanes = [(yR, "RESIDENT"), (yM, "APP · MODELS"), (yW, "APP · WRITTEN RULES"), (yF, "FIELD WORKER"),
+             (yE, "ENGINEER")]
+    for y, name in lanes:
+        label(3.0, y, name, size=12, weight="bold", rotation=90)
+    for y in (yR - 5.75, yM - 5.75, yW - 5.75, yF - 5.75):
+        ax.plot([1.0, 140.5], [y, y], color="#d9d9d9", lw=1.2, zorder=0)
+    for x in (6.0, 22.0, 39.5, 53.0, 118.8, 129.0):
+        ax.plot([x, x], [10.0, 73.4], color="#cfcfcf", lw=1.2, ls=(0, (5, 4)), zorder=0)
+    columns = [(14.0, "0", "REPORT"), (30.75, "1", "DISPATCH"), (46.25, "2", "FIELD\nVISIT"),
+               (86.0, "3", "TRIAGE OF EACH CRACK\nthe only five outputs: Retake, Expert needed, Low, Medium, High"),
+               (123.9, "4", "BUILDING"), (135.0, "5", "FOLLOW-UP")]
+    for cx, num, head in columns:
+        ax.add_patch(plt.Circle((cx - 5.6 if num != "3" else 56.5, 71.2), 1.3, color=FLOW_INK, zorder=4))
+        hx = cx - 5.6 if num != "3" else 56.5
+        label(hx, 71.2, num, size=13, colour="white", weight="bold")
+        label(hx + 1.9, 71.2, head, size=11 if num != "3" else 11.5, ha="left", weight="bold" if num == "3" else "normal")
+
+    # 0 report and 1 dispatch (spec/features/dispatch.md, D27)
+    photo_box(14.0, yR, 12, 4.6, "REPORTS\nA CRACK")
+    label(9.6, yR - 2.8, "any phone · scale card or coin\nnew? growing? doors stick?\nearthquake? offset? sagging?",
+          size=10, colour=FLOW_TEXT, ha="left", va="top")
+    line([(8.8, yR - 2.3), (8.8, yM + 2.3)])
+    model_box(14.0, yM, 12, 4.6, "CRACK +\nROUGH WIDTH")
+    label(9.6, yM - 3.9, "crack found + confidence\nwidth upper end, if scale", size=10, colour=FLOW_TEXT,
+          ha="left", va="top")
+    line([(8.8, yM - 3.4), (8.8, yW + 2.3)], dot=False)
+    rule_box(14.0, yW, 11, 4.6, "DISPATCH\nRULE")
+    line([(14.0, yW - 2.3), (14.0, yW - 3.6)], head=False, dot=False)
+    mark(14.0, yW - 4.5, False, r=0.85)
+    label(15.3, yW - 4.5, "RETAKE → resident\n(2 fails: V2)", size=9.5, weight="bold", ha="left")
+    bus = 23.6
+    line([(19.5, yW), (bus, yW)], head=False, dot=False)
+    ax.plot([bus, bus], [yE, yR], color=FLOW_TEXT, lw=1.8, zorder=2)
+    for y, text_ in ((yR, "V3 · NOT\nASSESSED YET"), (yF, "V1 · WITHIN 1 WEEK\nV2 · WITHIN 1 MONTH"),
+                     (yE, "V1 ONLY:\nTOLD TODAY")):
+        line([(bus, y), (25.6, y)], dot=False)
+        para(31.2, y, 10.0, 3.6, text_, size=9.2)
+    detail(31.2, yR - 2.3, "recheck in 1 month = new report\n1 in 10 visited anyway (audit)")
+    line([(31.2, yR + 1.8), (31.2, yR + 4.6), (14.0, yR + 4.6), (14.0, yR + 2.3)], ls="--", dot=False)
+    detail(31.2, yF - 2.3, "queue: V1 first, then building\nflags, then the oldest report")
+    detail(31.2, yE - 2.3, "offset, sagging, ≥ 1 mm,\ngrowing + another sign")
+
+    # 2 field visit
+    line([(36.8, yF), (40.5, yF)], dot=False)
+    photo_box(46.25, yF, 11, 4.6, "FIRST VISIT")
+    detail(46.25, yF - 2.8, "reliable phone + scale card\nbuilding once · every cracked\nelement · every crack\nstickers + crack ID")
+    line([(51.75, yF), (54.6, yF), (54.6, yW), (54.8, yW)], dot=False)
+
+    # 3 triage of each crack (triage.matrix.assess): usable -> models -> doubts -> matrix
+    diamond(58.4, yW, 3.6, 3.0, "USABLE?\n≥ 3 PX?")
+    line([(58.4, yW - 3.0), (58.4, yW - 3.7)], head=False, dot=False)
+    mark(58.4, yW - 4.5, False, r=0.85)
+    label(59.7, yW - 4.5, "RETAKE\n(field worker)", size=9.5, weight="bold", ha="left")
+    line([(62.0, yW), (63.8, yW), (63.8, yM), (64.6, yM)], dot=False)
+    mark(62.9, yW, True, r=0.6)
+    model_box(70.1, yM, 11, 4.6, "MATERIAL · ELEMENT\nWIDTH · PATTERN")
+    detail(70.1, yM - 3.9, "each with a confidence\nwidth in mm ± 1 px")
+    line([(75.6, yM), (77.2, yM), (77.2, yW + 3.0)], dot=False)
+    checks = [(77.2, "CONCRETE?\nSURE ≥ 0.8?"), (86.2, "ELEMENT +\nPATTERN FIT?"), (95.2, "SURE ≥ 0.8?\nWIDTH OK?")]
+    for k, (cx, q) in enumerate(checks):
+        diamond(cx, yW, 3.6, 3.0, q)
+        line([(cx, yW - 3.0), (cx, yW - 3.7)], head=False, dot=False)
+        mark(cx, yW - 4.5, False, r=0.85)
+        ax.plot([cx, cx], [yW - 5.35, 32.4], color=FLOW_TEXT, lw=1.8, zorder=2)
+        nxt = checks[k + 1][0] - 3.6 if k < 2 else 99.0
+        line([(cx + 3.6, yW), (nxt, yW)], dot=False)
+        mark((cx + 3.6 + nxt) / 2, yW, True, r=0.75)
+    ax.plot([77.2, 101.6], [32.4, 32.4], color=FLOW_TEXT, lw=1.8, zorder=2)
+    label(89.2, 31.3, "EXPERT NEEDED: any doubt goes to the engineer", size=10, weight="bold")
+    rule_box(104.0, yW, 10, 4.6, "MATRIX V2")
+    detail(104.0, yW - 2.8, "pattern × width band\n(upper end) · column +1\nwarning signs +1\noffset, sagging → High")
+    levels = [(yW + 3.6, "LOW"), (yW, "MEDIUM"), (yW - 3.6, "HIGH")]
+    for y, name in levels:
+        para(113.6, y, 6.6, 2.8, name, size=10)
+        line([(109.0, yW), (109.6, y)], dot=False)
+
+    # 4 building risk score (spec/features/building_score.md)
+    ax.plot([117.8, 118.4, 118.4, 117.8], [yW + 3.6, yW + 3.6, yW - 3.6, yW - 3.6], color=FLOW_TEXT, lw=1.8, zorder=2)
+    line([(118.4, yW), (119.4, yW)], dot=False)
+    rule_box(123.9, yW, 9.0, 4.6, "BUILDING\nRISK SCORE")
+    detail(123.4, yW - 2.8, "worst crack, ≥ 2 risk\nflags, spread across\nelements → P1·P2·P3")
+
+    # 5 follow-up: result to the resident, engineer review, retraining
+    line([(113.6, yW + 5.0), (113.6, yR), (129.2, yR)], dot=False)
+    label(114.2, yR - 3.6, "LOW, MEDIUM", size=9.2, weight="bold", ha="left")
+    para(135.0, yR, 9.0, 4.6, "LEVEL + REASON\n+ NEXT STEP", size=9.8)
+    detail(135.0, yR - 2.8, "never 'safe' · Low: recheck\n6 months · Medium: advice,\n1 month · High: after review")
+    ax.plot([101.6, 101.6], [32.4, yE], color=FLOW_TEXT, lw=1.8, zorder=2)
+    ax.plot([113.6, 113.6], [yW - 5.0, yE], color=FLOW_TEXT, lw=1.8, zorder=2)
+    ax.plot([128.4, 128.7, 128.7], [yW - 1.6, yW - 1.6, yE], color=FLOW_TEXT, lw=1.8, zorder=2)
+    line([(101.6, yE), (130.0, yE)], dot=False)
+    label(113.0, yE + 1.0, "HIGH", size=9.2, weight="bold", ha="right")
+    label(128.1, yF + 0.9, "P1 · P2", size=9.2, weight="bold", ha="right")
+    terminal(135.0, yE, 9.4, 4.6, "ENGINEER\nREVIEW")
+    detail(135.0, yE - 2.8, "confirms or corrects every\nHigh and Expert needed\nvisits P1 and P2 buildings")
+    model_box(135.0, yM, 9.4, 4.6, "RETRAINING")
+    detail(134.6, yM - 3.9, "corrections = labels;\nnew version tested\non held-out photos")
+    line([(139.7, yE), (140.5, yE), (140.5, yM), (139.7, yM)], ls="--", dot=False)
+    line([(135.0, yM + 2.3), (135.0, yM + 4.3), (70.1, yM + 4.3), (70.1, yM + 2.3)], ls="--", dot=False)
+    label(101.0, yM + 5.0, "LEARNING LOOP: engineer corrections retrain the models; written rules change only by a "
+          "reviewed decision", size=10, weight="bold")
+    # monitoring: the resident's recheck photo goes through the same checks
+    line([(135.0, yR + 2.3), (135.0, 68.6), (58.4, 68.6), (58.4, yW + 3.0)], ls="--", dot=False)
+    label(96.0, 69.4, "MONITORING LOOP: on the recheck date the resident photographs the same crack (ID + stickers); "
+          "same checks; growth beyond the uncertainty = +1 level", size=10, weight="bold")
+
+    # legend
+    ly0, x = 4.6, 1.5
+    for kind, text_ in [("rect", "PERSON OR PHOTO"), ("diamond", "CHECK"), ("rule", "RULE"), ("stack", "MODEL"),
+                        ("para", "RESULT SHOWN TO A PERSON"), ("term", "ENGINEER"), ("ok", "YES, CONTINUE"),
+                        ("no", "NO, STOP HERE")]:
+        if kind == "rect":
+            photo_box(x + 1.3, ly0, 2.6, 1.5, "")
+        elif kind == "diamond":
+            diamond(x + 1.3, ly0, 1.3, 0.95, "")
+        elif kind == "rule":
+            rule_box(x + 1.3, ly0, 2.6, 1.5, "")
+        elif kind == "stack":
+            model_box(x + 1.3, ly0 + 0.3, 2.6, 1.2, "")
+        elif kind == "para":
+            para(x + 1.3, ly0, 1.8, 1.5, "")
+        elif kind == "term":
+            terminal(x + 1.3, ly0, 2.6, 1.5, "")
+        else:
+            mark(x + 1.3, ly0, kind == "ok", r=0.7)
+        label(x + 3.2, ly0, text_, size=10, ha="left")
+        x += 4.2 + 0.52 * len(text_)
+    label(139.5, 1.6, "Sources: src/triage/dispatch.py, src/triage/matrix.py, spec/features/building_score.md · "
+          "27 Oct 2026 · thresholds illustrative until calibrated", size=9, colour=FLOW_SOFT, ha="right")
     return fig
 
 
@@ -774,14 +896,8 @@ FLOW_CHECKS = {"S": ("ALL\nANSWERED?", None), "O": ("CARD +\nANGLE OK?", "RETAKE
                "P": ("SHARP, LIT,\n≥ 3 PX?", "RETAKE")}
 
 
-def pipeline_flow():
-    """Pipeline v3 drawn as a task flow: phases as columns, scales as lanes; colour = photo, rule or model."""
-    fig = plt.figure(figsize=(24, 17.6), facecolor="white")
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.set_xlim(0, 120)
-    ax.set_ylim(0, 88)
-    ax.set_axis_off()
-
+def _flow_tools(ax):
+    """Shapes of the task-flow figures (01b, 02): white = photos and people, grey = written rules, black = models."""
     def label(x, y, s, size=11, colour=FLOW_INK, weight="normal", **kw):
         ax.text(x, y, s, ha=kw.pop("ha", "center"), va=kw.pop("va", "center"), fontsize=size, color=colour,
                 weight=weight, linespacing=1.25, zorder=kw.pop("zorder", 6), **kw)
@@ -863,6 +979,20 @@ def pipeline_flow():
 
     def detail(cx, y_top, text):
         label(cx, y_top, text, size=10, colour=FLOW_TEXT, va="top")
+
+    return SimpleNamespace(label=label, photo_box=photo_box, rule_box=rule_box, model_box=model_box, diamond=diamond, para=para, pill=pill, terminal=terminal, mark=mark, line=line, status=status, detail=detail)
+
+
+def pipeline_flow():
+    """Pipeline v3 drawn as a task flow: phases as columns, scales as lanes; colour = photo, rule or model."""
+    fig = plt.figure(figsize=(24, 17.6), facecolor="white")
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.set_xlim(0, 120)
+    ax.set_ylim(0, 88)
+    ax.set_axis_off()
+
+    t = _flow_tools(ax)
+    label, photo_box, rule_box, model_box, diamond, para, pill, terminal, mark, line, status, detail = (t.label, t.photo_box, t.rule_box, t.model_box, t.diamond, t.para, t.pill, t.terminal, t.mark, t.line, t.status, t.detail)
 
     # title, section heading, colour key, columns
     label(1.5, 84.6, "Pipeline", size=40, weight="bold", ha="left")
