@@ -203,6 +203,8 @@ def pipeline():
 # Decisions are diamonds on the lifeline of the player who decides (written rules, engineer); models only measure.
 # Sources: src/triage/dispatch.py, src/triage/matrix.py, spec/features/building_score.md, spec/features/pipeline.md.
 PLAYERS = {"R": 12.0, "M": 35.0, "W": 58.0, "F": 81.0, "E": 104.0}  # lifeline x
+PLAYER_ICON = {"RESIDENT": "person", "APP · MODELS": "network", "APP · WRITTEN RULES": "rulebook",
+               "FIELD WORKER": "worker", "ENGINEER": "hardhat"}
 PLAYER_HEADS = [("R", "photo", "RESIDENT", "any phone"), ("M", "model", "APP · MODELS", "measure + confidence"),
                 ("W", "rule", "APP · WRITTEN RULES", "decide, auditable"),
                 ("F", "photo", "FIELD WORKER", "reliable phone + scale card"), ("E", "term", "ENGINEER", "final word")]
@@ -226,26 +228,33 @@ HANDOFFS = [
 ]
 
 
-def _handoff_icon(ax, key, cx, cy, s=2.8):
-    """Small black-and-white symbol for a hand-off between players, in an s x s box centred on (cx, cy)."""
-    K, u = "#111111", s / 10.0
+def _handoff_icon(ax, key, cx, cy, s=2.8, ink="#111111", paper="white"):
+    """Small black-and-white symbol for a player or a hand-off, in an s x s box centred on (cx, cy).
+    ink and paper swap for a symbol drawn on a black box (the models)."""
+    K, W, u = ink, paper, s / 10.0
 
     def P(x, y):
         return cx - s / 2 + x * u, cy - s / 2 + y * u
 
-    def rect(x, y, w, h, fc="white", lw=1.3):
-        ax.add_patch(matplotlib.patches.Rectangle(P(x, y), w * u, h * u, facecolor=fc, edgecolor=K, lw=lw, zorder=7))
+    def rect(x, y, w, h, fc=None, lw=1.3):
+        ax.add_patch(matplotlib.patches.Rectangle(P(x, y), w * u, h * u, facecolor=fc or W, edgecolor=K, lw=lw,
+                                                  zorder=7))
 
-    def poly(pts, fc="white", lw=1.3):
-        ax.add_patch(matplotlib.patches.Polygon([P(*q) for q in pts], closed=True, facecolor=fc, edgecolor=K, lw=lw,
-                                                zorder=7))
+    def poly(pts, fc=None, lw=1.3):
+        ax.add_patch(matplotlib.patches.Polygon([P(*q) for q in pts], closed=True, facecolor=fc or W, edgecolor=K,
+                                                lw=lw, zorder=7))
 
     def ln(pts, lw=1.4):
         xs, ys = zip(*[P(*q) for q in pts])
         ax.plot(xs, ys, color=K, lw=lw, zorder=8, solid_capstyle="round")
 
-    def circ(x, y, r, fc="white", lw=1.3):
-        ax.add_patch(plt.Circle(P(x, y), r * u, facecolor=fc, edgecolor=K, lw=lw, zorder=8))
+    def circ(x, y, r, fc=None, lw=1.3):
+        ax.add_patch(plt.Circle(P(x, y), r * u, facecolor=fc or W, edgecolor=K, lw=lw, zorder=8))
+
+    def shoulders(y_top, half):
+        theta = [i / 20 * 3.14159 for i in range(21)]
+        import math
+        poly([(5 + half * math.cos(t), 0.4 + (y_top - 0.4) * math.sin(t)) for t in theta], fc=W)
 
     if key == "camera":
         rect(0.5, 1.5, 9, 6.5)
@@ -290,6 +299,35 @@ def _handoff_icon(ax, key, cx, cy, s=2.8):
     elif key == "layers":
         for k in (2, 1, 0):
             rect(1 + k * 0.8, 1 + k * 2.2, 7.2, 3.4, fc=K if k == 0 else "#7a7a7a", lw=1.0)
+    elif key == "network":  # the learned models: a small neural network
+        nodes = [[(1.2, 2.6), (1.2, 7.4)], [(5, 1.2), (5, 5), (5, 8.8)], [(8.8, 5)]]
+        for left, right in zip(nodes, nodes[1:]):
+            for a in left:
+                for b in right:
+                    ln([a, b], lw=1.0)
+        for layer in nodes:
+            for x, y in layer:
+                circ(x, y, 1.1, fc=K)
+    elif key == "person":  # the resident
+        circ(5, 7.4, 2.0)
+        shoulders(5.0, 4.2)
+    elif key == "worker":  # the field worker: a cap and a clipboard
+        circ(4.2, 7.2, 1.8)
+        rect(2.0, 8.4, 4.4, 0.9, fc=K)
+        shoulders(4.8, 3.6)
+        rect(6.6, 0.6, 3.0, 4.2)
+        ln([(7.2, 3.6), (9.0, 3.6)], lw=1.0)
+        ln([(7.2, 2.2), (9.0, 2.2)], lw=1.0)
+    elif key == "hardhat":  # the engineer
+        import math
+        poly([(5 + 4.0 * math.cos(i / 20 * math.pi), 3.6 + 4.0 * math.sin(i / 20 * math.pi)) for i in range(21)], fc=K)
+        rect(0.4, 2.6, 9.2, 1.2, fc=K)
+        rect(4.4, 5.8, 1.2, 1.9, fc=W, lw=0.6)
+    elif key == "rulebook":  # the written rules: a rule sheet with a tick
+        poly([(1.8, 0.3), (8.2, 0.3), (8.2, 9.6), (1.8, 9.6)])
+        for y in (7.6, 5.8):
+            ln([(3.2, y), (6.8, y)], lw=1.1)
+        ln([(3.2, 3.0), (4.4, 1.8), (6.8, 4.4)], lw=1.8)
     elif key == "calendar":
         rect(0.8, 0.5, 8.4, 8.0)
         rect(0.8, 6.6, 8.4, 1.9, fc=K)
@@ -343,11 +381,15 @@ def decisions_and_players():
         else:
             terminal(cx, cy, w, h, "")
         ink = "white" if kind.startswith("model") else FLOW_INK
+        paper = FLOW_MODEL if kind.startswith("model") else ("#d2d2d2" if kind == "rule" else "white")
+        icon_s = min(h * 0.72, 4.2)
+        _handoff_icon(ax, PLAYER_ICON[name], cx - w / 2 + 1.0 + icon_s / 2, cy, s=icon_s, ink=ink, paper=paper)
+        tx = cx + (icon_s + 1.0) / 2
         if sub:
-            label(cx, cy + 0.9, name, size=size, colour=ink, weight="bold")
-            label(cx, cy - 1.1, sub, size=10.5, colour=ink)
+            label(tx, cy + 0.9, name, size=size, colour=ink, weight="bold")
+            label(tx, cy - 1.1, sub, size=10.5, colour=ink)
         else:
-            label(cx, cy, name, size=size, colour=ink, weight="bold")
+            label(tx, cy, name, size=size, colour=ink, weight="bold")
 
     # title, heading, colour key
     label(1.5, 92.6, "Decisions and players", size=40, weight="bold", ha="left")
@@ -365,20 +407,25 @@ def decisions_and_players():
     # players and lifelines
     for key, kind, name, sub in PLAYER_HEADS:
         head(kind, X[key], 80.6, 17.0, 5.6, name, sub)
-        ax.plot([X[key], X[key]], [6.4, 77.8], color="#9a9a9a", lw=1.6, ls=(0, (6, 4)), zorder=1)
+        if key == "M":  # the models: a solid black lifeline, so they stand out
+            ax.plot([X[key], X[key]], [6.4, 77.8], color=FLOW_MODEL, lw=3.2, zorder=1)
+        else:
+            ax.plot([X[key], X[key]], [6.4, 77.8], color="#9a9a9a", lw=1.6, ls=(0, (6, 4)), zorder=1)
     # phases (time goes down)
     for top, bottom, name in PHASES:
         ax.plot([1.0, 116.0], [bottom, bottom], color="#e0e0e0", lw=1.2, zorder=0)
         label(3.2, (top + bottom) / 2, name, size=10.5, weight="bold", colour=FLOW_SOFT, rotation=90)
     # models at work: black bars on the models lifeline
     for y0, y1 in ((73.4, 69.9), (45.4, 40.8)):
-        ax.add_patch(matplotlib.patches.Rectangle((X["M"] - 0.6, y1), 1.2, y0 - y1, facecolor=FLOW_MODEL,
-                                                  edgecolor="none", zorder=3))
+        ax.add_patch(FancyBboxPatch((X["M"] - 1.5, y1 - 0.4), 3.0, y0 - y1 + 0.8, boxstyle="round,pad=0,rounding_size=0.5",
+                                    facecolor=FLOW_MODEL, edgecolor="white", lw=1.5, zorder=3))
+        _handoff_icon(ax, "network", X["M"], (y0 + y1) / 2, s=2.4, ink="white", paper=FLOW_MODEL)
     # hand-offs
     for n, (y, a, b, icon, word, _meaning, dashed) in enumerate(HANDOFFS, start=1):
         x0, x1 = X[a], X[b]
-        step = 0.7 if x1 > x0 else -0.7
-        line([(x0 + step, y), (x1 - step, y)], ls="--" if dashed else "-", lw=2.2)
+        sign = 1 if x1 > x0 else -1
+        gap0, gap1 = (1.8 if a == "M" else 0.7), (1.8 if b == "M" else 0.7)  # clear of the models' work boxes
+        line([(x0 + sign * gap0, y), (x1 - sign * gap1, y)], ls="--" if dashed else "-", lw=2.2)
         # step number, symbol and one word, on a white tab above the arrow
         width = 1.8 + 0.8 + 2.8 + 0.8 + 0.62 * len(word)
         mid = (X["F"] + X["E"]) / 2 if word == "Alert" else (x0 + x1) / 2  # clear of arrow 4's head
@@ -416,8 +463,10 @@ def decisions_and_players():
     label(54.4, ly0, "WHAT PASSES BETWEEN PLAYERS", size=10, ha="left")
     line([(75.5, ly0), (80.5, ly0)], ls="--", lw=2.0)
     label(81.4, ly0, "LOOP (RECHECK, RETRAINING)", size=10, ha="left")
-    ax.add_patch(matplotlib.patches.Rectangle((100.9, ly0 - 0.9), 1.2, 1.8, facecolor=FLOW_MODEL, zorder=3))
-    label(103.0, ly0, "A MODEL AT WORK (MEASURES ONLY)", size=10, ha="left")
+    ax.add_patch(FancyBboxPatch((100.4, ly0 - 1.3), 2.6, 2.6, boxstyle="round,pad=0,rounding_size=0.4",
+                                facecolor=FLOW_MODEL, edgecolor="none", zorder=3))
+    _handoff_icon(ax, "network", 101.7, ly0, s=2.0, ink="white", paper=FLOW_MODEL)
+    label(103.6, ly0, "A MODEL AT WORK (MEASURES ONLY)", size=10, ha="left")
     label(139.5, 0.9, "Sources: src/triage/dispatch.py, src/triage/matrix.py, spec/features/building_score.md · "
           "27 Oct 2026 · thresholds illustrative until calibrated", size=9, colour=FLOW_SOFT, ha="right")
     return fig
