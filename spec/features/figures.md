@@ -8,7 +8,7 @@ Every figure is drawn from the repo's own rules and data map, so it changes when
 |---|---|---|
 | `01_pipeline.png` | Pipeline v3: three scales (S, O, P as in PHI-Net task 1) x five phases, scene check, monitoring and learning loops, status of each box | `spec/features/pipeline.md` |
 | `01b_pipeline_flow.png` | Step 0, report and dispatch (when a field worker visits: V1, V2, V3, D27), then the same pipeline v3 drawn as a task flow: phases as numbered columns, scales as lanes; diamonds for written checks with stop (Retake, Expert needed) and continue marks, stacked boxes for learned models, both loops. Black, white and grey only: white = photos and people, grey = written rules (code), black = learned models | `spec/features/pipeline.md`, `spec/features/dispatch.md` |
-| `02_decisions_and_players.png` | Decisions and players: the five players (resident, app models, app written rules, field worker, engineer) as lifelines, time going down, 14 numbered hand-offs showing what passes between them; decisions only on the written rules (dispatch, triage + building score) and the engineer (confirms or corrects); a 'who decides what' panel. Same black, white and grey style as 01b | `triage.dispatch.screen()`, `triage.matrix.assess()`, `spec/features/building_score.md` |
+| `02_decisions_and_players.png` | Decisions and players: the five players as lifelines, time going down, 14 numbered hand-offs, each with a symbol and one word (key below); decisions only on the written rules and the engineer; a 'who decides what' panel. Black, white and grey | `triage.dispatch.screen()`, `triage.matrix.assess()`, `spec/features/building_score.md` |
 | `03_risk_matrix.png` | Matrix v3 in black, white and grey: each crack pattern as a drawn symbol with one word (key below), base category per pattern x width band (Category 1 white, 2 grey, 3 black), and what raises it, in words, with new and assumed values tagged | `src/triage/risk_matrix_v3.json` (read at run time) |
 | `04_segmentation_tree.png` | Tree v3: crack path (yellow) into the atomic problem, building path (navy) into the building risk score, context (grey); scale badge and evidence under each node | `docs/segmentation_tree.md` |
 | `05_data_coverage.png` | Which data source feeds which pipeline stage, by scale | `docs/data_map.md`, section 1 |
@@ -35,3 +35,23 @@ The seven crack patterns are drawn as symbols, each with one word; everything el
 | Column with horizontal cracks | Column | horizontal crack in a column |
 | Missing patch with a bar showing | Spalling | spalling with exposed bar |
 | Cross of beam and column with an X at the joint | Joint | beam-column joint crack |
+
+## Arrow key of decisions and players (`02_decisions_and_players.png`)
+Each arrow shows its step number, a symbol and one word; the full meaning is here.
+
+| # | Symbol | Word | From → to | What passes |
+|---|---|---|---|---|
+| 1 | camera | Report | resident → app models | photo of the crack + answers |
+| 2 | ruler | Measure | app models → app written rules | crack found? rough width · confidence |
+| 3 | clock | Wait | app written rules → resident | Retake, or V3: not assessed yet, recheck in 1 month |
+| 4 | house | Visit | app written rules → field worker | V1: visit within 1 week · V2: within 1 month |
+| 5 | bell | Alert | app written rules → engineer | V1 only: the engineer is told the same day |
+| 6 | clipboard | Survey | field worker → resident | asks the building questions, places stickers + crack ID |
+| 7 | camera | Photos | field worker → app models | reliable photos: the building, every cracked element, every crack |
+| 8 | bar chart | Readings | app models → app written rules | material, element, width, pattern + confidence |
+| 9 | pencil | Pattern | field worker → app written rules | pattern picked from drawings while the model is unsure |
+| 10 | document | Result | app written rules → resident | Category 1 or 2: level, reason, recheck date |
+| 11 | warning triangle | Escalate | app written rules → engineer | Category 3, Expert needed (any doubt), buildings P1 · P2 |
+| 12 | check mark | Confirmed | engineer → resident | confirmed level, reason, next step · never 'safe' |
+| 13 | stacked layers | Retrain | engineer → app models | corrections become labels → retraining |
+| 14 | calendar | Recheck | resident → app models | recheck photo of the same crack ID → back to step 8 |

@@ -206,23 +206,97 @@ PLAYERS = {"R": 12.0, "M": 35.0, "W": 58.0, "F": 81.0, "E": 104.0}  # lifeline x
 PLAYER_HEADS = [("R", "photo", "RESIDENT", "any phone"), ("M", "model", "APP · MODELS", "measure + confidence"),
                 ("W", "rule", "APP · WRITTEN RULES", "decide, auditable"),
                 ("F", "photo", "FIELD WORKER", "reliable phone + scale card"), ("E", "term", "ENGINEER", "final word")]
-# (y, sender, receiver, text, dashed); time goes down
+# (y, sender, receiver, symbol, word, meaning, dashed); time goes down. The figure shows the symbol and the word;
+# the meaning is the key (spec/features/figures.md).
 HANDOFFS = [
-    (73.4, "R", "M", "1  photo of the crack + answers", False),
-    (69.9, "M", "W", "2  crack found? rough width · confidence", False),
-    (60.2, "W", "R", "3  Retake, or V3: not assessed yet, recheck in 1 month", False),
-    (56.8, "W", "F", "4  V1: visit within 1 week · V2: within 1 month", False),
-    (53.4, "W", "E", "5  V1 only: the engineer is told the same day", False),
-    (48.8, "F", "R", "6  visits: asks the building questions, places stickers + crack ID", False),
-    (45.4, "F", "M", "7  reliable photos: the building, every cracked element, every crack", False),
-    (40.8, "M", "W", "8  material, element, width, pattern + confidence", False),
-    (37.4, "F", "W", "9  pattern from drawings (model unsure)", False),
-    (28.6, "W", "R", "10  Category 1 or Category 2: level, reason, recheck date", False),
-    (25.2, "W", "E", "11  Category 3, Expert needed (any doubt), buildings P1 · P2", False),
-    (16.4, "E", "R", "12  confirmed level, reason, next step · never 'safe'", False),
-    (13.0, "E", "M", "13  corrections become labels → retraining", True),
-    (8.4, "R", "M", "14  recheck photo, same crack ID → back to 8", True),
+    (73.4, "R", "M", "camera", "Report", "photo of the crack + answers", False),
+    (69.9, "M", "W", "ruler", "Measure", "crack found? rough width · confidence", False),
+    (60.2, "W", "R", "clock", "Wait", "Retake, or V3: not assessed yet, recheck in 1 month", False),
+    (56.8, "W", "F", "house", "Visit", "V1: visit within 1 week · V2: within 1 month", False),
+    (53.4, "W", "E", "bell", "Alert", "V1 only: the engineer is told the same day", False),
+    (48.8, "F", "R", "clipboard", "Survey", "asks the building questions, places stickers + crack ID", False),
+    (45.4, "F", "M", "camera", "Photos", "reliable photos: the building, every cracked element, every crack", False),
+    (40.8, "M", "W", "bars", "Readings", "material, element, width, pattern + confidence", False),
+    (37.4, "F", "W", "pencil", "Pattern", "pattern picked from drawings while the model is unsure", False),
+    (28.6, "W", "R", "document", "Result", "Category 1 or 2: level, reason, recheck date", False),
+    (25.2, "W", "E", "warning", "Escalate", "Category 3, Expert needed (any doubt), buildings P1 · P2", False),
+    (16.4, "E", "R", "check", "Confirmed", "confirmed level, reason, next step · never 'safe'", False),
+    (13.0, "E", "M", "layers", "Retrain", "corrections become labels → retraining", True),
+    (8.4, "R", "M", "calendar", "Recheck", "recheck photo of the same crack ID → back to step 8", True),
 ]
+
+
+def _handoff_icon(ax, key, cx, cy, s=2.8):
+    """Small black-and-white symbol for a hand-off between players, in an s x s box centred on (cx, cy)."""
+    K, u = "#111111", s / 10.0
+
+    def P(x, y):
+        return cx - s / 2 + x * u, cy - s / 2 + y * u
+
+    def rect(x, y, w, h, fc="white", lw=1.3):
+        ax.add_patch(matplotlib.patches.Rectangle(P(x, y), w * u, h * u, facecolor=fc, edgecolor=K, lw=lw, zorder=7))
+
+    def poly(pts, fc="white", lw=1.3):
+        ax.add_patch(matplotlib.patches.Polygon([P(*q) for q in pts], closed=True, facecolor=fc, edgecolor=K, lw=lw,
+                                                zorder=7))
+
+    def ln(pts, lw=1.4):
+        xs, ys = zip(*[P(*q) for q in pts])
+        ax.plot(xs, ys, color=K, lw=lw, zorder=8, solid_capstyle="round")
+
+    def circ(x, y, r, fc="white", lw=1.3):
+        ax.add_patch(plt.Circle(P(x, y), r * u, facecolor=fc, edgecolor=K, lw=lw, zorder=8))
+
+    if key == "camera":
+        rect(0.5, 1.5, 9, 6.5)
+        rect(3.3, 8.0, 3.4, 1.4, fc=K)
+        circ(5, 4.7, 2.0)
+    elif key == "ruler":
+        rect(0, 3, 10, 4)
+        for i, x in enumerate((1.5, 3, 4.5, 6, 7.5, 9)):
+            ln([(x, 7), (x, 5.6 if i % 2 else 4.6)], lw=1.1)
+    elif key == "clock":
+        circ(5, 5, 4.6)
+        ln([(5, 5), (5, 8.2)])
+        ln([(5, 5), (7.4, 5)])
+    elif key == "house":
+        poly([(1.2, 0.5), (8.8, 0.5), (8.8, 5.6), (5, 9.4), (1.2, 5.6)])
+        rect(4, 0.5, 2, 3.2, fc=K)
+    elif key == "bell":
+        poly([(2, 2.6), (8, 2.6), (7.2, 4), (7.2, 6.8), (5, 8.8), (2.8, 6.8), (2.8, 4)])
+        circ(5, 1.3, 1.0, fc=K)
+    elif key == "clipboard":
+        rect(1.5, 0.3, 7, 9)
+        rect(3.5, 8.4, 3, 1.4, fc=K)
+        for y in (6.4, 4.4, 2.4):
+            ln([(3, y), (7, y)], lw=1.1)
+    elif key == "bars":
+        for x, h in ((1, 4), (4, 8), (7, 6)):
+            rect(x, 0.5, 2.2, h, fc=K)
+    elif key == "pencil":
+        poly([(1.2, 1.2), (2.6, 4.0), (7.6, 9.0), (9.0, 7.6), (4.0, 2.6)], fc="white")
+        poly([(1.2, 1.2), (2.6, 4.0), (4.0, 2.6)], fc=K)
+    elif key == "document":
+        poly([(1.8, 0.3), (8.2, 0.3), (8.2, 7.2), (6.0, 9.6), (1.8, 9.6)])
+        for y in (6.6, 4.6, 2.6):
+            ln([(3.2, y), (6.8, y)], lw=1.1)
+    elif key == "warning":
+        poly([(5, 9.6), (9.8, 0.6), (0.2, 0.6)])
+        ln([(5, 6.6), (5, 3.6)], lw=1.8)
+        circ(5, 2.2, 0.5, fc=K, lw=0.5)
+    elif key == "check":
+        circ(5, 5, 4.6)
+        ln([(2.8, 5.0), (4.4, 3.2), (7.4, 7.0)], lw=1.8)
+    elif key == "layers":
+        for k in (2, 1, 0):
+            rect(1 + k * 0.8, 1 + k * 2.2, 7.2, 3.4, fc=K if k == 0 else "#7a7a7a", lw=1.0)
+    elif key == "calendar":
+        rect(0.8, 0.5, 8.4, 8.0)
+        rect(0.8, 6.6, 8.4, 1.9, fc=K)
+        for x, y in ((2.8, 4.6), (5, 4.6), (7.2, 4.6), (2.8, 2.4), (5, 2.4)):
+            circ(x, y, 0.55, fc=K, lw=0.5)
+
+
 PHASES = [(76.4, 67.9, "REPORT"), (67.9, 51.4, "DISPATCH"), (51.4, 43.4, "FIELD VISIT"), (43.4, 23.2, "TRIAGE"),
           (23.2, 11.0, "REVIEW"), (11.0, 6.4, "FOLLOW-UP")]
 WHO_DECIDES = [
@@ -301,12 +375,20 @@ def decisions_and_players():
         ax.add_patch(matplotlib.patches.Rectangle((X["M"] - 0.6, y1), 1.2, y0 - y1, facecolor=FLOW_MODEL,
                                                   edgecolor="none", zorder=3))
     # hand-offs
-    for y, a, b, text_, dashed in HANDOFFS:
+    for n, (y, a, b, icon, word, _meaning, dashed) in enumerate(HANDOFFS, start=1):
         x0, x1 = X[a], X[b]
         step = 0.7 if x1 > x0 else -0.7
         line([(x0 + step, y), (x1 - step, y)], ls="--" if dashed else "-", lw=2.2)
-        label((x0 + x1) / 2, y + 1.15, text_, size=11.5, weight="bold",
-              bbox=dict(facecolor="white", edgecolor="none", pad=1.5))
+        # step number, symbol and one word, on a white tab above the arrow
+        width = 1.8 + 0.8 + 2.8 + 0.8 + 0.62 * len(word)
+        mid = (X["F"] + X["E"]) / 2 if word == "Alert" else (x0 + x1) / 2  # clear of arrow 4's head
+        left, ym = mid - width / 2, y + 1.75
+        ax.add_patch(FancyBboxPatch((left - 0.5, ym - 1.45), width + 1.0, 2.9, boxstyle="round,pad=0,rounding_size=0.4",
+                                    facecolor="white", edgecolor="none", zorder=5))
+        ax.add_patch(plt.Circle((left + 0.9, ym), 0.9, color=FLOW_INK, zorder=6))
+        label(left + 0.9, ym, str(n), size=9, colour="white", weight="bold", zorder=7)
+        _handoff_icon(ax, icon, left + 1.8 + 0.8 + 1.4, ym, s=2.8)
+        label(left + 1.8 + 0.8 + 2.8 + 0.8, ym, word, size=12.5, weight="bold", ha="left")
     # decisions: only on the written rules and the engineer
     diamond(X["W"], 64.4, 8.0, 3.0, "DISPATCH RULE\nV1 · V2 · V3 · RETAKE")
     diamond(X["W"], 32.8, 11.0, 3.6, "TRIAGE RULES + BUILDING SCORE\nRetake · Expert needed · Category 1 · Category 2 · Category 3\n"
