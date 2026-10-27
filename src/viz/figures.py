@@ -842,27 +842,36 @@ DATASETS = [("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0  ·  mostly bridges an
 
 
 def dataset_sizes():
-    fig, ax = plt.subplots(figsize=(11, 5.6))
+    """Image counts of the public datasets and of our own data, in black and white."""
+    K = "#111111"
+    fig, ax = plt.subplots(figsize=(15, 8.4), facecolor="white")
+    ax.set_facecolor("white")
     names = [d[0] for d in DATASETS]
     ys = range(len(DATASETS))
-    ax.barh(ys, [d[1] for d in DATASETS], height=0.42, color=BLUE)
+    ax.barh(ys, [d[1] for d in DATASETS], height=0.5, color=K)
     for y, (_, n, label) in zip(ys, DATASETS):
-        ax.text(n + 800, y, label, va="center", fontsize=9.5, color=INK)
+        ax.text(n + 900, y, label, va="center", fontsize=11.5, color=K)
     ax.set_yticks(list(ys), names)
+    for tick in ax.get_yticklabels():
+        tick.set_fontsize(15)
+        tick.set_fontweight("bold")
+        tick.set_color(K)
     ax.invert_yaxis()
     ax.set_xlim(0, 110_000)
     ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v / 1000:.0f}K" if v else "0"))
-    ax.grid(axis="x", color=GRID, lw=0.8)
+    ax.tick_params(axis="x", colors=K, labelsize=11.5, length=0)
+    ax.tick_params(axis="y", length=0, pad=10)
+    ax.grid(axis="x", color="#d9d9d9", lw=0.8)
     ax.set_axisbelow(True)
-    ax.tick_params(length=0)
     for s in ("top", "right", "left"):
         ax.spines[s].set_visible(False)
-    ax.set_xlabel("Images")
+    ax.spines["bottom"].set_color(K)
+    ax.set_xlabel("Images", fontsize=12, color=K)
     fig.suptitle("Public crack data is large; the closest to our homes are small engineer surveys",
-                 x=0.02, ha="left", fontsize=14, weight="bold")
-    fig.text(0.02, 0.875, "Image counts and licences from each dataset's page. Not plotted: CODEBRIM (36.4 GB, count "
-             "not stated, non-commercial) and the Dais et al. masonry subset.", fontsize=9.5, color=INK_2)
-    fig.subplots_adjust(left=0.24, right=0.98, top=0.8, bottom=0.14)
+                 x=0.02, ha="left", fontsize=18, weight="bold", color=K)
+    fig.text(0.02, 0.885, "Image counts and licences from each dataset's page. Not plotted: CODEBRIM (36.4 GB, count "
+             "not stated, non-commercial) and the Dais et al. masonry subset.", fontsize=11.5, color="#444444")
+    fig.subplots_adjust(left=0.27, right=0.98, top=0.83, bottom=0.1)
     return fig
 
 
