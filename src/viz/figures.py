@@ -829,7 +829,7 @@ def data_coverage():
 
 
 # From docs/data_map.md, section 2 (checked on the source pages, 24 Oct 2026).
-DATASETS = [("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0  ·  mostly bridges and pavement (off-concept)"),
+DATASETS = [("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0  ·  bridge decks, pavement, walls"),
             ("METU", 40_000, "40,000  ·  CC BY 4.0  ·  concrete walls of campus buildings"),
             ("PHI-Net", 36_413, "36,413  ·  CC BY-NC-SA 4.0  ·  post-earthquake, no masks"),
             ("CrackSeg9k", 9_255, "9,255  ·  CC0  ·  pixel masks, mostly pavement"),
@@ -839,6 +839,13 @@ DATASETS = [("SDNET2018", 56_000, "56,000+  ·  CC BY 4.0  ·  mostly bridges an
             ("Brick facades (Strathclyde)", 700, "700  ·  CC BY 4.0  ·  brick facades"),
             ("Pilot phone photos", 0, "0  ·  about 30 cracks this week  ·  no risk labels"),
             ("Engineer-labelled phone photos", 0, "0  ·  to collect in Phase 2  ·  the target data")]
+
+
+# Fit to the concept, from docs/data_map.md section 0 (SDNET2018: walls low, decks and pavement off-concept).
+DATASET_FIT = {"SDNET2018": "LOW / OFF", "METU": "LOW", "PHI-Net": "MEDIUM", "CrackSeg9k": "LOW",
+               "crack-seg (Ultralytics)": "LOW", "Haiti 2010 survey": "HIGH", "Brick masonry (Darbhanga)": "MEDIUM",
+               "Brick facades (Strathclyde)": "MEDIUM", "Pilot phone photos": "MEDIUM",
+               "Engineer-labelled phone photos": "TARGET"}
 
 
 def dataset_sizes():
@@ -851,13 +858,17 @@ def dataset_sizes():
     ax.barh(ys, [d[1] for d in DATASETS], height=0.5, color=K)
     for y, (_, n, label) in zip(ys, DATASETS):
         ax.text(n + 900, y, label, va="center", fontsize=11.5, color=K)
+        ax.text(1.0, y, DATASET_FIT[names[y]], transform=ax.get_yaxis_transform(), va="center", ha="right",
+                fontsize=13, weight="bold", color=K)
+    ax.text(1.0, -0.9, "FIT TO INFORMAL BUILDINGS", transform=ax.get_yaxis_transform(), va="center", ha="right",
+            fontsize=10.5, color="#444444")
     ax.set_yticks(list(ys), names)
     for tick in ax.get_yticklabels():
         tick.set_fontsize(15)
         tick.set_fontweight("bold")
         tick.set_color(K)
     ax.invert_yaxis()
-    ax.set_xlim(0, 110_000)
+    ax.set_xlim(0, 125_000)
     ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v / 1000:.0f}K" if v else "0"))
     ax.tick_params(axis="x", colors=K, labelsize=11.5, length=0)
     ax.tick_params(axis="y", length=0, pad=10)
@@ -867,10 +878,11 @@ def dataset_sizes():
         ax.spines[s].set_visible(False)
     ax.spines["bottom"].set_color(K)
     ax.set_xlabel("Images", fontsize=12, color=K)
-    fig.suptitle("Public crack data is large; the closest to our homes are small engineer surveys",
+    fig.suptitle("What data exists, and how good it is",
                  x=0.02, ha="left", fontsize=18, weight="bold", color=K)
-    fig.text(0.02, 0.885, "Image counts and licences from each dataset's page. Not plotted: CODEBRIM (36.4 GB, count "
-             "not stated, non-commercial) and the Dais et al. masonry subset.", fontsize=11.5, color="#444444")
+    fig.text(0.02, 0.905, "Size: image counts and licences from each dataset's page. Fit: how close each dataset is to "
+             "buildings in informal neighbourhoods (docs/data_map.md).\nThe largest sets fit worst; the target data does "
+             "not exist yet.", fontsize=11.5, color="#444444", va="top", linespacing=1.5)
     fig.subplots_adjust(left=0.27, right=0.98, top=0.83, bottom=0.1)
     return fig
 

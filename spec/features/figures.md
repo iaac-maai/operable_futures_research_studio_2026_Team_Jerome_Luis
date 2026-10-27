@@ -12,7 +12,7 @@ Every figure is drawn from the repo's own rules and data map, so it changes when
 | `03_risk_matrix.png` | Matrix v3 in black, white and grey: each crack pattern as a drawn symbol with one word (key below), base category per pattern x width band (Category 1 white, 2 grey, 3 black), and what raises it, in words, with new and assumed values tagged | `src/triage/risk_matrix_v3.json` (read at run time) |
 | `04_segmentation_tree.png` | Tree v3: crack path (yellow) into the atomic problem, building path (navy) into the building risk score, context (grey); scale badge and evidence under each node | `docs/segmentation_tree.md` |
 | `05_data_coverage.png` | Which data source feeds which pipeline stage, by scale | `docs/data_map.md`, section 1 |
-| `06_dataset_sizes.png` | Image counts and licences of public sets vs our target data | `docs/data_map.md`, section 2 |
+| `06_dataset_sizes.png` | What data exists, and how good it is: image counts and licences of the public sets and of our own data, with each one's fit to buildings in informal neighbourhoods; black and white | `docs/data_map.md`, sections 0 and 2 |
 | `07_confusion_template.png` | TP / FN / FP / TN and the full 3 x 5 confusion matrix, no counts | `spec/features/evaluation.md` |
 | `08_real_data_quality_gate.png` | Sharpness of public dataset images against the blur limit (made by `src/experiments/real_data_quality.py`, not by this script) | Haiti 2010, Darbhanga, Strathclyde, PHI-Net tasks 8, 3 and 6, METU, SDNET2018, crack-seg; panels ordered by fit to the concept |
 | `09_timeline.png` | Plan to the final presentation (17 Dec) with syllabus milestones and tasks at risk | `spec/constitution/roadmap.md` |
