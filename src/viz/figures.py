@@ -1118,7 +1118,7 @@ def dataset_comparison():
     ax.set_ylim(n - 0.4, -1.2)
     ax.set_axis_off()
     H, W = fig.get_figheight(), fig.get_figwidth()  # title as in the other figures: 38 pt on a 24 in figure
-    fig.text(0.01, 1 - 0.6 / H, "DATASET COMPARISON", fontsize=38 * W / 24, weight="bold", color=INK, va="center")
+    fig.text(0.01, 1 - 0.6 / H, "DATASET LABELS AND TRAINING OBJECTIVES", fontsize=38 * W / 24, weight="bold", color=INK, va="center")
     fig.text(0.99, 1 - 0.6 / H, "10", fontsize=40 * W / 24, weight="bold", color=INK, va="center", ha="right")
     fig.text(0.01, 1 - 1.25 / H, "Every dataset we hold, compared: fit to the concept, size, quality, labels, use",
              fontsize=18 * W / 24, weight="bold", color=INK_2, va="center")
