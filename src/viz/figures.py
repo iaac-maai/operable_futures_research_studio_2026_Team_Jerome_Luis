@@ -1103,11 +1103,8 @@ def dataset_comparison():
              (x_use, "What it can train for us", "left"), (x_lic, "Licence", "left")]
     for x, h, ha in heads:
         ax.text(x, -0.75, h.upper(), ha=ha, va="center", fontsize=15.5, weight="bold", color=INK)
+    ax.axhline(-0.42, color=INK, lw=1.4)  # one line, under the column titles only
     for r, (name, fit, images, gate, labels, use, licence) in enumerate(HELD):
-        if r and HELD[r - 1][1] != fit:
-            ax.axhline(r - 0.5, color=INK_2, lw=0.9)
-        elif r:
-            ax.axhline(r - 0.5, color=GRID, lw=0.6)
         ax.text(0, r, name.upper(), va="center", fontsize=12, weight="bold", color=INK)
         ax.add_patch(FancyBboxPatch((x_fit, r - 0.2), 1.05, 0.4, boxstyle="round,pad=0,rounding_size=0.08",
                                     facecolor=FIT_FILL[fit], edgecolor=GRID if fit == "off-concept" else "none"))
