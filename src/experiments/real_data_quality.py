@@ -178,9 +178,10 @@ def histogram(rows: list[dict], path: Path) -> None:
     rank = {g: i for i, (g, _) in enumerate(FIT_ORDER)}
     fit = dict(FIT_ORDER)
     groups = sorted({r["group"] for r in rows}, key=lambda g: (rank.get(g, len(rank)), g))
-    cols = min(3, len(groups))
+    cols = min(4, len(groups))  # landscape; panels keep their order, read left to right
     nrows = -(-len(groups) // cols)
-    fig, axes = plt.subplots(nrows, cols, figsize=(max(11, 4.4 * cols), 3.3 * nrows + 1.6), squeeze=False)
+    height = max(3.6 * nrows + 1.9, 0.5625 * 5.2 * cols)  # at least 16:9
+    fig, axes = plt.subplots(nrows, cols, figsize=(5.2 * cols, height), squeeze=False)
     for ax in axes.flat[len(groups):]:
         ax.set_axis_off()
     bins = np.logspace(0, 4.5, 37)
@@ -210,12 +211,12 @@ def histogram(rows: list[dict], path: Path) -> None:
     for row in axes:
         row[0].set_ylabel("Images")
     fig.suptitle("Quality gate on real images: public dataset samples", x=0.02, ha="left", fontsize=14, weight="bold")
-    top = 1 - 1.3 / (3.3 * nrows + 1.6)
+    top = 1 - 1.3 / height
     fig.text(0.02, top + 0.02, f"Panels ordered by fit to our concept, best first (docs/data_map.md). "
              f"Images left of the red line would be asked to retake. Brightness limits "
              f"{MIN_BRIGHTNESS:g} to {MAX_BRIGHTNESS:g}.\nNot phone photos: tests the code, does not calibrate "
              "thresholds. PHI-Net images are 224 px crops, measured as they are (never scaled up).", fontsize=9.5, color=INK_2, va="bottom")
-    fig.subplots_adjust(left=0.07, right=0.98, top=top - 0.04, bottom=0.08, wspace=0.18, hspace=0.62)
+    fig.subplots_adjust(left=0.05, right=0.985, top=top - 0.05, bottom=0.07, wspace=0.16, hspace=0.62)
     fig.savefig(path, dpi=200)
     plt.close(fig)
 
