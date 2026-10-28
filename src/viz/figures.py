@@ -1075,7 +1075,7 @@ HELD_MISSING = {"CrackSeg9k": "zip not extracted"}
 
 def dataset_comparison():
     n = len(HELD)
-    fig, ax = plt.subplots(figsize=(19, 0.62 * n + 2.6))
+    fig, ax = plt.subplots(figsize=(19, 0.62 * n + 3.3))
     # x layout: name | fit | images bar | gate bar | labels | trains | licence
     x_fit, x_img, w_img, x_gate, w_gate, x_lab, x_use, x_lic, x_end = 3.3, 4.6, 3.0, 8.3, 1.6, 10.6, 13.6, 16.4, 18.2
     top = 40_000
@@ -1117,14 +1117,17 @@ def dataset_comparison():
     ax.set_xlim(-0.1, x_end)
     ax.set_ylim(n - 0.4, -1.2)
     ax.set_axis_off()
-    fig.suptitle("Every dataset we hold, compared: fit to informal buildings, size, quality, labels, use",
-                 x=0.01, ha="left", fontsize=14, weight="bold")
-    fig.text(0.01, 1 - 0.95 / fig.get_figheight(),
-             "Ordered by fit to the concept (D14). Image bars capped at 40,000. Category 1 gate rates on METU and SDNET "
+    H, W = fig.get_figheight(), fig.get_figwidth()  # title as in the other figures: 38 pt on a 24 in figure
+    fig.text(0.01, 1 - 0.6 / H, "DATASET COMPARISON", fontsize=38 * W / 24, weight="bold", color=INK, va="center")
+    fig.text(0.99, 1 - 0.6 / H, "10", fontsize=40 * W / 24, weight="bold", color=INK, va="center", ha="right")
+    fig.text(0.01, 1 - 1.25 / H, "Every dataset we hold, compared: fit to the concept, size, quality, labels, use",
+             fontsize=18 * W / 24, weight="bold", color=INK_2, va="center")
+    fig.text(0.01, 1 - 1.6 / H,
+             "Ordered by fit to the concept (D14). Image bars capped at 40,000. Low gate rates on METU and SDNET "
              "come from smooth concrete read as blur (open issue D12), not from bad photos. PHI-Net is post-earthquake "
              "damage, research use only;\nits images are 224 px crops. Sources: docs/data_map.md, sections 0 and 6.",
              fontsize=9.5, color=INK_2, va="top")
-    fig.subplots_adjust(left=0.01, right=0.99, top=1 - 1.5 / fig.get_figheight(), bottom=0.02)
+    fig.subplots_adjust(left=0.01, right=0.99, top=1 - 2.2 / H, bottom=0.02)
     return fig
 
 
