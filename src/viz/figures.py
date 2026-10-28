@@ -1009,10 +1009,11 @@ WEEK_DATES = ["29 Oct", "5 Nov", "12 Nov", "19 Nov", "26 Nov", "3 Dec", "10 Dec"
 WEEK_MILESTONES = [("data map", False), ("midterm", False), ("1st feature", False), ("beta", False),
                    ("harness + MCP", False), ("baseline", True), ("PoC + ethics", False), ("final", False),
                    ("blog", False)]
-# One clearly different look per workstream (never two greys): (fill, hatch); every edge is black.
+# One clearly different look per workstream: black, grey, white, blue, green, red, and one hatch (the user's pick;
+# the roadmap is an exception to the grey-only rule). (fill, hatch); every edge is black.
 WORKSTREAM_STYLE = {"Deliverables": ("#111111", None), "Data": ("#9a9a9a", None), "Pilot": ("white", None),
-                    "Models": ("white", "////"), "Agent and MCP": ("white", "xxx"),
-                    "Engineering partners": ("white", "oo"), "Integration": ("white", "--")}
+                    "Models": ("#1f5fbf", None), "Agent and MCP": ("#2e9e44", None),
+                    "Engineering partners": ("#d03b3b", None), "Integration": ("white", "////")}
 RISK_EDGE = dict(ls=(0, (4, 2)), lw=2.0)  # at risk (needs the engineering partners): thick dashed border
 
 
