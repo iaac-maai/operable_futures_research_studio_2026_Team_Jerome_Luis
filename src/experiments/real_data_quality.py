@@ -211,7 +211,7 @@ def histogram(rows: list[dict], path: Path) -> None:
     for row in axes:
         row[0].set_ylabel("Images")
     width = 5.2 * cols  # title as in the other figures: bold capitals, 38 pt on a 24 in figure
-    fig.text(0.02, 1 - 0.6 / height, "QUALITY GATE ON REAL IMAGES", fontsize=38 * width / 24, weight="bold",
+    fig.text(0.02, 1 - 0.6 / height, "QUALITY GATE ASSESSMENT ON IMAGERY DATABASE", fontsize=38 * width / 24, weight="bold",
              color="#111111", va="center")
     fig.text(0.985, 1 - 0.6 / height, "08", fontsize=40 * width / 24, weight="bold", color="#111111", va="center",
              ha="right")
