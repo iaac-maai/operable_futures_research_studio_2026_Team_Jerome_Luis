@@ -1014,7 +1014,8 @@ WEEK_MILESTONES = [("data map", False), ("midterm", False), ("1st feature", Fals
 WORKSTREAM_STYLE = {"Deliverables": ("#111111", None), "Data": ("#9a9a9a", None), "Pilot": ("white", None),
                     "Models": ("#1f5fbf", None), "Agent and MCP": ("#2e9e44", None),
                     "Engineering partners": ("#d03b3b", None), "Integration": ("white", "////")}
-RISK_EDGE = dict(ls=(0, (4, 2)), lw=2.0)  # at risk (needs the engineering partners): thick dashed border
+# At risk (needs the engineering partners): dark-red hatch, unlike any workstream; the row still shows the stream.
+RISK_STYLE = dict(facecolor="white", edgecolor="#9e1b1b", hatch="\\\\\\\\", lw=1.6)
 
 
 def timeline():
@@ -1031,8 +1032,8 @@ def timeline():
             ax.axhline(i - 0.5, color=GRID, lw=0.8, zorder=1)
         previous = stream
         ax.add_patch(FancyBboxPatch((start - 1 + 0.06, i - 0.36), end - start + 1 - 0.12, 0.72,
-                                    boxstyle="round,pad=0,rounding_size=0.12", zorder=2, facecolor=fill,
-                                    edgecolor=INK, hatch=hatch, **(RISK_EDGE if risk else dict(lw=1.4))))
+                                    boxstyle="round,pad=0,rounding_size=0.12", zorder=2,
+                                    **(RISK_STYLE if risk else dict(facecolor=fill, edgecolor=INK, hatch=hatch, lw=1.4))))
     for w, (label, risk) in enumerate(WEEK_MILESTONES):  # one milestone per week, on one row
         ax.text(w + 0.5, -0.95, label + (" (at risk)" if risk else ""), ha="center", va="center", fontsize=10.5,
                 color=INK_2 if risk else INK, style="italic" if risk else "normal")
@@ -1048,7 +1049,7 @@ def timeline():
         s.set_visible(False)
     handles = [Patch(facecolor=fill, edgecolor=INK, hatch=hatch, lw=1.4, label=s)
                for s, (fill, hatch) in WORKSTREAM_STYLE.items()]
-    handles.append(Patch(facecolor="white", edgecolor=INK, label="At risk", **RISK_EDGE))
+    handles.append(Patch(label="At risk", **RISK_STYLE))
     _house_legend(fig, handles, [h.get_label().upper() for h in handles])
     H, W = fig.get_figheight(), fig.get_figwidth()  # title as in the other figures: 38 pt on a 24 in figure
     fig.text(0.02, 1 - 0.45 / H, "PROJECT ROADMAP", fontsize=38 * W / 24, weight="bold", color=INK, va="center")
