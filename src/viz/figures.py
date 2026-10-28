@@ -1029,11 +1029,15 @@ def timeline():
     handles = [Patch(facecolor=c, edgecolor=c, label=s) for s, c in WORKSTREAM_COLOURS.items()]
     handles.append(Patch(facecolor="white", edgecolor=INK_2, hatch="///", label="At risk: needs engineering partners"))
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.4, -0.01), ncol=4, frameon=False)
-    fig.suptitle("Plan to the final presentation, 26 Oct to 24 Dec 2026", x=0.02, ha="left", fontsize=14,
-                 weight="bold")
-    fig.text(0.02, 0.9, "Milestones from the studio syllabus. Engineering partners: Engineers Without Borders and a "
+    H, W = fig.get_figheight(), fig.get_figwidth()  # title as in the other figures: 38 pt on a 24 in figure
+    fig.text(0.02, 1 - 0.45 / H, "TIMELINE", fontsize=38 * W / 24, weight="bold", color=INK, va="center")
+    fig.text(0.98, 1 - 0.45 / H, "09", fontsize=40 * W / 24, weight="bold", color=INK, va="center", ha="right")
+    fig.text(0.02, 1 - 0.95 / H, "Plan to the final presentation, 26 Oct to 24 Dec 2026", fontsize=18 * W / 24,
+             weight="bold", color=INK_2, va="center")
+    fig.text(0.02, 1 - 1.25 / H, "Milestones from the studio syllabus. Engineering partners: Engineers Without Borders and a "
              "third-party structural engineer.\nFallback if no engineer ratings by 26 Nov: compare on pilot photos "
-             "only; the matrix stays illustrative. Source: spec/constitution/roadmap.md", fontsize=9.5, color=INK_2)
+             "only; the matrix stays illustrative. Source: spec/constitution/roadmap.md", fontsize=9.5, color=INK_2,
+             va="top")
     fig.subplots_adjust(left=0.25, right=0.98, top=0.8, bottom=0.11)
     return fig
 
