@@ -17,6 +17,7 @@ Every figure is drawn from the repo's own rules and data map, so it changes when
 | `08_real_data_quality_gate.png` | Sharpness of public dataset images against the blur limit (made by `src/experiments/real_data_quality.py`, not by this script) | Haiti 2010, Darbhanga, Strathclyde, PHI-Net tasks 8, 3 and 6, METU, SDNET2018, crack-seg; panels ordered by fit to the concept |
 | `09_timeline.png` | Plan to the final presentation (17 Dec) with syllabus milestones and tasks at risk | `spec/constitution/roadmap.md` |
 | `10_dataset_comparison.png` | Every dataset on our disk side by side, in order of fit: images, quality gate pass rate, labels, what it trains, licence; one row per PHI-Net task | `docs/data_map.md`, sections 0 and 6; gate rates from `data/processed/real_data_quality.csv` |
+| `11_pattern_examples.png` | Real examples: two or three real photos of each crack pattern of the risk matrix, in the matrix's order and design (symbol + one word); each photo credited; engineer label or team pick per column. **Local only (git-ignored):** the photos keep their own licences (PHI-Net CC BY-NC-SA 4.0, Wikimedia Commons) | `src/viz/pattern_examples.py` (needs `data/raw/phinet`) |
 
 Colour rules: flow figures (01b, 02) and the matrix (03) use black, white and grey only: white = photos and people, grey = written rules, black = learned models; in the matrix, Category 1 white, 2 grey, 3 black, always with the number. Older figures (07, 09) still use the status colours, always with a text label; coverage uses one blue ramp.
 
