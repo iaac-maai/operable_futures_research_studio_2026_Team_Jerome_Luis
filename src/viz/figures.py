@@ -1108,7 +1108,7 @@ def dataset_comparison():
             ax.axhline(r - 0.5, color=INK_2, lw=0.9)
         elif r:
             ax.axhline(r - 0.5, color=GRID, lw=0.6)
-        ax.text(0, r, name, va="center", fontsize=10, color=INK)
+        ax.text(0, r, name.upper(), va="center", fontsize=12, weight="bold", color=INK)
         ax.add_patch(FancyBboxPatch((x_fit, r - 0.2), 1.05, 0.4, boxstyle="round,pad=0,rounding_size=0.08",
                                     facecolor=FIT_FILL[fit], edgecolor=GRID if fit == "off-concept" else "none"))
         ax.text(x_fit + 0.525, r, fit, ha="center", va="center", fontsize=8.5,
@@ -1131,7 +1131,7 @@ def dataset_comparison():
                                         boxstyle="round,pad=0,rounding_size=0.04", facecolor=BLUE, edgecolor="none"))
             ax.text(x_gate + w_gate + 0.08, r, f"{gate}%", va="center", fontsize=9.5, color=INK)
         ax.text(x_lab, r, labels, va="center", fontsize=8.8, color=INK_2, linespacing=1.05)
-        ax.text(x_use, r, use, va="center", fontsize=8.8, color=INK, linespacing=1.05)
+        ax.text(x_use, r, use.upper(), va="center", fontsize=12, weight="bold", color=INK, linespacing=1.1)
         ax.text(x_lic, r, licence, va="center", fontsize=8.8, color=INK_2)
     ax.set_xlim(-0.1, x_end)
     ax.set_ylim(n - 0.4, -1.2)
