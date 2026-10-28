@@ -1102,7 +1102,7 @@ def dataset_comparison():
              (x_gate, "Pass the quality gate", "left"), (x_lab, "Labels it gives", "left"),
              (x_use, "What it can train for us", "left"), (x_lic, "Licence", "left")]
     for x, h, ha in heads:
-        ax.text(x, -0.75, h, ha=ha, va="center", fontsize=10, weight="bold", color=INK)
+        ax.text(x, -0.75, h.upper(), ha=ha, va="center", fontsize=12, weight="bold", color=INK)
     for r, (name, fit, images, gate, labels, use, licence) in enumerate(HELD):
         if r and HELD[r - 1][1] != fit:
             ax.axhline(r - 0.5, color=INK_2, lw=0.9)
