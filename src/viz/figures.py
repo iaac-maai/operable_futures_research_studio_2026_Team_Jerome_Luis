@@ -972,36 +972,29 @@ def confusion_template():
 
 
 # From spec/constitution/roadmap.md. (workstream, task, first week, last week, at risk)
-PLAN = [
-    ("Deliverables", "29 Oct deliverables (done)", 1, 1, False),
-    ("Deliverables", "State of the art", 1, 1, False),
-    ("Deliverables", "Expert package", 1, 1, False),
-    ("Deliverables", "Midterm deck", 1, 2, False),
-    ("Deliverables", "Lean Canvas", 6, 7, False),
-    ("Deliverables", "Final pitch", 7, 8, False),
-    ("Deliverables", "Blog post", 8, 9, False),
-    ("Data", "Quality gate (done)", 1, 1, False),
-    ("Data", "Material test", 1, 1, False),
-    ("Data", "Pattern labels", 2, 3, False),
-    ("Pilot", "Pilot photos", 2, 2, False),
-    ("Pilot", "Label + tune gate", 2, 3, False),
-    ("Pilot", "Width in mm", 3, 4, False),
-    ("Models", "U-Net", 3, 4, False),
-    ("Models", "Element model", 3, 4, False),
-    ("Models", "Pattern model", 4, 5, False),
-    ("Agent and MCP", "First MCP", 3, 3, False),
-    ("Agent and MCP", "MCP harness", 4, 5, False),
-    ("Engineering partners", "Partner scoping", 1, 2, False),
-    ("Engineering partners", "Calibration", 3, 5, True),
-    ("Engineering partners", "Engineer labels", 4, 6, True),
-    ("Integration", "Review screen", 1, 2, False),
-    ("Integration", "Building score", 2, 3, False),
-    ("Integration", "Beta", 4, 4, False),
-    ("Integration", "Monitoring", 5, 5, False),
-    ("Integration", "Retraining loop", 5, 6, True),
-    ("Integration", "Baseline comparison", 6, 6, True),
-    ("Integration", "Proof of concept", 7, 7, False),
-    ("Integration", "Streamlit UI", 7, 8, False),
+PLAN = [  # (group, task, first week, last week, at risk); [n] = box n of the pipeline story (figure 01d); scope D30
+    ("Photos", "[2] Quality gate (done)", 1, 1, False),
+    ("Photos", "[5] Pilot photos + scale card", 2, 2, False),
+    ("Photos", "[2] Tune the gate on pilot photos", 2, 3, False),
+    ("Models", "[6] U-Net crack segmentation", 3, 4, False),
+    ("Models", "[6] Width in mm (1st feature)", 3, 4, False),
+    ("Models", "[6] Pattern model (stretch)", 4, 5, False),
+    ("Written rules", "[4] [7] Dispatch + risk matrix (done)", 1, 1, False),
+    ("Written rules", "[8] Building score", 2, 3, False),
+    ("Written rules", "[7] Calibrate with the engineer", 3, 5, True),
+    ("Engineer", "[9] Partner scoping", 1, 2, False),
+    ("Engineer", "[9] Engineer labels", 4, 6, True),
+    ("Engineer", "[9] Baseline comparison", 6, 6, True),
+    ("Prototype", "First MCP: building data", 3, 3, False),
+    ("Prototype", "Beta, end to end", 4, 4, False),
+    ("Prototype", "Harness + MCP to all sources", 5, 5, False),
+    ("Prototype", "Recheck + learn loops", 5, 6, True),
+    ("Prototype", "Proof of concept + ethics", 7, 7, False),
+    ("Prototype", "UI + realistic tests", 7, 8, False),
+    ("Syllabus", "Midterm deck", 1, 2, False),
+    ("Syllabus", "Lean Canvas", 6, 7, False),
+    ("Syllabus", "Final pitch", 7, 8, False),
+    ("Syllabus", "Blog post", 8, 9, False),
 ]
 # One date per week: the Thursday at the centre of each Monday-to-Sunday column, from 29 Oct.
 # One milestone per week, from the syllabus (the 2 Nov expert package is a task bar, the midterm is Fri 6 Nov).
@@ -1009,11 +1002,10 @@ WEEK_DATES = ["29 Oct", "5 Nov", "12 Nov", "19 Nov", "26 Nov", "3 Dec", "10 Dec"
 WEEK_MILESTONES = [("data map", False), ("midterm", False), ("1st feature", False), ("beta", False),
                    ("harness + MCP", False), ("baseline", True), ("PoC + ethics", False), ("final", False),
                    ("blog", False)]
-# One clearly different look per workstream: black, grey, white, blue, green, red, and one hatch (the user's pick;
-# the roadmap is an exception to the grey-only rule). (fill, hatch); every edge is black.
-WORKSTREAM_STYLE = {"Deliverables": ("#111111", None), "Data": ("#9a9a9a", None), "Pilot": ("white", None),
-                    "Models": ("#1f5fbf", None), "Agent and MCP": ("#2e9e44", None),
-                    "Engineering partners": ("#d03b3b", None), "Integration": ("white", "////")}
+# One look per group, following the pipeline's colour logic (white = photos, black = models, grey = written rules)
+# plus red, green and blue (the user's pick for the roadmap). (fill, hatch); every edge is black.
+WORKSTREAM_STYLE = {"Photos": ("white", None), "Models": ("#111111", None), "Written rules": ("#9a9a9a", None),
+                    "Engineer": ("#d03b3b", None), "Prototype": ("#2e9e44", None), "Syllabus": ("#1f5fbf", None)}
 # At risk (needs the engineering partners): dark-red hatch, unlike any workstream; the row still shows the stream.
 RISK_STYLE = dict(facecolor="white", edgecolor="#9e1b1b", hatch="\\\\\\\\", lw=1.6)
 
@@ -1040,7 +1032,7 @@ def timeline():
     ax.set_xlim(0, weeks)
     ax.set_ylim(n - 0.4, -1.6)
     ax.set_xticks([w + 0.5 for w in range(weeks)], WEEK_DATES, fontsize=13, weight="bold", color=INK)
-    ax.set_yticks(range(n), [t[1] for t in PLAN])
+    ax.set_yticks(range(n), [t[1] for t in PLAN], fontsize=12.5)
     ax.xaxis.tick_top()
     for w in range(weeks + 1):
         ax.axvline(w, color=GRID, lw=0.6, zorder=0)
@@ -1055,10 +1047,10 @@ def timeline():
     fig.text(0.02, 1 - 0.45 / H, "PROJECT ROADMAP", fontsize=38 * W / 24, weight="bold", color=INK, va="center")
     fig.text(0.02, 1 - 0.95 / H, "Plan to the final presentation, 29 Oct to 24 Dec 2026", fontsize=18 * W / 24,
              weight="bold", color=INK_2, va="center")
-    fig.text(0.02, 1 - 1.25 / H, "Milestones from the studio syllabus. Engineering partners: Engineers Without Borders and a "
-             "third-party structural engineer.\nFallback if no engineer ratings by 26 Nov: compare on pilot photos "
-             "only; the matrix stays illustrative. Source: spec/constitution/roadmap.md", fontsize=9.5, color=INK_2,
-             va="top")
+    fig.text(0.02, 1 - 1.25 / H, "We build the crack line of the pipeline: [n] = box n of the pipeline story (01d). Designed, "
+             "not built: the field worker's app, the facade and element models (the field worker picks the element, D30).\n"
+             "At risk = needs Engineers Without Borders or the structural engineer. Fallback if no engineer ratings by 26 Nov: "
+             "compare on pilot photos only. Source: spec/constitution/roadmap.md", fontsize=11, color=INK_2, va="top")
     fig.subplots_adjust(left=0.15, right=0.98, top=0.8, bottom=0.04)
     return fig
 
