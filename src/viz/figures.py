@@ -1009,8 +1009,11 @@ WEEK_DATES = ["29 Oct", "5 Nov", "12 Nov", "19 Nov", "26 Nov", "3 Dec", "10 Dec"
 WEEK_MILESTONES = [("data map", False), ("midterm", False), ("1st feature", False), ("beta", False),
                    ("harness + MCP", False), ("baseline", True), ("PoC + ethics", False), ("final", False),
                    ("blog", False)]
-WORKSTREAM_COLOURS = {"Deliverables": "#111111", "Data": "#8c8c8c", "Pilot": "#bdbdbd", "Models": "#3d3d3d",
-                      "Agent and MCP": "#a6a6a6", "Engineering partners": "#666666", "Integration": "#262626"}
+# One clearly different look per workstream (never two greys): (fill, hatch); every edge is black.
+WORKSTREAM_STYLE = {"Deliverables": ("#111111", None), "Data": ("#9a9a9a", None), "Pilot": ("white", None),
+                    "Models": ("white", "////"), "Agent and MCP": ("white", "xxx"),
+                    "Engineering partners": ("white", "oo"), "Integration": ("white", "--")}
+RISK_EDGE = dict(ls=(0, (4, 2)), lw=2.0)  # at risk (needs the engineering partners): thick dashed border
 
 
 def timeline():
@@ -1020,15 +1023,15 @@ def timeline():
     ax.axvspan(3, 4, color="#efefef", zorder=0)
     ax.text(3.5, n - 0.9, "hackathon\n(no studio)", ha="center", va="center", fontsize=8.5, color=INK_2)
     previous = None
+    plt.rcParams["hatch.linewidth"] = 1.3
     for i, (stream, task, start, end, risk) in enumerate(PLAN):
-        colour = WORKSTREAM_COLOURS[stream]
+        fill, hatch = WORKSTREAM_STYLE[stream]
         if stream != previous and previous is not None:
             ax.axhline(i - 0.5, color=GRID, lw=0.8, zorder=1)
         previous = stream
-        ax.add_patch(FancyBboxPatch((start - 1 + 0.06, i - 0.26), end - start + 1 - 0.12, 0.52,
-                                    boxstyle="round,pad=0,rounding_size=0.12", zorder=2,
-                                    facecolor=colour if not risk else "white", edgecolor=colour,
-                                    hatch="///" if risk else None, lw=1.6))
+        ax.add_patch(FancyBboxPatch((start - 1 + 0.06, i - 0.36), end - start + 1 - 0.12, 0.72,
+                                    boxstyle="round,pad=0,rounding_size=0.12", zorder=2, facecolor=fill,
+                                    edgecolor=INK, hatch=hatch, **(RISK_EDGE if risk else dict(lw=1.4))))
     for w, (label, risk) in enumerate(WEEK_MILESTONES):  # one milestone per week, on one row
         ax.text(w + 0.5, -0.95, label + (" (at risk)" if risk else ""), ha="center", va="center", fontsize=10.5,
                 color=INK_2 if risk else INK, style="italic" if risk else "normal")
@@ -1042,8 +1045,9 @@ def timeline():
     ax.tick_params(length=0)
     for s in ax.spines.values():
         s.set_visible(False)
-    handles = [Patch(facecolor=c, edgecolor=c, label=s) for s, c in WORKSTREAM_COLOURS.items()]
-    handles.append(Patch(facecolor="white", edgecolor=INK_2, hatch="///", label="At risk"))
+    handles = [Patch(facecolor=fill, edgecolor=INK, hatch=hatch, lw=1.4, label=s)
+               for s, (fill, hatch) in WORKSTREAM_STYLE.items()]
+    handles.append(Patch(facecolor="white", edgecolor=INK, label="At risk", **RISK_EDGE))
     _house_legend(fig, handles, [h.get_label().upper() for h in handles])
     H, W = fig.get_figheight(), fig.get_figwidth()  # title as in the other figures: 38 pt on a 24 in figure
     fig.text(0.02, 1 - 0.45 / H, "PROJECT ROADMAP", fontsize=38 * W / 24, weight="bold", color=INK, va="center")
