@@ -398,9 +398,9 @@ def decisions_and_players():
             label(tx, cy, name, size=size, colour=ink, weight="bold")
 
     # title, heading, colour key
-    label(1.5, 92.6, "Decisions and players", size=40, weight="bold", ha="left")
-    label(139.5, 92.6, "02", size=40, weight="bold", ha="right")
-    label(1.5, 87.6, "Who decides what, and what passes between players", size=22, colour=FLOW_TEXT, weight="bold",
+    label(1.5, 92.6, "DECISIONS AND PLAYERS", size=38 * 28.2 / 24, weight="bold", ha="left")
+    label(139.5, 92.6, "02", size=40 * 28.2 / 24, weight="bold", ha="right")
+    label(1.5, 87.0, "Who decides what, and what passes between players", size=18 * 28.2 / 24, colour=FLOW_TEXT, weight="bold",
           ha="left")
     kx = 72.0
     for fill, edge, name in (("white", FLOW_INK, "PEOPLE AND PHOTOS"), (FLOW_RULE, FLOW_RULE, "WRITTEN RULES (CODE)"),
@@ -553,8 +553,8 @@ def risk_matrix():
     ax.set_xlim(0, 180)
     ax.set_ylim(0, 104)
     ax.set_axis_off()
-    ax.text(3, 98.5, "Risk matrix", fontsize=34, weight="bold", color=K, va="center")
-    ax.text(177, 98.5, "03", fontsize=34, weight="bold", color=K, va="center", ha="right")
+    ax.text(3, 98.5, "RISK MATRIX", fontsize=38 * 18 / 24, weight="bold", color=K, va="center")
+    ax.text(177, 98.5, "03", fontsize=40 * 18 / 24, weight="bold", color=K, va="center", ha="right")
     ax.text(3, 92.6, f"Reinforced concrete, v{VERSION}. Base category from the crack pattern × width; the element, the "
             "location on the element and warning signs can only raise it. Values illustrative until calibrated with "
             "the engineering partners.", fontsize=11, color=GREY_TXT, va="center")
@@ -889,7 +889,7 @@ def dataset_sizes():
             used = row[3 + k]
             ax.plot(x, y, transform=trans, marker="o" if used else "_", ms=15 if used else 12,
                     color=K if used else "#9a9a9a", mew=2, clip_on=False)
-    fig.suptitle("WHAT WE FOUND AND HOW IT COULD HELP", x=0.02, ha="left", fontsize=18, weight="bold",
+    fig.suptitle("WHAT WE FOUND AND HOW IT COULD HELP", x=0.02, ha="left", fontsize=38 * 17 / 24, weight="bold",
                  color=K)
     fig.text(0.02, 0.905, "Train: teach a model.  Test: check a model or the quality gate on data it has not seen.  "
              "Measure: the photos carry a scale, so crack widths in mm can be checked.\nCounts and licences from each "
