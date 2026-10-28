@@ -95,6 +95,9 @@ def pattern_examples():
             "label; 'team pick': chosen by the team, to confirm with the engineer.", fontsize=13, color="#444444",
             va="center")
     col_w, size, top = 33.6, 30.0, 100.0
+    for k in range(1, len(EXAMPLES)):  # a separator line between patterns
+        x = 2.4 + col_w * k
+        ax.plot([x, x], [6.5, 117.5], color="#8a8a8a", lw=1.6, ls=(0, (6, 4)), zorder=0)
     for k, (pattern, photos, basis) in enumerate(EXAMPLES):
         xc = 2.4 + col_w * (k + 0.5)
         ax.add_patch(FancyBboxPatch((xc - 15, 105.5), 30, 10, boxstyle="round,pad=0,rounding_size=0.8",
