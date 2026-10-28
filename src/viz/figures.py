@@ -1436,9 +1436,117 @@ def pipeline_flow():
     return fig
 
 
+# The story of figure 01b in five steps, for a talk. Same colour logic: white = photos and people,
+# grey = written rules, black = learned models. Details (dispatch, three scales, scene check) stay in 01b.
+SIMPLE_STEPS = [  # (x, kind, icon, word, one line)
+    (24, "photo", "camera", "PHOTO", "A resident photographs\nthe crack"),
+    (70, "rule", "check", "CHECK", "Is the photo\nusable?"),
+    (116, "model", "network", "MEASURE", "Models find the crack:\nwidth in mm, pattern,\nconfidence"),
+    (162, "rule", "rulebook", "DECIDE", "The written risk matrix\ngives a category"),
+]
+SIMPLE_OUTCOMES = [  # (y, category, what happens; fill, edge, ink as in the risk matrix)
+    (89, "CATEGORY 1", "Monitor, recheck\nin 6 months", "white", "#111111", "#111111"),
+    (74, "CATEGORY 2", "Low-cost advice,\nrecheck in 1 month", "#d2d2d2", "#d2d2d2", "#111111"),
+    (59, "CATEGORY 3", "An engineer\nmust confirm", "#111111", "#111111", "white"),
+]
+
+
+def pipeline_simple():
+    """Figure 01b told in five big steps: photo, check, measure, decide, act; two stops and two loops."""
+    fig = plt.figure(figsize=(24, 13.5), facecolor="white")
+    ax = fig.add_axes([0, 0, 1, 1])  # units of 0.1 inch
+    ax.set_xlim(0, 240)
+    ax.set_ylim(0, 135)
+    ax.set_axis_off()
+    t = _flow_tools(ax)
+    K, GREY = FLOW_INK, FLOW_RULE
+
+    def card(cx, cy, w, h, fill, edge, lw=2.4):
+        ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2), w, h, boxstyle="round,pad=0,rounding_size=2.2",
+                                    facecolor=fill, edgecolor=edge, lw=lw, zorder=4))
+
+    def arrow(points, ls="-", lw=3.2):
+        xs, ys = zip(*points)
+        ax.plot(xs[:-1], ys[:-1], color=K, lw=lw, ls=ls, zorder=2, solid_capstyle="round")
+        ax.annotate("", xy=points[-1], xytext=points[-2], zorder=2,
+                    arrowprops=dict(arrowstyle="-|>", color=K, lw=lw, ls="-", shrinkA=0, shrinkB=0,
+                                    mutation_scale=26))
+
+    def stop(cx, cy, word, sub):
+        t.mark(cx, cy, False, r=2.6)
+        t.label(cx + 4.2, cy + 1.6, word, size=19, weight="bold", ha="left")
+        t.label(cx + 4.2, cy - 2.6, sub, size=12.5, colour=FLOW_TEXT, ha="left")
+
+    t.label(2.4, 127.5, "SYSTEM ARCHITECTURE", size=38, weight="bold", ha="left")
+    t.label(237.6, 127.5, "01c", size=40, weight="bold", ha="right")
+    t.label(2.4, 119.5, "Second Look in five steps: from a resident's photo to an engineer's decision", size=18,
+            colour=FLOW_TEXT, weight="bold", ha="left")
+    kx = 150
+    for fill, edge, name in (("white", K, "PEOPLE"), (GREY, GREY, "WRITTEN RULES"), (K, K, "LEARNED MODELS")):
+        ax.add_patch(FancyBboxPatch((kx, 118.3), 4.4, 2.6, boxstyle="round,pad=0,rounding_size=0.5", facecolor=fill,
+                                    edgecolor=edge, lw=1.8, zorder=4))
+        t.label(kx + 5.6, 119.6, name, size=12.5, weight="bold", ha="left")
+        kx += 9.5 + 1.05 * len(name)
+
+    # the four steps up to the category
+    cy, w, h = 80, 30, 30
+    styles = {"photo": ("white", K, K), "rule": (GREY, GREY, K), "model": (K, K, "white")}
+    for k, (cx, kind, icon, word, line_) in enumerate(SIMPLE_STEPS):
+        fill, edge, ink = styles[kind]
+        ax.add_patch(plt.Circle((cx, cy + h / 2 + 5.5), 3.0, color=K, zorder=4))
+        t.label(cx, cy + h / 2 + 5.5, str(k + 1), size=20, colour="white", weight="bold")
+        card(cx, cy, w, h, fill, edge)
+        _handoff_icon(ax, icon, cx, cy + 4.5, s=13, ink=ink, paper=fill)
+        t.label(cx, cy - 9.0, word, size=24, colour=ink, weight="bold")
+        t.label(cx, cy - h / 2 - 3.0, line_, size=13.5, colour=FLOW_TEXT, va="top")
+        if k:
+            arrow([(SIMPLE_STEPS[k - 1][0] + w / 2 + 1, cy), (cx - w / 2 - 1.2, cy)])
+
+    # step 5: act on the category
+    ax.add_patch(plt.Circle((198, cy + h / 2 + 5.5), 3.0, color=K, zorder=4))
+    t.label(198, cy + h / 2 + 5.5, "5", size=20, colour="white", weight="bold")
+    t.label(204, cy + h / 2 + 5.5, "ACT", size=24, weight="bold", ha="left")
+    for oy, cat, what, fill, edge, ink in SIMPLE_OUTCOMES:
+        card(212, oy, 46, 13, fill, edge, lw=2.0)
+        t.label(212, oy + 3.2, cat, size=17, colour=ink, weight="bold")
+        t.label(212, oy - 3.0, what, size=12, colour=ink)
+        arrow([(162 + w / 2 + 1, cy), (181, cy), (181, oy), (188.2, oy)], lw=2.6)
+
+    # the two stops: any doubt goes to a person
+    x_check, x_model = SIMPLE_STEPS[1][0], SIMPLE_STEPS[2][0]
+    arrow([(x_check, 51), (x_check, 37.5)], lw=2.6)
+    stop(x_check, 34.5, "RETAKE", "a new photo,\nnever a guess")
+    arrow([(x_model, 51), (x_model, 37.5)], lw=2.6)
+    stop(x_model, 34.5, "EXPERT NEEDED", "the model is unsure:\nnever Category 1")
+    t.label(x_check + 3, 46, "no", size=13, weight="bold", ha="left")
+    t.label(x_model + 3, 46, "unsure", size=13, weight="bold", ha="left")
+
+    # the engineer: confirms every Category 3 and every referral
+    ex, ey = 212, 30
+    card(ex, ey, 46, 15, "white", K)
+    _handoff_icon(ax, "hardhat", ex - 14, ey, s=9)
+    t.label(ex + 4, ey + 2.4, "ENGINEER", size=19, weight="bold")
+    t.label(ex + 4, ey - 3.0, "confirms on site", size=12, colour=FLOW_TEXT)
+    arrow([(212, 52.5), (212, 38.0)], lw=2.6)
+    arrow([(146, 34.5), (188.2, 34.5)], lw=2.6)
+
+    # loops: recheck (people) and learning (models)
+    arrow([(235, 89), (237.5, 89), (237.5, 109), (24, 109), (24, cy + h / 2 + 8.5)], ls=(0, (4, 3)), lw=2.2)
+    t.label(118, 111.3, "RECHECK: the same crack is photographed again; growth raises the category", size=13,
+            weight="bold")
+    arrow([(ex, 22.5), (ex, 12), (x_model - 12.5, 12), (x_model - 12.5, cy - h / 2 - 1.2)], ls=(0, (4, 3)), lw=2.2)
+    t.label(160, 14.3, "LEARN: the engineer's corrections retrain the models", size=13, weight="bold")
+
+    t.label(2.4, 3.5, "Simplified view of figure 01b (field visit, building / element / crack scales and scene check "
+            "are shown there). Second Look never issues a safety clearance. Recheck times illustrative until "
+            "calibrated.", size=10.5, colour=FLOW_SOFT, ha="left")
+    return fig
+
+
 FIGURES = {
     "01_pipeline.png": pipeline,
     "01b_pipeline_flow.png": pipeline_flow,
+    "01c_pipeline_simple.png": pipeline_simple,
     "02_decisions_and_players.png": decisions_and_players,
     "03_risk_matrix.png": risk_matrix,
     "04_segmentation_tree.png": segmentation_tree,
