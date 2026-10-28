@@ -963,7 +963,7 @@ def confusion_template():
         ax.tick_params(length=0)
         for s in ax.spines.values():
             s.set_visible(False)
-    _house_title(fig, "EVALUATION", "How the tool will be scored")
+    _house_title(fig, "CONFUSION MATRIX", "How the tool will be scored")
     fig.text(0.02, 0.02, "Template: counts come from a held-out set of engineer-labelled photos, which does not "
              "exist yet. The non-AI baseline (engineer looks at the photo only) is scored the same way. "
              "spec/features/evaluation.md", fontsize=9, color=INK_2)
