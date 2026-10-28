@@ -210,12 +210,16 @@ def histogram(rows: list[dict], path: Path) -> None:
                     va="top", ha="right", fontsize=8, color=INK_2)
     for row in axes:
         row[0].set_ylabel("Images")
-    fig.suptitle("Quality gate on real images: public dataset samples", x=0.02, ha="left", fontsize=14, weight="bold")
-    top = 1 - 1.3 / height
-    fig.text(0.02, top + 0.02, f"Panels ordered by fit to our concept, best first (docs/data_map.md). "
+    width = 5.2 * cols  # title as in the other figures: bold capitals, 38 pt on a 24 in figure
+    fig.text(0.02, 1 - 0.6 / height, "QUALITY GATE ON REAL IMAGES", fontsize=38 * width / 24, weight="bold",
+             color="#111111", va="center")
+    fig.text(0.985, 1 - 0.6 / height, "08", fontsize=40 * width / 24, weight="bold", color="#111111", va="center",
+             ha="right")
+    top = 1 - 1.75 / height
+    fig.text(0.02, top + 0.015, f"Public dataset samples. Panels ordered by fit to our concept, best first (docs/data_map.md). "
              f"Images left of the red line would be asked to retake. Brightness limits "
              f"{MIN_BRIGHTNESS:g} to {MAX_BRIGHTNESS:g}.\nNot phone photos: tests the code, does not calibrate "
-             "thresholds. PHI-Net images are 224 px crops, measured as they are (never scaled up).", fontsize=9.5, color=INK_2, va="bottom")
+             "thresholds. PHI-Net images are 224 px crops, measured as they are (never scaled up).", fontsize=11, color=INK_2, va="bottom")
     fig.subplots_adjust(left=0.05, right=0.985, top=top - 0.05, bottom=0.07, wspace=0.16, hspace=0.62)
     fig.savefig(path, dpi=200)
     plt.close(fig)
