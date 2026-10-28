@@ -1,6 +1,6 @@
 # Second Look
 
-Second Look is a human-in-the-loop triage system for cracks in reinforced concrete. It checks the photo and the material, finds and measures the crack in millimetres, classifies its pattern, and applies written, auditable risk rules, returning a level with its confidence. An engineer confirms every Category 3 and every referral, and their corrections retrain the models. It never issues a safety clearance.
+Second Look helps people living in ageing reinforced-concrete buildings decide whether a crack needs an engineer. A resident photographs a crack in a concrete beam, column, slab or wall. The app checks the photo, measures the crack's width in millimetres and recognises its pattern. Written, auditable rules then sort it into one of three categories: monitor, low-cost advice and a recheck, or an engineer must confirm. Whenever the system is unsure, it sends the case to an expert, and every correction the engineer makes improves the models. It never says a building is safe: it decides who looks next, and how soon.
 
 IAAC Barcelona, MaAI, Research Studio "Operable Futures", 2026-27.
 Team: Jerome Eid (@jeromgeid-ui), Luis Sebastian Wulf (@wulfluis).
