@@ -180,8 +180,8 @@ def histogram(rows: list[dict], path: Path) -> None:
     groups = sorted({r["group"] for r in rows}, key=lambda g: (rank.get(g, len(rank)), g))
     cols = min(4, len(groups))  # landscape; panels keep their order, read left to right
     nrows = -(-len(groups) // cols)
-    height = max(4.1 * nrows + 1.9, 0.5625 * 5.2 * cols)  # at least 16:9
-    fig, axes = plt.subplots(nrows, cols, figsize=(5.2 * cols, height), squeeze=False)
+    height = 13.5  # 16:9 like every figure (24 x 13.5 in, 4800 x 2700 px)
+    fig, axes = plt.subplots(nrows, cols, figsize=(24, height), squeeze=False)
     for ax in axes.flat[len(groups):]:
         ax.set_axis_off()
     bins = np.logspace(0, 4.5, 37)
@@ -212,11 +212,9 @@ def histogram(rows: list[dict], path: Path) -> None:
             ax.spines[s].set_visible(False)
     for row in axes:
         row[0].set_ylabel("Images")
-    width = 5.2 * cols  # title as in the other figures: bold capitals, 38 pt on a 24 in figure
+    width = 24  # title as in the other figures: bold capitals, 38 pt on a 24 in figure
     fig.text(0.02, 1 - 0.6 / height, "QUALITY GATE ASSESSMENT ON IMAGERY DATABASE", fontsize=38 * width / 24, weight="bold",
              color="#111111", va="center")
-    fig.text(0.985, 1 - 0.6 / height, "08", fontsize=40 * width / 24, weight="bold", color="#111111", va="center",
-             ha="right")
     top = 1 - 1.75 / height
     fig.text(0.02, top + 0.015, f"Public dataset samples. Panels ordered by fit to our concept, best first (docs/data_map.md). "
              f"Red line: blur limit (illustrative); images left of it would be asked to retake. Brightness limits "

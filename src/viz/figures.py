@@ -27,7 +27,8 @@ BLUE, AQUA, VIOLET = "#333333", "#8c8c8c", "#5c5c5c"
 SEQ = {"covered": "#262626", "partial": "#7a7a7a", "planned": "#cfcfcf", "none": SURFACE}
 # Status colours are reserved for triage levels, always with a text label.
 LEVEL = {"Category 1": "#e6e6e6", "Category 2": "#a6a6a6", "Category 3": "#111111", "Expert needed": "#595959", "Retake": MUTED}
-ON_FILL = {"Category 1": INK, "Category 2": INK}  # dark text on the light fills, white elsewhere
+ON_FILL = {"Category 1": INK, "Category 2": INK}
+SLIDE_PX = 4800  # every figure is 16:9 and saved 4800 px wide (4800 x 2700), to drop straight into a slide  # dark text on the light fills, white elsewhere
 
 plt.rcParams.update({
     "font.family": "sans-serif",
@@ -44,11 +45,10 @@ plt.rcParams.update({
 })
 
 
-def _house_title(fig, title, number, subtitle=None):
-    """The title every figure carries: bold capitals, 38 pt on a 24 in wide figure, number on the right."""
+def _house_title(fig, title, subtitle=None):
+    """The title every figure carries: bold capitals, 38 pt on a 24 in wide figure (no number: added in the deck)."""
     H, W = fig.get_figheight(), fig.get_figwidth()
     fig.text(0.02, 1 - 0.5 / H, title, fontsize=38 * W / 24, weight="bold", color=INK, va="center")
-    fig.text(0.98, 1 - 0.5 / H, number, fontsize=40 * W / 24, weight="bold", color=INK, va="center", ha="right")
     if subtitle:
         fig.text(0.02, 1 - 1.0 / H, subtitle, fontsize=18 * W / 24, weight="bold", color=INK_2, va="center")
 
@@ -369,9 +369,11 @@ WHO_DECIDES = [
 
 def decisions_and_players():
     """Who decides what, and when: players as lifelines, hand-offs as numbered arrows, decisions as diamonds."""
-    fig = plt.figure(figsize=(28.2, 19.2), facecolor="white")
+    W = 19.2 * 16 / 9  # 16:9 like every figure; the 141-unit drawing sits in the middle
+    pad = (W / 0.2 - 141) / 2
+    fig = plt.figure(figsize=(W, 19.2), facecolor="white")
     ax = fig.add_axes([0, 0, 1, 1])
-    ax.set_xlim(0, 141)
+    ax.set_xlim(-pad, 141 + pad)
     ax.set_ylim(0, 96)
     ax.set_axis_off()
     t = _flow_tools(ax)
@@ -408,9 +410,8 @@ def decisions_and_players():
             label(tx, cy, name, size=size, colour=ink, weight="bold")
 
     # title, heading, colour key
-    label(1.5, 92.6, "DECISIONS AND PLAYERS", size=38 * 28.2 / 24, weight="bold", ha="left")
-    label(139.5, 92.6, "02", size=40 * 28.2 / 24, weight="bold", ha="right")
-    label(1.5, 87.0, "Who decides what, and what passes between players", size=18 * 28.2 / 24, colour=FLOW_TEXT, weight="bold",
+    label(1.5 - pad, 92.6, "DECISIONS AND PLAYERS", size=38 * W / 24, weight="bold", ha="left")
+    label(1.5 - pad, 87.0, "Who decides what, and what passes between players", size=18 * W / 24, colour=FLOW_TEXT, weight="bold",
           ha="left")
     kx = 72.0
     for fill, edge, name in (("white", FLOW_INK, "PEOPLE AND PHOTOS"), (FLOW_RULE, FLOW_RULE, "WRITTEN RULES (CODE)"),
@@ -558,13 +559,14 @@ def risk_matrix():
     """Matrix v3 in black, white and grey: base category per pattern (drawn symbol) x width band, and what raises it.
     Values read from src/triage/risk_matrix_v3.json; pattern symbol key in spec/features/figures.md."""
     K, GREY_TXT = "#111111", "#555555"
-    fig = plt.figure(figsize=(18, 10.4), facecolor="white")
+    W = 10.4 * 16 / 9  # 16:9 like every figure
+    pad = (W / 0.1 - 180) / 2
+    fig = plt.figure(figsize=(W, 10.4), facecolor="white")
     ax = fig.add_axes([0, 0, 1, 1])
-    ax.set_xlim(0, 180)
+    ax.set_xlim(-pad, 180 + pad)
     ax.set_ylim(0, 104)
     ax.set_axis_off()
-    ax.text(3, 98.5, "RISK MATRIX", fontsize=38 * 18 / 24, weight="bold", color=K, va="center")
-    ax.text(177, 98.5, "03", fontsize=40 * 18 / 24, weight="bold", color=K, va="center", ha="right")
+    ax.text(3 - pad, 98.5, "RISK MATRIX", fontsize=38 * W / 24, weight="bold", color=K, va="center")
     ax.text(3, 92.6, f"Reinforced concrete, v{VERSION}. Base category from the crack pattern × width; the element, the "
             "location on the element and warning signs can only raise it. Values illustrative until calibrated with "
             "the engineering partners.", fontsize=11, color=GREY_TXT, va="center")
@@ -698,10 +700,10 @@ def segmentation_tree():
     path converges into the atomic problem and the building path into the building risk score."""
     import textwrap
 
-    fig, ax = plt.subplots(figsize=(22, 12.2))
+    fig, ax = plt.subplots(figsize=(22, 22 * 9 / 16))
     ax.set_axis_off()
-    _house_title(fig, "PROBLEM SEGMENTATION TREE", "04")
-    fig.text(0.02, 1 - 1.45 / 12.2, "Macro problem → four branches → causes and needs → the atomic problem (one crack) and the "
+    _house_title(fig, "PROBLEM SEGMENTATION TREE")
+    fig.text(0.02, 1 - 1.45 / fig.get_figheight(), "Macro problem → four branches → causes and needs → the atomic problem (one crack) and the "
              "building risk score (one building). Under each node: its evidence, as a source number (docs/sources.md),"
              "\nexpert input (studio professor, 27 Oct), measured (our data map) or an assumption still to test. "
              "S, O, P: the scale of the photo, as in PHI-Net task 1 (structural, object, pixel).", fontsize=11,
@@ -784,7 +786,7 @@ def segmentation_tree():
     ax.set_xlim(-1.0, width + 1.0)
     ax.set_ylim(0.9, 12.9)
     ax.set_aspect("equal")
-    fig.subplots_adjust(left=0.01, right=0.99, top=1 - 2.1 / 12.2, bottom=0.03)
+    fig.subplots_adjust(left=0.01, right=0.99, top=1 - 2.1 / fig.get_figheight(), bottom=0.03)
     return fig
 
 
@@ -812,7 +814,7 @@ COVERAGE_LABEL = {"covered": "covers", "partial": "partly", "planned": "planned"
 
 
 def data_coverage():
-    fig, ax = plt.subplots(figsize=(21, 8.4))
+    fig, ax = plt.subplots(figsize=(21, 21 * 9 / 16))
     for r, row in enumerate(COVERAGE):
         for c, state in enumerate(row):
             ax.add_patch(FancyBboxPatch((c + 0.04, r + 0.08), 0.92, 0.84, boxstyle="round,pad=0,rounding_size=0.05",
@@ -831,7 +833,7 @@ def data_coverage():
                        [("covered", "Covers the need"), ("partial", "Partly"), ("planned", "Planned, does not exist yet"),
                         ("none", "Nothing")]],
               loc="upper center", bbox_to_anchor=(0.5, -0.02), ncol=4, frameon=False)
-    _house_title(fig, "DATA MAP", "05", "Which source feeds which pipeline stage")
+    _house_title(fig, "DATA MAP", "Which source feeds which pipeline stage")
     fig.text(0.02, 1 - 1.4 / fig.get_figheight(), "Public data covers only crack segmentation (P); every other stage needs our own photos or an "
              "engineer. From docs/data_map.md, section 1 (27 Oct 2026).", fontsize=10, color=INK_2)
     fig.subplots_adjust(left=0.13, right=0.99, top=1 - 2.3 / fig.get_figheight(), bottom=0.1)
@@ -860,7 +862,7 @@ DATASETS = [
 def dataset_sizes():
     """What data exists and what each set can be used for (train, test, measure), in black and white."""
     K = "#111111"
-    fig, ax = plt.subplots(figsize=(17, 8.6))
+    fig, ax = plt.subplots(figsize=(17, 17 * 9 / 16))
     names = [d[0] for d in DATASETS]
     ys = range(len(DATASETS))
     ax.barh(ys, [d[1] for d in DATASETS], height=0.5, color=K)
@@ -909,7 +911,7 @@ def dataset_sizes():
 
 
 def confusion_template():
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(14, 6.4), gridspec_kw={"width_ratios": [1, 1.6]})
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(14, 14 * 9 / 16), gridspec_kw={"width_ratios": [1, 1.6]})
     cells = [  # (row, col, title, meaning, colour)
         (0, 0, "TP", "danger caught,\nengineer visits", LEVEL["Category 1"]),
         (0, 1, "FN", "missed danger:\nwrong all-clear. Stop condition", LEVEL["Category 3"]),
@@ -956,11 +958,11 @@ def confusion_template():
         ax.tick_params(length=0)
         for s in ax.spines.values():
             s.set_visible(False)
-    _house_title(fig, "EVALUATION", "07", "How the tool will be scored")
+    _house_title(fig, "EVALUATION", "How the tool will be scored")
     fig.text(0.02, 0.02, "Template: counts come from a held-out set of engineer-labelled photos, which does not "
              "exist yet. The non-AI baseline (engineer looks at the photo only) is scored the same way. "
              "spec/features/evaluation.md", fontsize=9, color=INK_2)
-    fig.subplots_adjust(left=0.1, right=0.98, top=1 - 2.2 / 6.4, bottom=0.09, wspace=0.25)
+    fig.subplots_adjust(left=0.1, right=0.98, top=1 - 2.2 / fig.get_figheight(), bottom=0.09, wspace=0.25)
     return fig
 
 
@@ -1008,7 +1010,7 @@ WORKSTREAM_COLOURS = {"Deliverables": "#111111", "Data": "#8c8c8c", "Pilot": "#b
 
 def timeline():
     weeks = len(WEEK_DATES)
-    fig, ax = plt.subplots(figsize=(14, 10.9))
+    fig, ax = plt.subplots(figsize=(10.9 * 16 / 9, 10.9))
     n = len(PLAN)
     ax.axvspan(3, 4, color="#efefef", zorder=0)
     ax.text(3.5, n - 0.9, "hackathon\n(no studio)", ha="center", va="center", fontsize=8.5, color=INK_2)
@@ -1040,7 +1042,6 @@ def timeline():
     ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.4, -0.01), ncol=4, frameon=False)
     H, W = fig.get_figheight(), fig.get_figwidth()  # title as in the other figures: 38 pt on a 24 in figure
     fig.text(0.02, 1 - 0.45 / H, "PROJECT ROADMAP", fontsize=38 * W / 24, weight="bold", color=INK, va="center")
-    fig.text(0.98, 1 - 0.45 / H, "09", fontsize=40 * W / 24, weight="bold", color=INK, va="center", ha="right")
     fig.text(0.02, 1 - 0.95 / H, "Plan to the final presentation, 29 Oct to 24 Dec 2026", fontsize=18 * W / 24,
              weight="bold", color=INK_2, va="center")
     fig.text(0.02, 1 - 1.25 / H, "Milestones from the studio syllabus. Engineering partners: Engineers Without Borders and a "
@@ -1088,7 +1089,7 @@ HELD_MISSING = {"CrackSeg9k": "zip not extracted"}
 
 def dataset_comparison():
     n = len(HELD)
-    fig, ax = plt.subplots(figsize=(19, 0.62 * n + 3.3))
+    fig, ax = plt.subplots(figsize=((0.62 * n + 3.3) * 16 / 9, 0.62 * n + 3.3))
     # x layout: name | fit | images bar | gate bar | labels | trains | licence
     x_fit, x_img, w_img, x_gate, w_gate, x_lab, x_use, x_lic, x_end = 3.3, 4.6, 3.0, 8.3, 1.6, 10.6, 13.6, 16.4, 18.2
     top = 40_000
@@ -1132,7 +1133,6 @@ def dataset_comparison():
     ax.set_axis_off()
     H, W = fig.get_figheight(), fig.get_figwidth()  # title as in the other figures: 38 pt on a 24 in figure
     fig.text(0.01, 1 - 0.6 / H, "DATASET LABELS AND TRAINING OBJECTIVES", fontsize=38 * W / 24, weight="bold", color=INK, va="center")
-    fig.text(0.99, 1 - 0.6 / H, "10", fontsize=40 * W / 24, weight="bold", color=INK, va="center", ha="right")
     fig.text(0.01, 1 - 1.25 / H, "Every dataset we hold, compared: fit to the concept, size, quality, labels, use",
              fontsize=18 * W / 24, weight="bold", color=INK_2, va="center")
     fig.text(0.01, 1 - 1.6 / H,
@@ -1255,9 +1255,11 @@ def _flow_tools(ax):
 
 def pipeline_flow():
     """Pipeline v3 drawn as a task flow: phases as columns, scales as lanes; colour = photo, rule or model."""
-    fig = plt.figure(figsize=(24, 17.6), facecolor="white")
+    W = 17.6 * 16 / 9  # 16:9 like every figure; the 120-unit drawing sits in the middle
+    pad = (W / 0.2 - 120) / 2
+    fig = plt.figure(figsize=(W, 17.6), facecolor="white")
     ax = fig.add_axes([0, 0, 1, 1])
-    ax.set_xlim(0, 120)
+    ax.set_xlim(-pad, 120 + pad)
     ax.set_ylim(0, 88)
     ax.set_axis_off()
 
@@ -1291,9 +1293,9 @@ def pipeline_flow():
         label(cx, cy - 1.4, title, size=14, weight="bold")
 
     # title, section heading, colour key, columns
-    label(1.5, 84.6, "SYSTEM ARCHITECTURE", size=38, weight="bold", ha="left")
-    label(118.5, 84.6, "01", size=40, weight="bold", ha="right")
-    label(1.5, 79.2, "The triage mechanism: from a resident's photo to an engineer's decision", size=18, colour=FLOW_TEXT, weight="bold", ha="left")
+    label(1.5 - pad, 84.6, "SYSTEM ARCHITECTURE", size=38 * W / 24, weight="bold", ha="left")
+    label(1.5 - pad, 79.2, "The triage mechanism: from a resident's photo to an engineer's decision", size=18 * W / 24,
+          colour=FLOW_TEXT, weight="bold", ha="left")
     kx = 61.5
     for fill, edge, name in (("white", FLOW_INK, "PHOTOS AND PEOPLE"), (FLOW_RULE, FLOW_RULE, "WRITTEN RULES (CODE)"),
                              (FLOW_MODEL, FLOW_MODEL, "LEARNED MODELS (WITH A CONFIDENCE)")):
@@ -1512,7 +1514,6 @@ def pipeline_simple():
         t.label(22.5, cy, word, size=17, weight="bold")
 
     t.label(2.4, 127.5, "SYSTEM ARCHITECTURE", size=38, weight="bold", ha="left")
-    t.label(237.6, 127.5, "01c", size=40, weight="bold", ha="right")
     t.label(2.4, 119.5, "The triage mechanism in summary: from a resident's photo to an engineer's decision", size=18,
             colour=FLOW_TEXT, weight="bold", ha="left")
     kx = 150
@@ -1640,7 +1641,7 @@ def pipeline_story():
         t.label(cx + 2.8, top - 4.2, word, size=14, weight="bold", ha="left")
         t.label(cx + 2.8 + 1.3 * len(word) + 1.5, top - 4.2, why, size=12, colour=FLOW_TEXT, ha="left")
 
-    _house_title(fig, "SYSTEM ARCHITECTURE", "01d")
+    _house_title(fig, "SYSTEM ARCHITECTURE")
     t.label(2.4, 119.5, "Second Look in plain words. The system never says \"safe\": it decides who looks next, and how "
             "soon.", size=18, colour=FLOW_TEXT, weight="bold", ha="left")
     kx = 162  # legend on one line, top right, on the title row
@@ -1751,7 +1752,7 @@ def main(out_dir: Path = Path(__file__).resolve().parents[2] / "figures") -> lis
     for name, make in FIGURES.items():
         fig = make()
         path = out_dir / name
-        fig.savefig(path, dpi=200)
+        fig.savefig(path, dpi=SLIDE_PX / fig.get_figwidth())  # 16:9 figures come out at 4800 x 2700 px
         plt.close(fig)
         paths.append(path)
     return paths
