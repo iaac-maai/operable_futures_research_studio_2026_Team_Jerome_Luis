@@ -1022,12 +1022,11 @@ def timeline():
                                     boxstyle="round,pad=0,rounding_size=0.12", zorder=2,
                                     facecolor=colour if not risk else "white", edgecolor=colour,
                                     hatch="///" if risk else None, lw=1.6))
-    for k, (x, label, risk) in enumerate(MILESTONES):
-        ax.plot(x, -0.8, marker="D", ms=10, color=LEVEL["Category 3"] if not risk else "white",
-                markeredgecolor=LEVEL["Category 3"], mew=1.8, zorder=3)
-        ax.text(x, -1.85 if k % 2 == 0 else -2.75, label, ha="center", va="center", fontsize=8.5, color=INK)
+    for k, (x, label, risk) in enumerate(MILESTONES):  # milestones as text only, staggered so they never touch
+        ax.text(x, -0.9 if k % 2 == 0 else -1.9, label + (" (at risk)" if risk else ""), ha="center", va="center",
+                fontsize=8.5, color=INK, weight="bold" if not risk else "normal", style="italic" if risk else "normal")
     ax.set_xlim(0, weeks)
-    ax.set_ylim(n - 0.4, -3.3)
+    ax.set_ylim(n - 0.4, -2.6)
     ax.set_xticks([w + 0.5 for w in range(weeks)], [f"W{w + 1}\n{d}" for w, d in enumerate(WEEK_STARTS)])
     ax.set_yticks(range(n), [t[1] for t in PLAN])
     ax.xaxis.tick_top()
