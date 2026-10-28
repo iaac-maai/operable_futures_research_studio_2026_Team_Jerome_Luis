@@ -20,13 +20,14 @@ if __package__ in (None, ""):
 from triage.matrix import (_ESCALATOR_EFFECT, _LOCATION_RULE, BAND_NAMES, BANDS, BASIS, ELEMENT_RAISE, ELEMENTS,
                            ESCALATORS, MATRIX, PATTERN_NAMES, PATTERNS, VERSION)
 
-# Palette: reference instance of the dataviz skill (light mode).
-SURFACE, INK, INK_2, MUTED, GRID = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9"
-BLUE, AQUA, VIOLET = "#2a78d6", "#1baf7a", "#6250d6"
-SEQ = {"covered": "#1c5cab", "partial": "#5598e7", "planned": "#b7d3f6", "none": SURFACE}
+# Palette: black, white and greys only (the user's house style); differences also carried by labels, line styles
+# or hatching, never by grey alone.
+SURFACE, INK, INK_2, MUTED, GRID = "#ffffff", "#111111", "#4d4d4d", "#8a8a8a", "#e0e0e0"
+BLUE, AQUA, VIOLET = "#333333", "#8c8c8c", "#5c5c5c"
+SEQ = {"covered": "#262626", "partial": "#7a7a7a", "planned": "#cfcfcf", "none": SURFACE}
 # Status colours are reserved for triage levels, always with a text label.
-LEVEL = {"Category 1": "#0ca30c", "Category 2": "#fab219", "Category 3": "#d03b3b", "Expert needed": "#ec835a", "Retake": MUTED}
-ON_FILL = {"Category 2": INK}  # dark text on the yellow fill, white elsewhere
+LEVEL = {"Category 1": "#e6e6e6", "Category 2": "#a6a6a6", "Category 3": "#111111", "Expert needed": "#595959", "Retake": MUTED}
+ON_FILL = {"Category 1": INK, "Category 2": INK}  # dark text on the light fills, white elsewhere
 
 plt.rcParams.update({
     "font.family": "sans-serif",
@@ -41,6 +42,15 @@ plt.rcParams.update({
     "axes.facecolor": SURFACE,
     "savefig.facecolor": SURFACE,
 })
+
+
+def _house_title(fig, title, number, subtitle=None):
+    """The title every figure carries: bold capitals, 38 pt on a 24 in wide figure, number on the right."""
+    H, W = fig.get_figheight(), fig.get_figwidth()
+    fig.text(0.02, 1 - 0.5 / H, title, fontsize=38 * W / 24, weight="bold", color=INK, va="center")
+    fig.text(0.98, 1 - 0.5 / H, number, fontsize=40 * W / 24, weight="bold", color=INK, va="center", ha="right")
+    if subtitle:
+        fig.text(0.02, 1 - 1.0 / H, subtitle, fontsize=18 * W / 24, weight="bold", color=INK_2, va="center")
 
 
 def _box(ax, x, y, w, h, text, fill, edge, size=9.5, color=INK, weight="normal", lw=1.2):
@@ -90,14 +100,14 @@ PIPE_BOXES = {
     (2, 3): ("rule", "Crack level + growth", "matrix v3 → level, reason, next step\ngrowth counts only if larger\nthan the measurement uncertainty", "partly"),
     (2, 4): ("human", "Resident", "level, reason, next step,\nrecheck date\nnever 'safe', never a clearance", "partly"),
 }
-PIPE_STATUS = {"code": ("in code", "#2F4B7C", "#2F4B7C", "white"),
-               "partly": ("partly in code", "#dfe6f2", "#2F4B7C", "#2F4B7C"),
+PIPE_STATUS = {"code": ("in code", "#262626", "#262626", "white"),
+               "partly": ("partly in code", "#e6e6e6", "#262626", "#262626"),
                "spec": ("specified", "#FFFFFF", MUTED, INK_2)}
 
 
 def pipeline():
     """Pipeline v3: three scales (S, O, P) x five phases, scene check, monitoring and learning loops, status."""
-    kinds = {"learned": (VIOLET, "#ecebfb"), "rule": (AQUA, "#e3f5ee"), "human": (MUTED, "#f0efec")}
+    kinds = {"learned": (VIOLET, "#ececec"), "rule": (AQUA, "#f2f2f2"), "human": (MUTED, "#efefef")}
     x0, w, y0, h = [0, 4.1, 9.35, 13.45, 17.55], 3.5, [7.0, 4.25, 1.5], 2.05
     rx, rw = 8.0, 0.95  # scene check
     fig, ax = plt.subplots(figsize=(21, 12.6))
@@ -123,7 +133,7 @@ def pipeline():
                                     facecolor=TREE_NAVY, edgecolor="none"))
         ax.text(-1.375, y + h - 0.5, code, ha="center", va="center", color=TREE_YELLOW, fontsize=26, weight="bold")
         ax.text(-1.375, y + h / 2 - 0.15, name, ha="center", va="center", color="white", fontsize=10, weight="bold")
-        ax.text(-1.375, y + 0.42, what, ha="center", va="center", color="#dfe6f2", fontsize=9, linespacing=1.2)
+        ax.text(-1.375, y + 0.42, what, ha="center", va="center", color="#e6e6e6", fontsize=9, linespacing=1.2)
     for (r, c), (kind, title, body, status) in PIPE_BOXES.items():
         edge, fill = kinds[kind]
         x, y = x0[c], y0[r]
@@ -650,7 +660,7 @@ TREE = [
         ("D2", "No crack labels by engineers", "context", "", "measured: data map"),
     ]),
 ]
-TREE_YELLOW, TREE_NAVY, TREE_GREY = "#F2C14E", "#2F4B7C", "#a8a7a1"
+TREE_YELLOW, TREE_NAVY, TREE_GREY = "#c4c4c4", "#262626", "#8c8c8c"
 TREE_PATH = {"crack": TREE_YELLOW, "building": TREE_NAVY, "context": TREE_GREY}
 
 
@@ -688,10 +698,10 @@ def segmentation_tree():
     path converges into the atomic problem and the building path into the building risk score."""
     import textwrap
 
-    fig, ax = plt.subplots(figsize=(22, 11.6))
+    fig, ax = plt.subplots(figsize=(22, 12.2))
     ax.set_axis_off()
-    fig.suptitle("Problem segmentation tree", x=0.02, ha="left", fontsize=16, weight="bold")
-    fig.text(0.02, 0.915, "Macro problem → four branches → causes and needs → the atomic problem (one crack) and the "
+    _house_title(fig, "PROBLEM SEGMENTATION TREE", "04")
+    fig.text(0.02, 1 - 1.45 / 12.2, "Macro problem → four branches → causes and needs → the atomic problem (one crack) and the "
              "building risk score (one building). Under each node: its evidence, as a source number (docs/sources.md),"
              "\nexpert input (studio professor, 27 Oct), measured (our data map) or an assumption still to test. "
              "S, O, P: the scale of the photo, as in PHI-Net task 1 (structural, object, pixel).", fontsize=11,
@@ -765,7 +775,7 @@ def segmentation_tree():
             "P1 · P2 · P3", ha="center", va="center", fontsize=11, weight="bold", color="white", zorder=4)
     ax.text(centre, y_build - 0.22, "crack levels and growth from the atomic problem + building data (age, added floors, "
             "structure or use changed) + damage spread across elements", ha="center", va="center", fontsize=9.5,
-            color="#dfe6f2", zorder=4)
+            color="#e6e6e6", zorder=4)
 
     ax.legend(handles=[Line2D([], [], color=TREE_YELLOW, lw=4, label="Crack path → atomic problem (scales P, O)"),
                        Line2D([], [], color=TREE_NAVY, lw=4, label="Building path → building risk score (scale S)"),
@@ -774,7 +784,7 @@ def segmentation_tree():
     ax.set_xlim(-1.0, width + 1.0)
     ax.set_ylim(0.9, 12.9)
     ax.set_aspect("equal")
-    fig.subplots_adjust(left=0.01, right=0.99, top=0.86, bottom=0.03)
+    fig.subplots_adjust(left=0.01, right=0.99, top=1 - 2.1 / 12.2, bottom=0.03)
     return fig
 
 
@@ -802,7 +812,7 @@ COVERAGE_LABEL = {"covered": "covers", "partial": "partly", "planned": "planned"
 
 
 def data_coverage():
-    fig, ax = plt.subplots(figsize=(21, 7.8))
+    fig, ax = plt.subplots(figsize=(21, 8.4))
     for r, row in enumerate(COVERAGE):
         for c, state in enumerate(row):
             ax.add_patch(FancyBboxPatch((c + 0.04, r + 0.08), 0.92, 0.84, boxstyle="round,pad=0,rounding_size=0.05",
@@ -821,10 +831,10 @@ def data_coverage():
                        [("covered", "Covers the need"), ("partial", "Partly"), ("planned", "Planned, does not exist yet"),
                         ("none", "Nothing")]],
               loc="upper center", bbox_to_anchor=(0.5, -0.02), ncol=4, frameon=False)
-    fig.suptitle("Data map: which source feeds which pipeline stage", x=0.02, ha="left", fontsize=14, weight="bold")
-    fig.text(0.02, 0.905, "Public data covers only crack segmentation (P); every other stage needs our own photos or an "
+    _house_title(fig, "DATA MAP", "05", "Which source feeds which pipeline stage")
+    fig.text(0.02, 1 - 1.4 / fig.get_figheight(), "Public data covers only crack segmentation (P); every other stage needs our own photos or an "
              "engineer. From docs/data_map.md, section 1 (27 Oct 2026).", fontsize=10, color=INK_2)
-    fig.subplots_adjust(left=0.13, right=0.99, top=0.76, bottom=0.1)
+    fig.subplots_adjust(left=0.13, right=0.99, top=1 - 2.3 / fig.get_figheight(), bottom=0.1)
     return fig
 
 
@@ -899,7 +909,7 @@ def dataset_sizes():
 
 
 def confusion_template():
-    fig, (a1, a2) = plt.subplots(1, 2, figsize=(14, 5.4), gridspec_kw={"width_ratios": [1, 1.6]})
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(14, 6.4), gridspec_kw={"width_ratios": [1, 1.6]})
     cells = [  # (row, col, title, meaning, colour)
         (0, 0, "TP", "danger caught,\nengineer visits", LEVEL["Category 1"]),
         (0, 1, "FN", "missed danger:\nwrong all-clear. Stop condition", LEVEL["Category 3"]),
@@ -909,20 +919,20 @@ def confusion_template():
     for r, c, title, meaning, colour in cells:
         a1.add_patch(FancyBboxPatch((c + 0.04, r + 0.04), 0.92, 0.92, boxstyle="round,pad=0,rounding_size=0.05",
                                     facecolor=colour, edgecolor="none"))
-        ink = INK if colour == LEVEL["Category 2"] else "white"
+        ink = "white" if colour == LEVEL["Category 3"] else INK
         a1.text(c + 0.5, r + 0.36, title, ha="center", va="center", fontsize=18, weight="bold", color=ink)
         a1.text(c + 0.5, r + 0.66, meaning, ha="center", va="center", fontsize=9, color=ink)
     a1.set_xlim(0, 2)
     a1.set_ylim(2, 0)
     a1.set_xticks([0.5, 1.5], ["Tool flags\n(Category 3 or Expert needed)", "Tool does not flag\n(Category 1 or Category 2)"])
-    a1.set_yticks([0.5, 1.5], ["Engineer:\nHigh", "Engineer:\nLow or Category 2"])
+    a1.set_yticks([0.5, 1.5], ["Engineer:\nCategory 3", "Engineer:\nCategory 1 or 2"])
     a1.xaxis.tick_top()
     a1.set_title("Table 1: the safety question", loc="left", weight="bold", pad=44)
 
-    kinds = {"correct": ("#e3f5ee", INK), "over-cautious": ("#fdf0d0", INK), "false alarm": ("#fdf0d0", INK),
-             "referral": ("#fbe3d9", INK), "retake": ("#f0efec", INK_2),
+    kinds = {"correct": ("#f2f2f2", INK), "over-cautious": ("#d9d9d9", INK), "false alarm": ("#d9d9d9", INK),
+             "referral": ("#bfbfbf", INK), "retake": ("#efefef", INK_2),
              "false all-clear": (LEVEL["Category 3"], "white"), "missed danger": (LEVEL["Category 3"], "white"),
-             "missed danger\n(worst)": ("#9e2424", "white")}
+             "missed danger\n(worst)": ("#111111", "white")}
     grid = [["correct", "over-cautious", "false alarm", "referral", "retake"],
             ["false all-clear", "correct", "over-cautious", "referral", "retake"],
             ["missed danger\n(worst)", "missed danger", "correct", "referral", "retake"]]
@@ -946,53 +956,53 @@ def confusion_template():
         ax.tick_params(length=0)
         for s in ax.spines.values():
             s.set_visible(False)
-    fig.suptitle("How the tool will be scored", x=0.02, ha="left", fontsize=14, weight="bold")
+    _house_title(fig, "EVALUATION", "07", "How the tool will be scored")
     fig.text(0.02, 0.02, "Template: counts come from a held-out set of engineer-labelled photos, which does not "
              "exist yet. The non-AI baseline (engineer looks at the photo only) is scored the same way. "
              "spec/features/evaluation.md", fontsize=9, color=INK_2)
-    fig.subplots_adjust(left=0.08, right=0.98, top=0.74, bottom=0.1, wspace=0.25)
+    fig.subplots_adjust(left=0.1, right=0.98, top=1 - 2.2 / 6.4, bottom=0.09, wspace=0.25)
     return fig
 
 
 # From spec/constitution/roadmap.md. (workstream, task, first week, last week, at risk)
 PLAN = [
-    ("Deliverables", "29 Oct deliverables + real-data test (done)", 1, 1, False),
-    ("Deliverables", "State-of-the-art review (reference thesis)", 1, 1, False),
-    ("Deliverables", "Expert package to the professor (Mon 2 Nov)", 1, 1, False),
-    ("Deliverables", "Midterm deck + problem & data brief", 1, 2, False),
+    ("Deliverables", "29 Oct deliverables (done)", 1, 1, False),
+    ("Deliverables", "State of the art", 1, 1, False),
+    ("Deliverables", "Expert package", 1, 1, False),
+    ("Deliverables", "Midterm deck", 1, 2, False),
     ("Deliverables", "Lean Canvas", 6, 7, False),
-    ("Deliverables", "Pitch deck, final presentation", 7, 8, False),
+    ("Deliverables", "Final pitch", 7, 8, False),
     ("Deliverables", "Blog post", 8, 9, False),
-    ("Data", "Quality gate on public sets (done)", 1, 1, False),
-    ("Data", "Material model: concrete vs not, first test", 1, 1, False),
-    ("Data", "Map public labels to the 7 patterns", 2, 3, False),
-    ("Pilot", "Collect pilot photos: S, O, P scales", 2, 2, False),
-    ("Pilot", "Prepare, label, tune quality gate", 2, 3, False),
-    ("Pilot", "Scale card + width ± uncertainty (1st feature)", 3, 4, False),
-    ("Models", "U-Net on CrackSeg9k + crack-seg", 3, 4, False),
-    ("Models", "Element model (PHI-Net task 6)", 3, 4, False),
-    ("Models", "Pattern model (PHI-Net tasks 3, 8)", 4, 5, False),
-    ("Agent and MCP", "First MCP: OpenStreetMap building data", 3, 3, False),
-    ("Agent and MCP", "Plan/build harness, MCP to all sources", 4, 5, False),
-    ("Engineering partners", "Scope with EWB + structural engineer", 1, 2, False),
-    ("Engineering partners", "Calibration: matrix, thresholds", 3, 5, True),
-    ("Engineering partners", "Engineer-labelled photos + baseline", 4, 6, True),
-    ("Integration", "Engineer review screen (mock-up)", 1, 2, False),
-    ("Integration", "Building questionnaire + risk score (code)", 2, 3, False),
-    ("Integration", "Beta: end-to-end on pilot photos", 4, 4, False),
-    ("Integration", "Monitoring: crack IDs, stickers, revisit", 5, 5, False),
-    ("Integration", "Corrections logged + retraining loop", 5, 6, True),
-    ("Integration", "Comparison vs non-AI baseline", 6, 6, True),
-    ("Integration", "Proof of concept, limits + ethics", 7, 7, False),
-    ("Integration", "Streamlit UI, realistic testing", 7, 8, False),
+    ("Data", "Quality gate (done)", 1, 1, False),
+    ("Data", "Material test", 1, 1, False),
+    ("Data", "Pattern labels", 2, 3, False),
+    ("Pilot", "Pilot photos", 2, 2, False),
+    ("Pilot", "Label + tune gate", 2, 3, False),
+    ("Pilot", "Width in mm", 3, 4, False),
+    ("Models", "U-Net", 3, 4, False),
+    ("Models", "Element model", 3, 4, False),
+    ("Models", "Pattern model", 4, 5, False),
+    ("Agent and MCP", "First MCP", 3, 3, False),
+    ("Agent and MCP", "MCP harness", 4, 5, False),
+    ("Engineering partners", "Partner scoping", 1, 2, False),
+    ("Engineering partners", "Calibration", 3, 5, True),
+    ("Engineering partners", "Engineer labels", 4, 6, True),
+    ("Integration", "Review screen", 1, 2, False),
+    ("Integration", "Building score", 2, 3, False),
+    ("Integration", "Beta", 4, 4, False),
+    ("Integration", "Monitoring", 5, 5, False),
+    ("Integration", "Retraining loop", 5, 6, True),
+    ("Integration", "Baseline comparison", 6, 6, True),
+    ("Integration", "Proof of concept", 7, 7, False),
+    ("Integration", "Streamlit UI", 7, 8, False),
 ]
 # (x in weeks from Monday 26 Oct, label, at risk); x = (days after 26 Oct + 0.5) / 7, from the syllabus.
 MILESTONES = [(0.5, "29 Oct\ndata map", False), (1.07, "2 Nov\nexpert package", False), (1.64, "6 Nov\nmidterm", False),
               (2.5, "12 Nov\n1st feature", False), (3.64, "20 Nov\nbeta", False),
               (4.5, "26 Nov\nharness + MCP", False), (5.5, "3 Dec\nbaseline", True),
               (6.5, "10 Dec\nPoC + ethics", False), (7.5, "17 Dec\nfinal", False), (8.5, "24 Dec\nblog", False)]
-WORKSTREAM_COLOURS = {"Deliverables": BLUE, "Data": "#eb6834", "Pilot": AQUA, "Models": "#eda100",
-                      "Agent and MCP": VIOLET, "Engineering partners": "#e87ba4", "Integration": "#008300"}
+WORKSTREAM_COLOURS = {"Deliverables": "#111111", "Data": "#8c8c8c", "Pilot": "#bdbdbd", "Models": "#3d3d3d",
+                      "Agent and MCP": "#a6a6a6", "Engineering partners": "#666666", "Integration": "#262626"}
 WEEK_STARTS = ["26 Oct", "2 Nov", "9 Nov", "16 Nov", "23 Nov", "30 Nov", "7 Dec", "14 Dec", "21 Dec"]
 
 
@@ -1000,7 +1010,7 @@ def timeline():
     weeks = len(WEEK_STARTS)
     fig, ax = plt.subplots(figsize=(14, 10.9))
     n = len(PLAN)
-    ax.axvspan(3, 4, color="#f0efec", zorder=0)
+    ax.axvspan(3, 4, color="#efefef", zorder=0)
     ax.text(3.5, n - 0.9, "hackathon\n(no studio)", ha="center", va="center", fontsize=8.5, color=INK_2)
     previous = None
     for i, (stream, task, start, end, risk) in enumerate(PLAN):
@@ -1038,7 +1048,7 @@ def timeline():
              "third-party structural engineer.\nFallback if no engineer ratings by 26 Nov: compare on pilot photos "
              "only; the matrix stays illustrative. Source: spec/constitution/roadmap.md", fontsize=9.5, color=INK_2,
              va="top")
-    fig.subplots_adjust(left=0.25, right=0.98, top=0.8, bottom=0.11)
+    fig.subplots_adjust(left=0.15, right=0.98, top=0.8, bottom=0.11)
     return fig
 
 

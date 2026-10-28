@@ -173,7 +173,7 @@ def histogram(rows: list[dict], path: Path) -> None:
     import matplotlib.pyplot as plt
     import numpy as np
 
-    from viz.figures import BLUE, GRID, INK_2, LEVEL
+    from viz.figures import GRID, INK_2
 
     rank = {g: i for i, (g, _) in enumerate(FIT_ORDER)}
     fit = dict(FIT_ORDER)
@@ -186,18 +186,19 @@ def histogram(rows: list[dict], path: Path) -> None:
         ax.set_axis_off()
     bins = np.logspace(0, 4.5, 37)
     for ax, group in zip(axes.flat, groups):
-        for label, colour in (("crack", BLUE), ("no crack", "#eb6834"), ("unlabelled", "#1baf7a"),
-                              ("engineer: light", "#86b6ef"), ("engineer: moderate", "#3987e5"),
-                              ("engineer: severe", "#184f95"), ("not linked to a building", "#898781"),
-                              ("damaged", BLUE), ("undamaged", "#eb6834"), ("spalling", BLUE),
-                              ("no spalling", "#eb6834")):
+        for label, colour, ls in (("crack", "#111111", "-"), ("no crack", "#8c8c8c", "--"),
+                                  ("unlabelled", "#4d4d4d", ":"), ("engineer: light", "#b3b3b3", "-"),
+                                  ("engineer: moderate", "#666666", "-"), ("engineer: severe", "#111111", "-"),
+                                  ("not linked to a building", "#8c8c8c", "--"), ("damaged", "#111111", "-"),
+                                  ("undamaged", "#8c8c8c", "--"), ("spalling", "#111111", "-"),
+                                  ("no spalling", "#8c8c8c", "--")):  # black, white and greys; style tells them apart
             vals = [max(r["sharpness"], 1) for r in rows if r["group"] == group and r["label"] == label]
             if vals:
-                ax.hist(vals, bins=bins, histtype="step", lw=2, color=colour, label=label)
+                ax.hist(vals, bins=bins, histtype="step", lw=2, color=colour, ls=ls, label=label)
         handles = ax.get_legend_handles_labels()[0]  # legend above the plot, never on the data
         ax.legend(frameon=False, fontsize=10.5, loc="lower left", bbox_to_anchor=(0, 1.0), borderaxespad=0.3,
                   ncol=2 if len(handles) > 3 else len(handles), handlelength=1.6, columnspacing=1.2)
-        ax.axvline(MIN_SHARPNESS, color=LEVEL["Category 3"], lw=1.2)
+        ax.axvline(MIN_SHARPNESS, color="#111111", lw=1.4, ls=(0, (6, 2, 1, 2)))
         ax.set_xscale("log")
         members = [r for r in rows if r["group"] == group]
         accepted = sum(r["image_ok"] for r in members) / len(members)
@@ -218,7 +219,7 @@ def histogram(rows: list[dict], path: Path) -> None:
              ha="right")
     top = 1 - 1.75 / height
     fig.text(0.02, top + 0.015, f"Public dataset samples. Panels ordered by fit to our concept, best first (docs/data_map.md). "
-             f"Red line: blur limit (illustrative); images left of it would be asked to retake. Brightness limits "
+             f"Dash-dot line: blur limit (illustrative); images left of it would be asked to retake. Brightness limits "
              f"{MIN_BRIGHTNESS:g} to {MAX_BRIGHTNESS:g}.\nNot phone photos: tests the code, does not calibrate "
              "thresholds. PHI-Net images are 224 px crops, measured as they are (never scaled up).", fontsize=11, color=INK_2, va="bottom")
     fig.subplots_adjust(left=0.05, right=0.985, top=top - 0.075, bottom=0.06, wspace=0.16, hspace=0.78)
