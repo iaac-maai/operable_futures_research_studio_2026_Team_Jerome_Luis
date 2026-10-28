@@ -1275,9 +1275,9 @@ def pipeline_flow():
         label(cx, cy - 1.4, title, size=14, weight="bold")
 
     # title, section heading, colour key, columns
-    label(1.5, 84.6, "Pipeline", size=40, weight="bold", ha="left")
+    label(1.5, 84.6, "SYSTEM ARCHITECTURE", size=38, weight="bold", ha="left")
     label(118.5, 84.6, "01", size=40, weight="bold", ha="right")
-    label(1.5, 79.2, "From a phone photo to a decision", size=22, colour=FLOW_TEXT, weight="bold", ha="left")
+    label(1.5, 79.2, "The triage mechanism: from a resident's photo to an engineer's decision", size=18, colour=FLOW_TEXT, weight="bold", ha="left")
     kx = 61.5
     for fill, edge, name in (("white", FLOW_INK, "PHOTOS AND PEOPLE"), (FLOW_RULE, FLOW_RULE, "WRITTEN RULES (CODE)"),
                              (FLOW_MODEL, FLOW_MODEL, "LEARNED MODELS (WITH A CONFIDENCE)")):
