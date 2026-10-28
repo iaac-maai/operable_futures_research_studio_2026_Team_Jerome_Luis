@@ -1446,8 +1446,8 @@ SIMPLE_ROWS = [  # (y, pill icon, pill word, capture, check (word, stop), model 
     (67, "house", "BUILDING", ("clipboard", "QUESTIONS"), ("ANSWERED?", None), ("FACADE\nMODEL (later)", None),
      ("bars", "BUILDING\nSCORE"), ("hardhat", "ENGINEER")),
     (46, "column", "ELEMENT", ("camera", "ELEMENT\nPHOTO"), ("CARD +\nANGLE?", "RETAKE"),
-     ("MATERIAL +\nELEMENT", "EXPERT"), ("rulebook", "ELEMENT\nRULES"), None),
-    (25, "crack", "CRACK", ("ruler", "CLOSE-UP"), ("SHARP?", "RETAKE"), ("U-NET +\nPATTERN", "EXPERT"),
+     ("MATERIAL +\nELEMENT", "EXPERT NEEDED"), ("rulebook", "ELEMENT\nRULES"), None),
+    (25, "crack", "CRACK", ("ruler", "CLOSE-UP"), ("SHARP?", "RETAKE"), ("U-NET +\nPATTERN", "EXPERT NEEDED"),
      ("rulebook", "CATEGORY\n1 · 2 · 3"), ("person", "RESIDENT")),
 ]
 
