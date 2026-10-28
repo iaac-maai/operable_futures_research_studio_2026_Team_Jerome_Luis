@@ -91,7 +91,7 @@ def pattern_examples():
     ax.set_xlim(0, 240)
     ax.set_ylim(0, 135)
     ax.set_axis_off()
-    ax.text(2.4, 128.5, "REAL EXAMPLES", fontsize=38, weight="bold", color=K, va="center")
+    ax.text(2.4, 128.5, "CRACK FEATURES AND TYPES", fontsize=38, weight="bold", color=K, va="center")
     ax.text(237.6, 128.5, "02b", fontsize=40, weight="bold", color=K, va="center", ha="right")
     ax.text(2.4, 121.5, "Real photos of each crack pattern in the risk matrix (figure 03). 'Engineer label': PHI-Net's "
             "label; 'team pick': chosen by the team, to confirm with the engineer.", fontsize=13, color="#444444",
