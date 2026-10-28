@@ -1592,10 +1592,144 @@ def pipeline_simple():
     return fig
 
 
+# Figure 01d: the two-minute explanation of the pipeline, drawn as a pipeline with its own words.
+# Same colour logic as 01b and 01c: white = photos and people, grey = written rules, black = learned models.
+def pipeline_story():
+    """The spoken pipeline in three rows: report, field visit, decision; stops, categories and loops."""
+    fig = plt.figure(figsize=(24, 13.5), facecolor="white")
+    ax = fig.add_axes([0, 0, 1, 1])  # units of 0.1 inch
+    ax.set_xlim(0, 240)
+    ax.set_ylim(0, 135)
+    ax.set_axis_off()
+    t = _flow_tools(ax)
+    K, GREY = FLOW_INK, FLOW_RULE
+    styles = {"photo": ("white", K, K), "rule": (GREY, GREY, K), "model": (K, K, "white")}
+
+    def arrow(points, ls="-", lw=2.4):
+        xs, ys = zip(*points)
+        ax.plot(xs[:-1], ys[:-1], color=K, lw=lw, ls=ls, zorder=2, solid_capstyle="round")
+        ax.annotate("", xy=points[-1], xytext=points[-2], zorder=2,
+                    arrowprops=dict(arrowstyle="-|>", color=K, lw=lw, ls="-", shrinkA=0, shrinkB=0,
+                                    mutation_scale=20))
+
+    def card(cx, cy, w, h, kind, icon, head, body, num=None):
+        fill, edge, ink = styles[kind]
+        ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2), w, h, boxstyle="round,pad=0,rounding_size=1.4",
+                                    facecolor=fill, edgecolor=edge, lw=2.0, zorder=4))
+        left = cx - w / 2
+        if icon:
+            _handoff_icon(ax, icon, left + 5.2, cy, s=6.5, ink=ink, paper=fill)
+            left += 9.6
+        else:
+            left += 2.4
+        t.label(left, cy + h / 2 - 3.6, head, size=15, colour=ink, weight="bold", ha="left")
+        t.label(left, cy + h / 2 - 7.0, body, size=12, colour=ink, ha="left", va="top")
+        if num:
+            ax.add_patch(plt.Circle((cx - w / 2, cy + h / 2), 2.3, color=K, zorder=6))
+            t.label(cx - w / 2, cy + h / 2, num, size=13, colour="white", weight="bold", zorder=7)
+
+    def chip(cx, cy, w, h, kind, text, size=11.5, bold=True):
+        fill, edge, ink = styles[kind]
+        ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2), w, h, boxstyle="round,pad=0,rounding_size=1.0",
+                                    facecolor=fill, edgecolor=edge, lw=1.6, zorder=4))
+        t.label(cx, cy, text, size=size, colour=ink, weight="bold" if bold else "normal")
+
+    def stop(cx, top, word, why):
+        ax.plot([cx, cx], [top, top - 2.4], color=K, lw=2.0, zorder=2)
+        t.mark(cx, top - 4.2, False, r=1.8)
+        t.label(cx + 2.8, top - 4.2, word, size=14, weight="bold", ha="left")
+        t.label(cx + 2.8 + 1.3 * len(word) + 1.5, top - 4.2, why, size=12, colour=FLOW_TEXT, ha="left")
+
+    _house_title(fig, "SYSTEM ARCHITECTURE", "01d")
+    t.label(2.4, 119.5, "Second Look in plain words. The system never says \"safe\": it decides who looks next, and how "
+            "soon.", size=18, colour=FLOW_TEXT, weight="bold", ha="left")
+    kx = 168
+    for fill, edge, name in (("white", K, "PEOPLE"), (GREY, GREY, "WRITTEN RULES"), (K, K, "MODELS")):
+        ax.add_patch(FancyBboxPatch((kx, 118.3), 4.4, 2.6, boxstyle="round,pad=0,rounding_size=0.5", facecolor=fill,
+                                    edgecolor=edge, lw=1.8, zorder=4))
+        t.label(kx + 5.6, 119.6, name, size=12.5, weight="bold", ha="left")
+        kx += 9.5 + 1.05 * len(name)
+
+    # row 1: the report
+    y1, h1 = 97, 24
+    card(25, y1, 40, h1, "photo", "person", "RESIDENT", "Notices a crack, opens the app,\ntakes one photo and answers a\n"
+         "few simple questions. Never\nasked the material, the element\nor the type of crack.", "1")
+    card(67, y1, 34, h1, "rule", "check", "PHOTO CHECK", "Blurred or too dark?\nWe never guess from\na bad photo.", "2")
+    stop(67, y1 - h1 / 2, "RETAKE", "")
+    card(105, y1, 26, h1, "model", "network", "MODEL", "Finds the\ncrack.", "3")
+    card(144, y1, 36, h1, "rule", "rulebook", "WRITTEN RULE", "Not the AI: decides\nwhether someone\nneeds to go.", "4")
+    arrow([(45.6, y1), (49.4, y1)])
+    arrow([(84.6, y1), (91.4, y1)])
+    arrow([(118.6, y1), (125.4, y1)])
+    visits = [(106.5, "V1", "a field worker within a week,\nthe engineer is told today"),
+              (97, "V2", "a visit within a month"),
+              (87.5, "V3", "no visit yet; the resident\nrechecks in a month")]
+    for vy, code_, text_ in visits:
+        ax.add_patch(FancyBboxPatch((180, vy - 4.0), 54, 8.0, boxstyle="round,pad=0,rounding_size=1.0",
+                                    facecolor="white", edgecolor=K, lw=1.6, zorder=4))
+        t.label(182.2, vy, code_, size=15, weight="bold", ha="left")
+        t.label(190, vy, text_, size=11.5, ha="left")
+        arrow([(162.6, y1), (179.4, vy)], lw=1.8)
+    t.label(203, 80.8, "We can't send someone to every crack, so this rule decides where people go first.", size=11.5,
+            colour=FLOW_TEXT, style="italic")
+
+    # row 2: the field visit (V1 or V2)
+    y2, h2 = 58, 24
+    ax.plot([234.6, 237.5, 237.5], [106.5, 106.5, 76.5], color=K, lw=2.6, zorder=2)
+    ax.plot([234.6, 237.5], [97, 97], color=K, lw=2.6, zorder=2)
+    arrow([(237.5, 76.5), (25, 76.5), (25, y2 + h2 / 2 + 2.6)], lw=2.6)
+    t.label(130, 78.3, "V1 OR V2", size=12, weight="bold")
+    card(25, y2, 40, h2, "photo", "worker", "FIELD WORKER", "Brings a reliable phone and\na scale card, and looks at\n"
+         "three scales:", "5")
+    for cx, icon, head, body in ((70, "house", "BUILDING", "A short case\nfile, answered\nonce."),
+                                 (104, "column", "ELEMENT", "A photo of each\ncracked beam,\ncolumn or wall."),
+                                 (138, "crack", "CRACK", "A close-up\nof each one.")):
+        card(cx, y2, 30, h2, "photo", icon, head, body)
+    arrow([(45.6, y2), (54.4, y2)])
+    arrow([(85.6, y2), (88.4, y2)])
+    arrow([(119.6, y2), (122.4, y2)])
+    arrow([(153.6, y2), (163.4, y2)])
+    ax.add_patch(FancyBboxPatch((164, y2 - h2 / 2), 70, h2, boxstyle="round,pad=0,rounding_size=1.4",
+                                facecolor="white", edgecolor=K, lw=2.0, ls=(0, (4, 3)), zorder=3))
+    t.label(199, y2 + 7.5, "EVERY SCALE, THE SAME FIVE STEPS", size=14, weight="bold")
+    for k, (kind, word) in enumerate((("photo", "CAPTURE"), ("rule", "CHECK"), ("model", "PERCEIVE"),
+                                      ("rule", "DECIDE"), ("photo", "ACT"))):
+        chip(171.5 + k * 13.75, y2 - 2.5, 12.0, 8.0, kind, word, size=10.5)
+
+    # row 3: perceive, decide, act
+    y3, h3 = 24, 22
+    arrow([(199, y2 - h2 / 2), (199, 40), (33, 40), (33, y3 + h3 / 2 + 0.6)], lw=2.6)
+    card(33, y3, 52, h3, "model", "network", "MODELS ONLY PERCEIVE", "They find the crack, measure its\nwidth in mm and "
+         "recognise its\npattern, each with a confidence.", "6")
+    stop(33, y3 - h3 / 2, "EXPERT NEEDED", "if a model is unsure: never \"fine\"")
+    card(92, y3, 44, h3, "rule", "rulebook", "DECISION", "A written, auditable risk\nmatrix gives Category\n1, 2 or 3.",
+         "7")
+    arrow([(59.6, y3), (69.4, y3)])
+    cats = [(31.0, "CATEGORY 1 · monitor", "photo"), (24.0, "CATEGORY 2 · low-cost advice + recheck", "rule"),
+            (17.0, "CATEGORY 3 · an engineer must confirm", "model")]
+    for cy, text_, kind in cats:
+        chip(148, cy, 48, 6.0, kind, text_, size=11)
+        arrow([(114.6, y3), (118, y3), (118, cy), (123.4, cy)], lw=1.8)
+    card(207, y3, 50, h3, "rule", "bars", "BUILDING SCORE", "The crack categories add up\nto a building score, which\n"
+         "gives the engineer a\npriority list.", "8")
+    arrow([(172.6, y3), (181.4, y3)])
+
+    # the two loops
+    for ly, word, text_ in ((7.6, "RECHECK", "the same crack is photographed again; if it grows, its category goes up"),
+                            (2.8, "LEARN", "every correction the engineer makes retrains the models")):
+        ax.add_patch(matplotlib.patches.Arc((126, ly), 3.2, 3.2, theta1=40, theta2=330, color=K, lw=2.0, zorder=5))
+        ax.annotate("", xy=(127.3, ly + 1.0), xytext=(127.0, ly + 1.3),
+                    arrowprops=dict(arrowstyle="-|>", color=K, lw=1.6, mutation_scale=10), zorder=5)
+        t.label(129.5, ly, word, size=13, weight="bold", ha="left")
+        t.label(129.5 + 0.95 * len(word) + 2.0, ly, text_, size=12, ha="left")
+    return fig
+
+
 FIGURES = {
     "01_pipeline.png": pipeline,
     "01b_pipeline_flow.png": pipeline_flow,
     "01c_pipeline_simple.png": pipeline_simple,
+    "01d_pipeline_story.png": pipeline_story,
     "02_decisions_and_players.png": decisions_and_players,
     "03_risk_matrix.png": risk_matrix,
     "04_segmentation_tree.png": segmentation_tree,
