@@ -11,4 +11,4 @@ __pycache__/
 .env
 
 # real photos under third-party licences (PHI-Net CC BY-NC-SA, Wikimedia Commons): kept local, not published
-figures/11_pattern_examples.png
+figures/02b_real_examples.png

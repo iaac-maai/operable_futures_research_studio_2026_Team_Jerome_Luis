@@ -2,7 +2,8 @@
 
 Spec: spec/features/figures.md. Run from the repository root:  py src/viz/pattern_examples.py
 Needs PHI-Net in data/raw/phinet (src/experiments/phinet_prepare.py); downloads the Wikimedia Commons photos into
-data/processed/pattern_examples/commons on first run. Writes figures/11_pattern_examples.png, which is git-ignored:
+data/processed/pattern_examples/commons on first run. Writes figures/02b_real_examples.png (shown right before
+the risk matrix), which is git-ignored:
 the photos keep their own licences (PHI-Net CC BY-NC-SA 4.0; Commons as listed below), so the figure is not published.
 """
 
@@ -27,7 +28,7 @@ from viz.figures import PATTERN_WORD, _icon
 ROOT = Path(__file__).resolve().parents[2]
 PHINET = ROOT / "data" / "raw" / "phinet"
 COMMONS_DIR = ROOT / "data" / "processed" / "pattern_examples" / "commons"
-OUT = ROOT / "figures" / "11_pattern_examples.png"
+OUT = ROOT / "figures" / "02b_real_examples.png"
 T3, T8 = "task3_spalling_condition", "task8_damage_type"
 
 # Wikimedia Commons files: key -> (file name, author, licence)
@@ -91,7 +92,7 @@ def pattern_examples():
     ax.set_ylim(0, 135)
     ax.set_axis_off()
     ax.text(2.4, 128.5, "REAL EXAMPLES", fontsize=38, weight="bold", color=K, va="center")
-    ax.text(237.6, 128.5, "11", fontsize=40, weight="bold", color=K, va="center", ha="right")
+    ax.text(237.6, 128.5, "02b", fontsize=40, weight="bold", color=K, va="center", ha="right")
     ax.text(2.4, 121.5, "Real photos of each crack pattern in the risk matrix (figure 03). 'Engineer label': PHI-Net's "
             "label; 'team pick': chosen by the team, to confirm with the engineer.", fontsize=13, color="#444444",
             va="center")

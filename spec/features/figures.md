@@ -9,6 +9,7 @@ Every figure is drawn from the repo's own rules and data map, so it changes when
 | `01_pipeline.png` | Pipeline v3: three scales (S, O, P as in PHI-Net task 1) x five phases, scene check, monitoring and learning loops, status of each box | `spec/features/pipeline.md` |
 | `01b_pipeline_flow.png` | Step 0, report and dispatch (when a field worker visits: V1, V2, V3, D27), then the same pipeline v3 drawn as a task flow: phases as numbered columns, scales as lanes; diamonds for written checks with stop (Retake, Expert needed) and continue marks, stacked boxes for learned models, both loops. Black, white and grey only: white = photos and people, grey = written rules (code), black = learned models | `spec/features/pipeline.md`, `spec/features/dispatch.md` |
 | `02_decisions_and_players.png` | Decisions and players: the five players as lifelines, time going down, 14 numbered hand-offs, each with a symbol and one word (key below); decisions only on the written rules and the engineer; a 'who decides what' panel. Black, white and grey | `triage.dispatch.screen()`, `triage.matrix.assess()`, `spec/features/building_score.md` |
+| `02b_real_examples.png` | Real examples: up to three real photos of each crack pattern of the risk matrix, in the matrix's order and design (symbol + one word); each photo credited; engineer label or team pick per column. **Local only (git-ignored):** the photos keep their own licences (PHI-Net CC BY-NC-SA 4.0, Wikimedia Commons) | `src/viz/pattern_examples.py` (needs `data/raw/phinet`) |
 | `03_risk_matrix.png` | Matrix v3 in black, white and grey: each crack pattern as a drawn symbol with one word (key below), base category per pattern x width band (Category 1 white, 2 grey, 3 black), and what raises it, in words, with new and assumed values tagged | `src/triage/risk_matrix_v3.json` (read at run time) |
 | `04_segmentation_tree.png` | Tree v3: crack path (yellow) into the atomic problem, building path (navy) into the building risk score, context (grey); scale badge and evidence under each node | `docs/segmentation_tree.md` |
 | `05_data_coverage.png` | Which data source feeds which pipeline stage, by scale | `docs/data_map.md`, section 1 |
@@ -17,14 +18,13 @@ Every figure is drawn from the repo's own rules and data map, so it changes when
 | `08_real_data_quality_gate.png` | Sharpness of public dataset images against the blur limit (made by `src/experiments/real_data_quality.py`, not by this script) | Haiti 2010, Darbhanga, Strathclyde, PHI-Net tasks 8, 3 and 6, METU, SDNET2018, crack-seg; panels ordered by fit to the concept |
 | `09_timeline.png` | Plan to the final presentation (17 Dec) with syllabus milestones and tasks at risk | `spec/constitution/roadmap.md` |
 | `10_dataset_comparison.png` | Every dataset on our disk side by side, in order of fit: images, quality gate pass rate, labels, what it trains, licence; one row per PHI-Net task | `docs/data_map.md`, sections 0 and 6; gate rates from `data/processed/real_data_quality.csv` |
-| `11_pattern_examples.png` | Real examples: up to three real photos of each crack pattern of the risk matrix, in the matrix's order and design (symbol + one word); each photo credited; engineer label or team pick per column. **Local only (git-ignored):** the photos keep their own licences (PHI-Net CC BY-NC-SA 4.0, Wikimedia Commons) | `src/viz/pattern_examples.py` (needs `data/raw/phinet`) |
 
 Colour rules: flow figures (01b, 02) and the matrix (03) use black, white and grey only: white = photos and people, grey = written rules, black = learned models; in the matrix, Category 1 white, 2 grey, 3 black, always with the number. Older figures (07, 09) still use the status colours, always with a text label; coverage uses one blue ramp.
 
 When `docs/` changes, update the data constants in `figures.py` (TREE, COVERAGE, DATASETS, HELD, PLAN, MILESTONES) and rerun.
 Later, once engineer-labelled photos exist: a filled confusion matrix and the measured threshold curve (missed Category 3 vs referral rate).
 
-## Symbol key of the risk matrix (`03_risk_matrix.png`)
+## Symbol key of the risk matrix (`03_risk_matrix.png`, also used in `02b_real_examples.png`)
 The seven crack patterns are drawn as symbols, each with one word; everything else on the figure is in words.
 
 | Symbol | Word | Pattern |
