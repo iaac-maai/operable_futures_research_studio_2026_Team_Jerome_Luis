@@ -1643,11 +1643,11 @@ def pipeline_story():
     _house_title(fig, "SYSTEM ARCHITECTURE", "01d")
     t.label(2.4, 119.5, "Second Look in plain words. The system never says \"safe\": it decides who looks next, and how "
             "soon.", size=18, colour=FLOW_TEXT, weight="bold", ha="left")
-    kx = 168
+    kx = 162  # legend on one line, top right, on the title row
     for fill, edge, name in (("white", K, "PEOPLE"), (GREY, GREY, "WRITTEN RULES"), (K, K, "MODELS")):
-        ax.add_patch(FancyBboxPatch((kx, 118.3), 4.4, 2.6, boxstyle="round,pad=0,rounding_size=0.5", facecolor=fill,
+        ax.add_patch(FancyBboxPatch((kx, 128.7), 4.4, 2.6, boxstyle="round,pad=0,rounding_size=0.5", facecolor=fill,
                                     edgecolor=edge, lw=1.8, zorder=4))
-        t.label(kx + 5.6, 119.6, name, size=12.5, weight="bold", ha="left")
+        t.label(kx + 5.6, 130.0, name, size=12.5, weight="bold", ha="left")
         kx += 9.5 + 1.05 * len(name)
 
     # row 1: the report
@@ -1696,32 +1696,36 @@ def pipeline_story():
                                       ("rule", "DECIDE"), ("photo", "ACT"))):
         chip(171.5 + k * 13.75, y2 - 2.5, 12.0, 8.0, kind, word, size=10.5)
 
-    # row 3: perceive, decide, act
+    # row 3: perceive, decide, act, and the engineer at the end
     y3, h3 = 24, 22
-    arrow([(199, y2 - h2 / 2), (199, 40), (33, 40), (33, y3 + h3 / 2 + 0.6)], lw=2.6)
-    card(33, y3, 52, h3, "model", "network", "MODELS ONLY PERCEIVE", "They find the crack, measure its\nwidth in mm and "
-         "recognise its\npattern, each with a confidence.", "6")
-    stop(33, y3 - h3 / 2, "EXPERT NEEDED", "if a model is unsure: never \"fine\"")
-    card(92, y3, 44, h3, "rule", "rulebook", "DECISION", "A written, auditable risk\nmatrix gives Category\n1, 2 or 3.",
+    arrow([(199, y2 - h2 / 2), (199, 40), (31, 40), (31, y3 + h3 / 2 + 0.6)], lw=2.6)
+    card(31, y3, 46, h3, "model", "network", "MODELS PERCEIVE", "They find the crack, measure\nits width in mm and "
+         "recognise\nits pattern, each with a\nconfidence.", "6")
+    stop(14, y3 - h3 / 2, "EXPERT NEEDED", "")
+    t.label(16.8, 5.2, "if a model is unsure: never \"fine\"", size=12, colour=FLOW_TEXT, ha="left")
+    card(80, y3, 40, h3, "rule", "rulebook", "DECISION", "A written, auditable\nrisk matrix gives\nCategory 1, 2 or 3.",
          "7")
-    arrow([(59.6, y3), (69.4, y3)])
+    arrow([(54.6, y3), (59.4, y3)])
     cats = [(31.0, "CATEGORY 1 · monitor", "photo"), (24.0, "CATEGORY 2 · low-cost advice + recheck", "rule"),
             (17.0, "CATEGORY 3 · an engineer must confirm", "model")]
     for cy, text_, kind in cats:
-        chip(148, cy, 48, 6.0, kind, text_, size=11)
-        arrow([(114.6, y3), (118, y3), (118, cy), (123.4, cy)], lw=1.8)
-    card(207, y3, 50, h3, "rule", "bars", "BUILDING SCORE", "The crack categories add up\nto a building score, which\n"
-         "gives the engineer a\npriority list.", "8")
-    arrow([(172.6, y3), (181.4, y3)])
+        chip(129, cy, 44, 6.0, kind, text_, size=10.5)
+        arrow([(100.6, y3), (104, y3), (104, cy), (106.4, cy)], lw=1.8)
+    card(176, y3, 38, h3, "rule", "bars", "BUILDING SCORE", "Crack categories add\nup to a building score:\n"
+         "the engineer's\npriority list.", "8")
+    arrow([(151.6, y3), (156.4, y3)])
+    card(218, y3, 36, h3, "photo", "hardhat", "ENGINEER", "Confirms every\nCategory 3 and\nevery Expert\nneeded, on site.",
+         "9")
+    arrow([(195.6, y3), (199.4, y3)])
 
-    # the two loops
-    for ly, word, text_ in ((7.6, "RECHECK", "the same crack is photographed again; if it grows, its category goes up"),
-                            (2.8, "LEARN", "every correction the engineer makes retrains the models")):
-        ax.add_patch(matplotlib.patches.Arc((126, ly), 3.2, 3.2, theta1=40, theta2=330, color=K, lw=2.0, zorder=5))
-        ax.annotate("", xy=(127.3, ly + 1.0), xytext=(127.0, ly + 1.3),
-                    arrowprops=dict(arrowstyle="-|>", color=K, lw=1.6, mutation_scale=10), zorder=5)
-        t.label(129.5, ly, word, size=13, weight="bold", ha="left")
-        t.label(129.5 + 0.95 * len(word) + 2.0, ly, text_, size=12, ha="left")
+    # learn: the engineer's corrections go back to the models (dashed)
+    arrow([(218, y3 - h3 / 2), (218, 4.2), (47, 4.2), (47, y3 - h3 / 2 - 0.6)], ls=(0, (4, 3)), lw=2.2)
+    t.label(132, 6.6, "LEARN: every correction the engineer makes retrains the models, for better accuracy and "
+            "precision", size=12.5, weight="bold")
+    # recheck: categories 1 and 2 bring the same crack back to the resident (dashed)
+    arrow([(129, 34.0), (129, 37.9), (2.6, 37.9), (2.6, y1), (4.4, y1)], ls=(0, (4, 3)), lw=2.2)
+    t.label(4.8, 43.2, "RECHECK: the same crack is photographed again; if it grows, its category goes up", size=11.5,
+            weight="bold", ha="left")
     return fig
 
 
