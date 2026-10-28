@@ -4,7 +4,7 @@ from viz.pattern_examples import COMMONS, EXAMPLES
 
 def test_every_pattern_of_the_matrix_has_photos_in_matrix_order():
     assert [p for p, *_ in EXAMPLES] == PATTERNS
-    assert all(1 <= len(photos) <= 3 for _, photos, _ in EXAMPLES)
+    assert all(1 <= len(photos) <= 2 for _, photos, _ in EXAMPLES)
 
 
 def test_every_commons_photo_has_a_file_name_an_author_and_a_licence():

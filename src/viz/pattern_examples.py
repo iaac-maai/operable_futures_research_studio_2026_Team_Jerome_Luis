@@ -45,12 +45,11 @@ COMMONS = {
 # basis: an engineer label from PHI-Net, or the team's pick (not yet confirmed by an engineer).
 EXAMPLES = [
     ("surface_map", [("commons", "asr_pillar"), ("commons", "asr_barrier")], "clear examples"),
-    ("flexural", [(T8, 1433), (T8, 1562), (T8, 1195)], "engineer label"),
-    ("diagonal_shear", [(T8, 4048), (T8, 3825), (T8, 3393)], "engineer label"),
-    ("along_bar", [("commons", "rust_crack"), ("commons", "bar_exposed"), (T3, 6004)], "team pick, to confirm"),
-    ("column_horizontal", [("commons", "imperial_column"), (T8, 1253), (T8, 1611)], "engineer label + team pick"),
-    ("spalling_exposed_bar", [("commons", "burst_column"), ("commons", "rust_soffit"), ("commons", "bridge_spalling")],
-     "clear examples"),
+    ("flexural", [(T8, 1433), (T8, 1195)], "engineer label"),
+    ("diagonal_shear", [(T8, 4048), (T8, 3393)], "engineer label"),
+    ("along_bar", [("commons", "rust_crack"), ("commons", "bar_exposed")], "team pick, to confirm"),
+    ("column_horizontal", [("commons", "imperial_column"), (T8, 1611)], "engineer label + team pick"),
+    ("spalling_exposed_bar", [("commons", "burst_column"), ("commons", "rust_soffit")], "clear examples"),
     ("joint", [(T8, 61)], "team pick, to confirm"),
 ]
 HEAD = {"User-Agent": "SecondLook-studio-research/0.1 (IAAC student project)"}
@@ -84,10 +83,10 @@ def square(img):
 
 
 def pattern_examples():
-    fig = plt.figure(figsize=(24, 13.5))
+    fig = plt.figure(figsize=(24, 10.5))
     ax = fig.add_axes([0, 0, 1, 1])  # drawing layer in units of 0.1 inch
     ax.set_xlim(0, 240)
-    ax.set_ylim(0, 135)
+    ax.set_ylim(30, 135)
     ax.set_axis_off()
     ax.text(2.4, 128.5, "REAL EXAMPLES", fontsize=38, weight="bold", color=K, va="center")
     ax.text(237.6, 128.5, "11", fontsize=40, weight="bold", color=K, va="center", ha="right")
@@ -97,7 +96,7 @@ def pattern_examples():
     col_w, size, top = 33.6, 30.0, 100.0
     for k in range(1, len(EXAMPLES)):  # a separator line between patterns
         x = 2.4 + col_w * k
-        ax.plot([x, x], [6.5, 117.5], color="#8a8a8a", lw=1.6, zorder=0)
+        ax.plot([x, x], [37.0, 117.5], color="#8a8a8a", lw=1.6, zorder=0)
     for k, (pattern, photos, basis) in enumerate(EXAMPLES):
         xc = 2.4 + col_w * (k + 0.5)
         ax.add_patch(FancyBboxPatch((xc - 15, 105.5), 30, 10, boxstyle="round,pad=0,rounding_size=0.8",
@@ -108,12 +107,12 @@ def pattern_examples():
         for r, (src, ref) in enumerate(photos):
             img, caption = commons_photo(ref) if src == "commons" else phinet_photo(src, ref)
             y0 = top - r * (size + 1.2) - size
-            pax = fig.add_axes([(xc - size / 2) / 240, y0 / 135, size / 240, size / 135])
+            pax = fig.add_axes([(xc - size / 2) / 240, (y0 - 30) / 105, size / 240, size / 105])
             pax.imshow(square(img))
             pax.set_axis_off()
             pax.text(0.02, 0.03, caption, transform=pax.transAxes, fontsize=7.5, color="white",
                      bbox=dict(facecolor=K, edgecolor="none", pad=2))
-    ax.text(2.4, 2.6, "Photos: Wikimedia Commons, each under the licence printed on it (links: data/processed/"
+    ax.text(2.4, 33.0, "Photos: Wikimedia Commons, each under the licence printed on it (links: data/processed/"
             "pattern_examples/credits.md); PHI-Net (PEER, UC Berkeley; Gao & Mosalam [53][55]), CC BY-NC-SA 4.0, "
             "research and teaching only. Not for publication.", fontsize=9.5, color="#555555", va="center")
     return fig
