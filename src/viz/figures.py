@@ -986,7 +986,7 @@ PLAN = [  # (group, task, first week, last week, at risk); [n] = box n of the pi
     ("Engineer", "[9] Engineer labels", 4, 6, True),
     ("Engineer", "[9] Baseline comparison", 6, 6, True),
     ("Prototype", "First MCP: building data", 3, 3, False),
-    ("Prototype", "Beta, end to end", 4, 4, False),
+    ("Prototype", "Beta, end to end", 4, 4 - 2 / 7, False),  # hackathon, Monday 16 to Friday 20 Nov
     ("Prototype", "Harness + MCP to all sources", 5, 5, False),
     ("Prototype", "Recheck + learn loops", 5, 6, True),
     ("Prototype", "Proof of concept + ethics", 7, 7, False),
@@ -1014,8 +1014,9 @@ def timeline():
     weeks = len(WEEK_DATES)
     fig, ax = plt.subplots(figsize=(10.9 * 16 / 9, 10.9))
     n = len(PLAN)
-    ax.axvspan(3, 4, color="#efefef", zorder=0)
-    ax.text(3.5, n - 0.9, "hackathon\n(no studio)", ha="center", va="center", fontsize=8.5, color=INK_2)
+    ax.axvspan(3, 3 + 5 / 7, color="#e6e6e6", zorder=0)  # hackathon: Monday 16 to Friday 20 Nov (columns run Mon-Sun)
+    ax.text(3 + 2.5 / 7, n - 0.9, "HACKATHON\nMon 16 - Fri 20 Nov", ha="center", va="center", fontsize=10.5,
+            weight="bold", color=INK_2)
     previous = None
     plt.rcParams["hatch.linewidth"] = 1.3
     for i, (stream, task, start, end, risk) in enumerate(PLAN):
