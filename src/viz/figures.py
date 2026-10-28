@@ -996,18 +996,18 @@ PLAN = [
     ("Integration", "Proof of concept", 7, 7, False),
     ("Integration", "Streamlit UI", 7, 8, False),
 ]
-# (x in weeks from Monday 26 Oct, label, at risk); x = (days after 26 Oct + 0.5) / 7, from the syllabus.
-MILESTONES = [(0.5, "29 Oct\ndata map", False), (1.07, "2 Nov\nexpert package", False), (1.64, "6 Nov\nmidterm", False),
-              (2.5, "12 Nov\n1st feature", False), (3.64, "20 Nov\nbeta", False),
-              (4.5, "26 Nov\nharness + MCP", False), (5.5, "3 Dec\nbaseline", True),
-              (6.5, "10 Dec\nPoC + ethics", False), (7.5, "17 Dec\nfinal", False), (8.5, "24 Dec\nblog", False)]
+# One date per week: the Thursday at the centre of each Monday-to-Sunday column, from 29 Oct.
+# One milestone per week, from the syllabus (the 2 Nov expert package is a task bar, the midterm is Fri 6 Nov).
+WEEK_DATES = ["29 Oct", "5 Nov", "12 Nov", "19 Nov", "26 Nov", "3 Dec", "10 Dec", "17 Dec", "24 Dec"]
+WEEK_MILESTONES = [("data map", False), ("midterm", False), ("1st feature", False), ("beta", False),
+                   ("harness + MCP", False), ("baseline", True), ("PoC + ethics", False), ("final", False),
+                   ("blog", False)]
 WORKSTREAM_COLOURS = {"Deliverables": "#111111", "Data": "#8c8c8c", "Pilot": "#bdbdbd", "Models": "#3d3d3d",
                       "Agent and MCP": "#a6a6a6", "Engineering partners": "#666666", "Integration": "#262626"}
-WEEK_STARTS = ["26 Oct", "2 Nov", "9 Nov", "16 Nov", "23 Nov", "30 Nov", "7 Dec", "14 Dec", "21 Dec"]
 
 
 def timeline():
-    weeks = len(WEEK_STARTS)
+    weeks = len(WEEK_DATES)
     fig, ax = plt.subplots(figsize=(14, 10.9))
     n = len(PLAN)
     ax.axvspan(3, 4, color="#efefef", zorder=0)
@@ -1022,12 +1022,12 @@ def timeline():
                                     boxstyle="round,pad=0,rounding_size=0.12", zorder=2,
                                     facecolor=colour if not risk else "white", edgecolor=colour,
                                     hatch="///" if risk else None, lw=1.6))
-    for k, (x, label, risk) in enumerate(MILESTONES):  # milestones as text only, staggered so they never touch
-        ax.text(x, -0.9 if k % 2 == 0 else -1.9, label + (" (at risk)" if risk else ""), ha="center", va="center",
-                fontsize=8.5, color=INK, weight="bold" if not risk else "normal", style="italic" if risk else "normal")
+    for w, (label, risk) in enumerate(WEEK_MILESTONES):  # one milestone per week, on one row
+        ax.text(w + 0.5, -0.95, label + (" (at risk)" if risk else ""), ha="center", va="center", fontsize=10.5,
+                color=INK_2 if risk else INK, style="italic" if risk else "normal")
     ax.set_xlim(0, weeks)
-    ax.set_ylim(n - 0.4, -2.6)
-    ax.set_xticks([w + 0.5 for w in range(weeks)], [f"W{w + 1}\n{d}" for w, d in enumerate(WEEK_STARTS)])
+    ax.set_ylim(n - 0.4, -1.6)
+    ax.set_xticks([w + 0.5 for w in range(weeks)], WEEK_DATES, fontsize=13, weight="bold", color=INK)
     ax.set_yticks(range(n), [t[1] for t in PLAN])
     ax.xaxis.tick_top()
     for w in range(weeks + 1):
@@ -1041,7 +1041,7 @@ def timeline():
     H, W = fig.get_figheight(), fig.get_figwidth()  # title as in the other figures: 38 pt on a 24 in figure
     fig.text(0.02, 1 - 0.45 / H, "PROJECT ROADMAP", fontsize=38 * W / 24, weight="bold", color=INK, va="center")
     fig.text(0.98, 1 - 0.45 / H, "09", fontsize=40 * W / 24, weight="bold", color=INK, va="center", ha="right")
-    fig.text(0.02, 1 - 0.95 / H, "Plan to the final presentation, 26 Oct to 24 Dec 2026", fontsize=18 * W / 24,
+    fig.text(0.02, 1 - 0.95 / H, "Plan to the final presentation, 29 Oct to 24 Dec 2026", fontsize=18 * W / 24,
              weight="bold", color=INK_2, va="center")
     fig.text(0.02, 1 - 1.25 / H, "Milestones from the studio syllabus. Engineering partners: Engineers Without Borders and a "
              "third-party structural engineer.\nFallback if no engineer ratings by 26 Nov: compare on pilot photos "
