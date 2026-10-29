@@ -1,9 +1,16 @@
 # Currently used
 pytest
 matplotlib==3.11.2  # figures (src/viz/figures.py)
+numpy==2.5.3
+pillow==12.3.0
+# Crack segmentation (spec/features/segmentation.md). torch needs the CUDA build for RTX 50xx GPUs:
+#   py -m pip install torch==2.11.0 torchvision==0.26.0 --index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0
+torchvision==0.26.0
+segmentation-models-pytorch==0.6.0
+opencv-python-headless==5.0.0.93  # measurement
+scikit-image==0.26.0  # skeleton for width
 
 # Planned (add pinned versions when each is first used)
 # ultralytics   (YOLO, only if element boxes are needed later; AGPL-3.0, decision D9)
-# torch         (U-Net segmentation)
-# opencv-python (measurement)
 # streamlit     (prototype interface)
